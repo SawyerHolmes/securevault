@@ -1,0 +1,1149 @@
+/* =========================
+   TOKENS
+   — All design variables live here.
+     Change these to retheme the whole app.
+========================= */
+:root {
+    /* --- Spacing --- */
+    --page-padding: 2rem;        /* Left/right padding on all full-width sections */
+    --section-gap: 2rem;         /* Vertical gap between major page sections */
+
+    /* --- Border radius --- */
+    --radius-sm: 6px;            /* Small elements: buttons, inputs, tags */
+    --radius-md: 10px;           /* Medium elements: cards, dropdowns */
+    --radius-lg: 16px;           /* Large elements: modals */
+
+    /* --- Light mode colours --- */
+    --bg: #ffffff;               /* Page background */
+    --card: #ffffff;             /* Card / surface background */
+    --text: #111111;             /* Primary text */
+    --subtext: #888888;          /* Secondary / muted text */
+    --input: #f4f4f4;            /* Input and inactive surface fill */
+    --input-focus: #ebebeb;      /* Input fill on focus */
+    --border: #e5e5e5;           /* Borders and dividers */
+    --shadow: 0 1px 4px rgba(0, 0, 0, 0.06);          /* Subtle resting shadow */
+    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.1);    /* Elevated hover shadow */
+}
+
+/* --- Dark mode overrides --- */
+body.dark {
+    --bg: #111111;
+    --card: #1a1a1a;
+    --text: #f0f0f0;
+    --subtext: #888888;
+    --input: #252525;
+    --input-focus: #2e2e2e;
+    --border: #2e2e2e;
+    --shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+
+/* =========================
+   RESET & BASE
+========================= */
+*, *::before, *::after {
+    box-sizing: border-box;      /* Padding and border included in element width */
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; /* Smoother font rendering on Mac/iOS */
+}
+
+
+/* =========================
+   LAYOUT
+========================= */
+main {
+    padding: var(--section-gap) var(--page-padding); /* Top/bottom and left/right page padding */
+    flex: 1; /* main takes all remaining space */
+    background: var(--bg); /* dark or light */
+}
+
+
+/* Ensure main content fills the rest of the screen */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+header {
+    display: flex;
+    justify-content: space-between; /* Logo left, nav right */
+    align-items: center;
+    padding: 1rem var(--page-padding);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border); /* Thin separator under header */
+}
+
+/* App name / brand */
+header .logo {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* Nav links */
+header .menu a {
+    margin-left: 1.5rem;         /* Space between nav items */
+    text-decoration: none;
+    color: var(--text);       /* Muted by default */
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.15s;
+}
+
+header .menu a:hover {
+    color: var(--text);          /* Full colour on hover */
+}
+
+
+/* =========================
+   BUTTONS
+   — Shared base styles for both button variants
+========================= */
+.btn-black,
+.btn-white {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;                 /* Full width within parent by default */
+    transition: background 0.15s, transform 0.1s;
+}
+
+/* Primary filled button */
+.btn-black {
+    background: var(--text);     /* Black in light, white in dark */
+    color: var(--bg);
+    border: none;
+}
+
+.btn-black:hover { opacity: 0.85; }
+
+/* Secondary outlined button */
+.btn-white {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-white:hover { background: var(--input); }
+
+/* Press feedback for both */
+.btn-black:active,
+.btn-white:active { transform: scale(0.97); }
+
+
+/* =========================
+   VAULT CONTROLS
+   — Search bar and sort icon above the vault grid
+========================= */
+.vault-controls {
+    max-width: 400px;
+    padding: 18px var(--page-padding) 0; /* Top padding, sides match page */
+}
+
+/* Wrapper needed to position icons inside the input */
+.search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Underline-style search input */
+#search-input {
+    width: 100%;
+    padding: 10px 36px 8px 28px;  /* Left room for search icon, right for sort icon */
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+#search-input:focus        { border-bottom-color: var(--text); }  /* Darken underline on focus */
+#search-input::placeholder { color: var(--subtext); }
+
+/* Magnifying glass icon — left side of input */
+.search-icon {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: var(--subtext);
+    pointer-events: none;        /* Don't block clicks on the input */
+}
+
+/* Sort icon — right side of input */
+.sort-icon {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--subtext);
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.sort-icon:hover,
+.sort-icon.active { color: var(--text); } /* Highlight when active or hovered */
+
+/* --- Sort dropdown --- */
+.sort-menu {
+    position: absolute;
+    top: calc(100% + 6px);       /* Just below the search bar */
+    left: 0;
+    width: 100%;
+    display: none;               /* Shown via JS when sort icon clicked */
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-hover);
+    padding: 4px 0;
+    z-index: 500;
+}
+
+/* Sort option rows */
+.sort-field,
+.sort-order {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.sort-field:hover,
+.sort-order:hover { background: var(--input); }
+
+/* Thin line between field options and order options */
+.divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+}
+
+/* Radio-style dot indicator for selected sort option */
+.indicator {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.indicator.active {
+    border-color: var(--text);   /* Dark ring when selected */
+}
+
+.indicator.active::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--text);     /* Filled dot inside ring */
+    border-radius: 50%;
+}
+
+
+/* =========================
+   VAULT GRID
+   — The main card grid on the home page
+========================= */
+#vault-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive columns */
+    gap: 1.25rem;
+    padding: 18px var(--page-padding);
+}
+
+/* Individual vault entry card */
+.vault-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: box-shadow 0.15s;
+}
+
+.vault-card:active { transform: scale(0.97); }
+
+.vault-card:hover { box-shadow: var(--shadow-hover); }
+
+/* Entry name */
+.vault-card h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+/* Entry metadata (username, URL etc.) */
+.vault-card p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--subtext);
+}
+
+/* Shown when vault is empty */
+.empty-state {
+    grid-column: 1 / -1;        /* Span full grid width */
+    text-align: center;
+    margin-top: 60px;
+    color: var(--subtext);
+}
+
+/* GRID VIEW (default) */
+body.grid-view #vault-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* =========================
+   LIST VIEW TABLE
+========================= */
+.vault-container.list-view {
+    display: flex;
+    justify-content: center; /* horizontally center table */
+    width: 100%;
+    align-self: center;
+}
+
+.vault-list-table {
+    border-collapse: collapse;
+    width: 100%;           /* Or any width you want */
+    margin: 0 auto;       /* Centre horizontally */
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.vault-list-table th,
+.vault-list-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.vault-list-table th {
+    background: var(--bg);
+    font-weight: 600;
+    cursor: auto;
+}
+
+.vault-list-table tr:hover {
+    background: var(--input-focus);
+    cursor: pointer;
+}
+
+.vault-list-table tr:active { transform: scale(0.99); }
+
+
+
+/* Specific columns */
+.vault-list-table th:nth-child(1),
+.vault-list-table td:nth-child(1) { width: 20%; }
+.vault-list-table th:nth-child(2),
+.vault-list-table td:nth-child(2) { width: 30%; }
+.vault-list-table th:nth-child(3),
+.vault-list-table td:nth-child(3) { width: 20%; }
+.vault-list-table th:nth-child(4),
+.vault-list-table td:nth-child(4) { width: 30%; }
+
+/* =========================
+   GALLERY VIEW
+========================= */
+body.gallery-view #vault-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.vault-gallery-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.vault-gallery-card .gallery-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.vault-gallery-card .gallery-details p {
+    margin: 0.2rem 0;
+    font-size: 0.85rem;
+    color: var(--subtext);
+}
+
+/* =========================
+   EXPANDED CARD MODAL
+   — Full-detail view of a vault entry
+========================= */
+
+/* Dimmed backdrop */
+.expanded-card {
+    position: fixed;
+    inset: 0;
+    display: none;               /* Shown via JS */
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    backdrop-filter: blur(2px);  /* Frosted glass blur behind modal */
+}
+
+/* Modal panel */
+.expanded-content {
+    background: var(--card);
+    width: 90%;
+    max-width: 420px;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Title row with close button */
+.expanded-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+/* =========================
+   FIELDS
+   — Shared label + value layout used in modal and add-entry
+========================= */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field + .field {
+    margin-top: 10px;            /* Vertical breathing room between fields */
+}
+
+/* Uppercase micro-label above each field */
+.field label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--subtext);
+}
+
+/* Read-only value display box (username, URL etc.) */
+.value,
+#edit-password,
+#password-text {
+    background: var(--input);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.875rem;
+}
+
+/* Notes textarea inside the expanded modal */
+#expanded-notes textarea {
+    width: 100%;
+    min-height: 60px;
+    resize: none;                /* Prevent manual resize handle */
+    border: none;
+    outline: none;
+    background: var(--input);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--text);
+    box-sizing: border-box;
+}
+
+#expanded-notes .value {
+    display: flex;          /* keep flex for styling if needed */
+    align-items: flex-start; /* aligns content to top */
+    padding: 8px 10px;
+    min-height: 60px;
+    box-sizing: border-box;
+}
+
+/* Wrapper that holds input + eye toggle absolutely positioned */
+.password-wrapper {
+    position: relative;
+}
+
+/* Show/hide password toggle button */
+#toggle-password {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* Editable inputs inside .value or .password-wrapper */
+.value input,
+.value textarea,
+.password-wrapper input {
+    width: 100%;
+    padding: 8px;
+    padding-right: 32px;         /* Room for icon on the right */
+    background: var(--input);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 0.875rem;
+    outline: none;
+}
+
+
+/* =========================
+   MODAL ACTION BUTTONS
+   — Icon buttons and copy/remove inside the expanded card
+========================= */
+
+/* Small icon-only button (e.g. edit, close) */
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--subtext);
+    transition: color 0.15s;
+}
+
+.icon-btn:hover { color: var(--text); }
+
+/* Full-width action buttons at the bottom of the modal */
+#remove-btn,
+#copy-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Copy button is ghost-style (no background) */
+#copy-btn {
+    background: none;
+    border: none;
+    color: var(--subtext);
+    transition: color 0.15s;
+}
+
+#copy-btn:hover { color: var(--text); }
+
+
+/* =========================
+   CONFIRMATION MODAL
+   — "Are you sure?" dialog before destructive actions
+========================= */
+
+/* Dimmed backdrop — sits above everything else */
+.confirmation-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;               /* Shown via JS */
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;               /* Above the expanded card modal */
+    backdrop-filter: blur(2px);
+}
+
+/* Dialog box */
+.confirmation-modal {
+    background: var(--card);
+    max-width: 340px;
+    width: 90%;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Confirmation message text */
+.confirmation-modal p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text);
+}
+
+/* Side-by-side confirm/cancel buttons */
+.confirmation-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.confirmation-buttons button {
+    flex: 1;                     /* Equal width */
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.confirmation-buttons button:active { transform: scale(0.97); }
+
+/* "No, keep it" — primary filled */
+#confirm-no {
+    background: var(--text);
+    color: var(--bg);
+}
+
+#confirm-no:hover { opacity: 0.85; }
+
+/* "Yes, delete" — secondary outlined */
+#confirm-yes {
+    background: var(--input);
+    color: var(--text);
+    border: 1px solid var(--border) !important;
+}
+
+#confirm-yes:hover { background: var(--input-focus); }
+
+
+/* =========================
+   ADD ENTRY PAGE
+========================= */
+
+/* Centred single-column form container */
+.add-entry-container {
+    max-width: 600px;
+    margin: 3rem auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Page heading */
+.add-entry-title {
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: left;
+}
+
+/* Input and textarea inside a .field on this page */
+.field input,
+.field textarea {
+    width: 100%;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    background: var(--input);
+    border: none;
+    outline: none;
+}
+
+.field input:focus,
+.field textarea:focus {
+    background: var(--inputfocus); /* Slightly darker on focus */
+}
+
+/* Global textarea defaults (applies everywhere) */
+textarea {
+    min-height: 60px;
+    resize: none;
+    line-height: 1.4;
+}
+
+/* Add / Cancel button row */
+.add-entry-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.add-entry-actions button {
+    flex: none;
+    width: 120px;                /* Fixed width, not full-width */
+}
+
+
+/* =========================
+   SETTINGS PAGE
+========================= */
+
+/* Container */
+.settings-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 var(--page-padding);
+    display: flex;
+    flex-direction: column;
+    gap: var(--section-gap);
+}
+
+/* Section title */
+.settings-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: -0.5rem;
+}
+
+/* =========================
+   CARD (SECTION)
+========================= */
+
+.settings-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    padding: 1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================
+   INDIVIDUAL SETTINGS
+========================= */
+
+.setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0.9rem 0;
+}
+
+/* Divider between settings */
+.setting-item:not(:last-child) {
+    border-bottom: 1px solid var(--border);
+}
+
+/* Labels */
+.setting-item label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--subtext);
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+.setting-item input,
+.setting-item select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    background: var(--input);
+    border: none;
+    outline: none;
+    color: var(--text);
+    transition: background 0.15s;
+}
+
+.setting-item input:focus,
+.setting-item select:focus {
+    background: var(--input-focus);
+}
+
+/* =========================
+   TOGGLE ROW
+========================= */
+
+.toggle-field {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle-field span {
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+/* =========================
+   SWITCH (TOGGLE)
+========================= */
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 22px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    background: var(--border);
+    border-radius: 20px;
+    transition: 0.25s;
+}
+
+.slider::before {
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    top: 2px;
+    background: var(--card);
+    border-radius: 50%;
+    transition: 0.25s;
+}
+
+.switch input:checked + .slider {
+    background: var(--text);
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(20px);
+}
+
+/* =========================
+   SEGMENTED CONTROL
+========================= */
+/* 2-option segmented control (Appearance) */
+.segmented-control-2 {
+    position: relative;
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--input);
+    padding: 4px;
+}
+.segmented-control-2 label {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text);
+    z-index: 1;
+}
+.segmented-control-2 input[type="radio"] { display: none; }
+.segmented-slider-2 {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    transition: transform 0.3s ease, width 0.3s ease;
+}
+
+/* 3-option segmented control (Default Sort) */
+.segmented-control-3 {
+    position: relative;
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--input);
+    padding: 4px;
+}
+.segmented-control-3 label {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text);
+    z-index: 1;
+}
+.segmented-control-3 input[type="radio"] { display: none; }
+.segmented-slider-3 {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(calc(100% / 3) - 3px);
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    transition: transform 0.3s ease, width 0.3s ease;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.settings-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.settings-actions button {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 500px) {
+    .settings-container {
+        padding: 0 1rem;
+    }
+}
+/* =========================
+   SAVE SETTINGS MODAL
+   — Confirmation dialog before applying settings changes
+========================= */
+
+/* Dimmed backdrop */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;               /* Shown via JS */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(2px);
+}
+
+/* Modal panel */
+.modal-box {
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Modal heading */
+.modal-box h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* Modal body text */
+.modal-box p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--subtext);
+}
+
+/* Button row — right-aligned */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-actions button {
+    padding: 0.55rem 1rem;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+/* Cancel — outlined */
+.cancel-btn {
+    background: var(--input);
+    color: var(--text);
+    border: 1px solid var(--border) !important;
+}
+
+.cancel-btn:hover { background: var(--input-focus); }
+
+/* Confirm — filled */
+.confirm-btn {
+    background: var(--text);
+    color: var(--bg);
+}
+
+.confirm-btn:hover { opacity: 0.8; }
+
+
+/* =========================
+   LOGIN PAGE
+========================= */
+
+/* Full-page center layout */
+body.login-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: var(--text);
+    padding: 1rem;
+}
+
+/* Login container */
+.login-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 var(--page-padding);
+    display: flex;
+    flex-direction: column;
+    gap: var(--section-gap);
+}
+
+/* Page title */
+.login-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: -0.5rem;
+}
+
+/* Form fields */
+.login-container .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.login-container input[type="password"],
+.login-container input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    background: var(--input);
+    border: none;
+    outline: none;
+    color: var(--text);
+    transition: background 0.15s;
+}
+
+.login-container input:focus {
+    background: var(--input-focus);
+}
+
+/* Show/hide password button */
+.login-container .password-wrapper {
+    position: relative;
+}
+
+.login-container #toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--subtext);
+}
+
+/* Error message */
+.login-container .error {
+    color: #ff4d4f;
+    font-size: 0.85rem;
+    display: none;
+    text-align: center;
+}
+
+/* Buttons */
+.login-container button {
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.login-container #login-btn {
+    background: var(--text);
+    color: var(--bg);
+}
+
+.login-container #login-btn:hover {
+    opacity: 0.85;
+}
+
+.login-container #reset-btn {
+    background: var(--card);
+    color: var(--text);
+}
+
+.login-container #reset-btn:hover {
+    background: var(--input);
+}
+
+/* Optional: small links row */
+.login-container .links {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--subtext);
+}
+
+/* Dark mode overrides */
+body.dark.login-page {
+    background: var(--bg);
+}
+
+body.dark.login-container {
+    background: var(--card);
+}

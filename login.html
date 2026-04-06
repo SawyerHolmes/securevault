@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="js/crypto-utils.js"></script>
+    <script defer src="js/login.js"></script>
+</head>
+<body>
+
+<header>
+    <div class="logo">SecureVault</div>
+    <nav class="menu">
+        <a href="vault.html">Vault</a>
+        <a href="add-entry.html">Add Entry</a>
+        <a href="settings.html">Settings</a>
+        <a href="login.html" id="logout-btn">Logout</a>
+    </nav>
+</header>
+
+<main>
+  <div class="login-container">
+
+      <h2 class="login-title">Login</h2>
+      <p class="login-subtitle">Your passwords, safe and secure</p>
+
+      <label for="master-password">Master Password</label>
+      <div class="password-wrapper">
+          <input
+            id="master-password"
+            autocomplete="new-password" 
+            autocorrect="off" 
+            autocapitalize="off" 
+            spellcheck="false" 
+            type="password"
+            placeholder="Enter your master password">
+          <button type="button" id="toggle-password" class="toggle-password">
+              <i class="fa-solid fa-eye-slash"></i>
+          </button>
+      </div>
+
+      <button class="btn-black" id="login-btn">Login</button>
+      <button class="link-btn" id="reset-btn">Reset Password</button>
+
+      <div id="login-error" class="login-error"></div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>
