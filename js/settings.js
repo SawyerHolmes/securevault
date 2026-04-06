@@ -225,9 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initSegmentedControls3();
 });
 
-// Call after DOM load
-document.addEventListener('DOMContentLoaded', initSegmentedControls);
-
 // =========================
 // CONFIRMATION MODAL
 // =========================
