@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <title>Login</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="js/crypto-utils.js"></script>
-    <script defer src="js/login.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
@@ -22,32 +20,31 @@
 
 <main>
   <div class="login-container">
-
       <h2 class="login-title">Login</h2>
       <p class="login-subtitle">Your passwords, safe and secure</p>
-
       <label for="master-password">Master Password</label>
       <div class="password-wrapper">
           <input
             id="master-password"
-            autocomplete="new-password" 
-            autocorrect="off" 
-            autocapitalize="off" 
-            spellcheck="false" 
+            autocomplete="new-password"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
             type="password"
             placeholder="Enter your master password">
           <button type="button" id="toggle-password" class="toggle-password">
               <i class="fa-solid fa-eye-slash"></i>
           </button>
       </div>
-
       <button class="btn-black" id="login-btn">Login</button>
       <button class="link-btn" id="reset-btn">Reset Password</button>
-
       <div id="login-error" class="login-error"></div>
-    </div>
   </div>
 </main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="js/crypto-utils.js"></script>
+<script src="js/login.js"></script>
 
 </body>
 </html>
