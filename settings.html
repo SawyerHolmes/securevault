@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <title>Settings</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="js/crypto-utils.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/sync.js"></script>
     <script defer src="js/settings.js"></script>
-    <script src="js/global-settings.js"></script>
-    
 </head>
 <body>
 
@@ -31,13 +31,18 @@
         <div class="settings-section">
 
             <div class="setting-item">
-                <label for="change-password">Change Master Password</label>
-                <input type="password" id="change-password" placeholder="New master password">
+                <label for="change-password">Current Password</label>
+                <input type="password" id="change-password" placeholder="Enter current password">
             </div>
 
             <div class="setting-item">
-                <label for="confirm-password">Confirm New Password</label>
-                <input type="password" id="confirm-password" placeholder="Confirm password">
+                <label for="confirm-password">New Password</label>
+                <input type="password" id="confirm-password" placeholder="Enter new password">
+            </div>
+
+            <div class="setting-item">
+                <button class="btn-black" id="change-password-btn">Change Password</button>
+                <div id="password-change-status" style="font-size:0.8rem; margin-top:6px; min-height:1.2em;"></div>
             </div>
 
             <div class="setting-item toggle-field">
@@ -110,31 +115,6 @@
                 </label>
             </div>
 
-        </div>
-
-        <!-- Sync -->
-        <h2 class="settings-title">Sync</h2>
-        <div class="settings-section">
-        <div class="settings-card">
-
-            <div class="setting-item">
-                <label for="github-token">GitHub Personal Access Token</label>
-                <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
-            </div>
-
-            <div class="setting-item">
-                <label for="gist-id">Gist ID</label>
-                <input type="text" id="gist-id" placeholder="e.g. 4b2c8f1a9d3e7f0c2a1b">
-            </div>
-
-            <div class="setting-item" style="flex-direction:row; gap:0.75rem;">
-                <button class="btn-black" id="push-btn" style="flex:1">Push to Gist</button>
-                <button class="btn-white" id="pull-btn" style="flex:1">Pull from Gist</button>
-            </div>
-
-            <div id="sync-status" style="font-size:0.8rem; color:var(--subtext); min-height:1.2em;"></div>
-
-        </div>
         </div>
 
         <!-- Actions -->

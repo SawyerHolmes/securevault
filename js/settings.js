@@ -1,31 +1,9 @@
 // =========================
-// AUTH GUARD + SESSION CHECK
+// AUTH
 // =========================
-function checkAuth() {
-    const isAuth   = localStorage.getItem("authenticated") === "true";
-    const vaultKey = sessionStorage.getItem("vaultKey");
-
-    if (!isAuth || !vaultKey) {
-        window.location.replace("login.html");
-        return;
-    }
-
-    const last    = parseInt(localStorage.getItem("lastActive"), 10);
-    const timeout = 5 * 60 * 1000;
-
-    if (last && Date.now() - last > timeout) {
-        localStorage.removeItem("authenticated");
-        sessionStorage.removeItem("vaultKey");
-        window.location.replace("login.html");
-        return;
-    }
-
-    localStorage.setItem("lastActive", Date.now());
-}
-
 checkAuth();
+startActivityTracking();
 
-// Prevent back navigation
 window.history.pushState(null, null, window.location.href);
 window.addEventListener("popstate", () => {
     window.history.pushState(null, null, window.location.href);
@@ -37,7 +15,7 @@ window.addEventListener("popstate", () => {
 const DEFAULT_SETTINGS = {
     autoLock: false,
     darkMode: false,
-    viewMode: "grid",     // grid, list, gallery
+    viewMode: "grid",
     defaultSort: "name",
     confirmDelete: true
 };
@@ -51,7 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loadSettings();
     applySettingsToUI();
     attachEventListeners();
-    initSegmentedSliders();
+    initSegmentedControls2();
+    initSegmentedControls3();
 });
 
 // =========================
@@ -59,9 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // =========================
 function loadSettings() {
     const saved = localStorage.getItem("vaultSettings");
-    if (saved) {
-        settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
-    }
+    if (saved) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
 }
 
 function saveSettings() {
@@ -72,24 +49,23 @@ function saveSettings() {
 // APPLY TO UI
 // =========================
 function applySettingsToUI() {
-    document.getElementById("auto-lock").checked = settings.autoLock;
-    document.getElementById("dark-mode").checked = settings.darkMode;
+    document.getElementById("auto-lock").checked    = settings.autoLock;
+    document.getElementById("dark-mode").checked    = settings.darkMode;
     document.getElementById("confirm-delete").checked = settings.confirmDelete;
 
-    document.querySelectorAll('input[name="default-sort"]').forEach(radio => {
-        radio.checked = radio.value === settings.defaultSort;
+    document.querySelectorAll('input[name="default-sort"]').forEach(r => {
+        r.checked = r.value === settings.defaultSort;
     });
-    document.querySelectorAll('input[name="vault-view"]').forEach(radio => {
-        radio.checked = radio.value === settings.viewMode;
+    document.querySelectorAll('input[name="vault-view"]').forEach(r => {
+        r.checked = r.value === settings.viewMode;
     });
 
     applyDarkMode(settings.darkMode);
     applyViewMode(settings.viewMode);
 
-    // Load saved sync config into fields
     const cfg = getSyncConfig();
     document.getElementById("github-token").value = cfg.token;
-    document.getElementById("gist-id").value = cfg.gistId;
+    document.getElementById("gist-id").value      = cfg.gistId;
 }
 
 function saveSyncConfig() {
@@ -101,7 +77,7 @@ function saveSyncConfig() {
 function setSyncStatus(msg, color) {
     const el = document.getElementById("sync-status");
     el.textContent = msg;
-    el.style.color = color;
+    el.style.color  = color;
 }
 
 // =========================
@@ -120,8 +96,8 @@ function applyViewMode(mode) {
 // READ SETTINGS FROM UI
 // =========================
 function readSettingsFromUI() {
-    settings.autoLock = document.getElementById("auto-lock").checked;
-    settings.darkMode = document.getElementById("dark-mode").checked;
+    settings.autoLock      = document.getElementById("auto-lock").checked;
+    settings.darkMode      = document.getElementById("dark-mode").checked;
     settings.confirmDelete = document.getElementById("confirm-delete").checked;
 
     const sort = document.querySelector('input[name="default-sort"]:checked');
@@ -135,7 +111,8 @@ function readSettingsFromUI() {
 // EVENT LISTENERS
 // =========================
 function attachEventListeners() {
-    // Save button
+
+    // Save settings
     document.getElementById("save-settings").addEventListener("click", () => {
         readSettingsFromUI();
         showConfirmation("Save changes?", () => {
@@ -146,7 +123,7 @@ function attachEventListeners() {
         });
     });
 
-    // Reset button
+    // Reset settings
     document.getElementById("reset-settings").addEventListener("click", () => {
         showConfirmation("Reset all settings to default?", () => {
             settings = { ...DEFAULT_SETTINGS };
@@ -155,27 +132,59 @@ function attachEventListeners() {
         });
     });
 
-    // Dark mode toggle (live)
+    // Dark mode live toggle
     document.getElementById("dark-mode").addEventListener("change", (e) => {
         applyDarkMode(e.target.checked);
         settings.darkMode = e.target.checked;
         saveSettings();
     });
 
-    // Logout button
-    document.getElementById("logout-btn").addEventListener("click", () => {
-        localStorage.removeItem("authenticated");
-        sessionStorage.removeItem("vaultKey");
-        window.location.replace("login.html");
+    // Change master password
+    document.getElementById("change-password-btn").addEventListener("click", async () => {
+        const current = document.getElementById("change-password").value.trim();
+        const confirm = document.getElementById("confirm-password").value.trim();
+        const statusEl = document.getElementById("password-change-status");
+
+        if (!current || !confirm) {
+            statusEl.textContent = "Fill in both fields";
+            statusEl.style.color = "#c0392b";
+            return;
+        }
+        if (current === confirm) {
+            statusEl.textContent = "New password must be different from current";
+            statusEl.style.color = "#c0392b";
+            return;
+        }
+
+        statusEl.textContent = "Changing...";
+        statusEl.style.color = "var(--subtext)";
+
+        // current = existing password, confirm = new password
+        const result = await changeMasterPassword(current, confirm);
+
+        if (result.ok) {
+            statusEl.textContent = result.warning || "✓ Password changed successfully";
+            statusEl.style.color = result.warning ? "#e67e22" : "#2e7d32";
+            document.getElementById("change-password").value  = "";
+            document.getElementById("confirm-password").value = "";
+        } else {
+            statusEl.textContent = "✗ " + result.error;
+            statusEl.style.color = "#c0392b";
+        }
     });
+
+    // Logout
+    document.getElementById("logout-btn").addEventListener("click", logout);
 
     // Push to Gist
     document.getElementById("push-btn").addEventListener("click", async () => {
         saveSyncConfig();
         setSyncStatus("Pushing...", "var(--subtext)");
         const result = await pushToGist();
-        setSyncStatus(result.ok ? "✓ Pushed successfully" : `✗ ${result.error}`,
-                      result.ok ? "#2e7d32" : "#c0392b");
+        setSyncStatus(
+            result.ok ? "✓ Pushed successfully" : `✗ ${result.error}`,
+            result.ok ? "#2e7d32" : "#c0392b"
+        );
     });
 
     // Pull from Gist
@@ -183,21 +192,21 @@ function attachEventListeners() {
         saveSyncConfig();
         setSyncStatus("Pulling...", "var(--subtext)");
         const result = await pullFromGist();
-        setSyncStatus(result.ok ? "✓ Pulled successfully — refresh vault to see changes"
-                                : `✗ ${result.error}`,
-                      result.ok ? "#2e7d32" : "#c0392b");
+        setSyncStatus(
+            result.ok ? "✓ Pulled — refresh vault to see changes" : `✗ ${result.error}`,
+            result.ok ? "#2e7d32" : "#c0392b"
+        );
     });
 }
 
 // =========================
-// SEGMENTED CONTROLS (view mode & default sort)
+// SEGMENTED CONTROLS
 // =========================
 function initSegmentedControls2() {
     const control = document.querySelector('.segmented-control-2');
     if (!control) return;
     const radios = control.querySelectorAll('input[type="radio"]');
     const slider = control.querySelector('.segmented-slider-2');
-    
     radios.forEach((radio, i) => {
         radio.addEventListener('change', () => {
             slider.style.transform = `translateX(${i * 100}%)`;
@@ -211,7 +220,6 @@ function initSegmentedControls3() {
     if (!control) return;
     const radios = control.querySelectorAll('input[type="radio"]');
     const slider = control.querySelector('.segmented-slider-3');
-    
     radios.forEach((radio, i) => {
         radio.addEventListener('change', () => {
             slider.style.transform = `translateX(${i * 100}%)`;
@@ -220,28 +228,19 @@ function initSegmentedControls3() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    initSegmentedControls2();
-    initSegmentedControls3();
-});
-
 // =========================
 // CONFIRMATION MODAL
 // =========================
 function showConfirmation(message, onConfirm) {
-    const overlay = document.getElementById("confirmation-overlay");
+    const overlay   = document.getElementById("confirmation-overlay");
     const messageEl = document.getElementById("confirm-message");
-    const btnYes = document.getElementById("confirm-yes");
-    const btnNo = document.getElementById("confirm-no");
+    const btnYes    = document.getElementById("confirm-yes");
+    const btnNo     = document.getElementById("confirm-no");
 
-    messageEl.textContent = message;
-    overlay.style.display = "flex";
+    messageEl.textContent    = message;
+    overlay.style.display    = "flex";
 
-    btnYes.onclick = () => {
-        overlay.style.display = "none";
-        onConfirm();
-    };
-    btnNo.onclick = () => { overlay.style.display = "none"; };
-
+    btnYes.onclick = () => { overlay.style.display = "none"; onConfirm(); };
+    btnNo.onclick  = () => { overlay.style.display = "none"; };
     overlay.onclick = (e) => { if (e.target === overlay) overlay.style.display = "none"; };
 }
