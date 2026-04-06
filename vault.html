@@ -9,7 +9,6 @@
 </head>
 <body>
 
-<!-- Header -->
 <header>
   <div class="logo">SecureVault</div>
   <nav class="menu">
@@ -23,45 +22,26 @@
 <!-- Search Bar + Sort -->
 <div class="vault-controls">
   <div class="search-wrapper">
-
-    <!-- Left search icon -->
     <svg class="search-icon" viewBox="0 0 24 24">
       <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
       <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2"/>
     </svg>
-
-    <!-- Search input -->
     <input type="text" id="search-input" placeholder="Search" autocomplete="off">
-
-    <!-- Right sort icon -->
     <svg class="sort-icon" id="sort-toggle" viewBox="0 0 24 24">
       <line x1="4" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="2"/>
       <circle cx="10" cy="6" r="2" fill="currentColor"/>
-
       <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="2"/>
       <circle cx="14" cy="12" r="2" fill="currentColor"/>
-
       <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="2"/>
       <circle cx="8" cy="18" r="2" fill="currentColor"/>
     </svg>
-
-    <!-- Sort dropdown menu -->
     <div class="sort-menu" id="sort-menu">
-      <div class="sort-field" data-field="name">
-        Site Name <span class="indicator"></span>
-      </div>
-      <div class="sort-field" data-field="username">
-        Username <span class="indicator"></span>
-      </div>
+      <div class="sort-field" data-field="name">Site Name <span class="indicator"></span></div>
+      <div class="sort-field" data-field="username">Username <span class="indicator"></span></div>
       <div class="divider"></div>
-      <div class="sort-order" data-order="asc">
-        Ascending <span class="indicator"></span>
-      </div>
-      <div class="sort-order" data-order="desc">
-        Descending <span class="indicator"></span>
-      </div>
+      <div class="sort-order" data-order="asc">Ascending <span class="indicator"></span></div>
+      <div class="sort-order" data-order="desc">Descending <span class="indicator"></span></div>
     </div>
-
   </div>
 </div>
 
@@ -85,32 +65,52 @@
     </div>
 
     <div class="expanded-body">
-      <div class="field">
-        <label>Username</label>
-        <div class="value" id="expanded-username">—</div>
+
+      <!-- URL -->
+      <div class="field" id="url-field">
+        <label>URL</label>
+        <div class="value url-value" id="expanded-url">—</div>
       </div>
 
+      <!-- Username + copy -->
       <div class="field">
-        <label>Password</label>
-        <div class="password-wrapper">
-            <div class="value" id="expanded-password">••••••••</div>
-            <button id="toggle-password" class="icon-btn">
-            <i class="fa-solid fa-eye-slash"></i>
-            </button>
+        <label>Username</label>
+        <div class="value-row">
+          <div class="value" id="expanded-username">—</div>
+          <button class="icon-btn copy-icon-btn" id="copy-username-btn" title="Copy username">
+            <i class="fa-regular fa-copy"></i>
+          </button>
         </div>
       </div>
 
-        <button id="copy-btn" class="btn-white">Copy</button>
+      <!-- Password + toggle + copy -->
+      <div class="field">
+        <label>Password</label>
+        <div class="value-row">
+          <div class="password-wrapper" style="flex:1;">
+            <div class="value" id="expanded-password">••••••••</div>
+            <button id="toggle-password" class="icon-btn">
+              <i class="fa-solid fa-eye-slash"></i>
+            </button>
+          </div>
+          <button class="icon-btn copy-icon-btn" id="copy-btn" title="Copy password">
+            <i class="fa-regular fa-copy"></i>
+          </button>
+        </div>
+      </div>
 
+      <!-- Notes -->
       <div class="field">
         <label>Notes</label>
         <div class="value notes" id="expanded-notes">No notes</div>
       </div>
 
-    
     </div>
 
     <button class="btn-black" id="remove-btn">Remove</button>
+
+    <!-- Copy feedback toast -->
+    <div class="copy-toast" id="copy-toast">Copied!</div>
 
   </div>
 </div>
@@ -118,21 +118,18 @@
 <!-- Confirmation Modal -->
 <div class="confirmation-overlay" id="confirmation-overlay">
   <div class="confirmation-modal">
-    <div id="confirmation-message">Are you sure you want to remove this password?</div>
+    <div id="confirmation-message">Are you sure you want to remove this entry?</div>
     <div class="confirmation-buttons">
-      <button class="btn-white" id="confirm-yes">Yes</button>
-      <button class="btn-black" id="confirm-no">No</button>
+      <button class="btn-white" id="confirm-yes">Yes, remove</button>
+      <button class="btn-black" id="confirm-no">Cancel</button>
     </div>
-    <button class="btn-black" id="confirm-close" style="display:none;">Close</button>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
 <script src="js/crypto-utils.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/vault.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/global-settings.js"></script>
 
 </body>
 </html>

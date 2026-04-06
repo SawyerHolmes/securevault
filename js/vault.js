@@ -7,75 +7,54 @@ let passwordVisible = false;
 let sortField = "name";
 let sortOrder = "asc";
 
-// =========================
-// SETTINGS
-// =========================
 const settings = JSON.parse(localStorage.getItem("vaultSettings")) || {
     darkMode: false,
-    viewMode: "grid",      // grid, list, gallery
+    viewMode: "grid",
     defaultSort: "name",
     confirmDelete: true
 };
 
 // =========================
-// ELEMENTS
+// AUTH
 // =========================
-const vaultContainer = document.getElementById("vault-container");
-const searchInput = document.getElementById("search-input");
-
-const expandedCard = document.getElementById("expanded-card");
-const expandedName = document.getElementById("expanded-name");
-const expandedUsername = document.getElementById("expanded-username");
-const expandedPassword = document.getElementById("expanded-password");
-const expandedNotes = document.getElementById("expanded-notes");
-
-const editBtn = document.getElementById("edit-btn");
-const saveCancelWrapper = document.getElementById("save-cancel-wrapper");
-const saveBtn = document.getElementById("save-btn");
-const cancelBtn = document.getElementById("cancel-btn");
-
-const copyBtn = document.getElementById("copy-btn");
-const removeBtn = document.getElementById("remove-btn");
-const togglePasswordBtn = document.getElementById("toggle-password");
-
-const confirmOverlay = document.getElementById("confirmation-overlay");
-const confirmYes = document.getElementById("confirm-yes");
-const confirmNo = document.getElementById("confirm-no");
-
-// =========================
-// AUTH GUARD + SESSION CHECK
-// =========================
-function checkAuth() {
-    const isAuth   = localStorage.getItem("authenticated") === "true";
-    const vaultKey = sessionStorage.getItem("vaultKey");
-    if (!isAuth || !vaultKey) { window.location.replace("login.html"); return; }
-
-    const last    = parseInt(localStorage.getItem("lastActive"), 10);
-    const timeout = 5 * 60 * 1000;
-    if (last && Date.now() - last > timeout) {
-        localStorage.removeItem("authenticated");
-        sessionStorage.removeItem("vaultKey");
-        window.location.replace("login.html");
-        return;
-    }
-    localStorage.setItem("lastActive", Date.now());
-}
-
-
 checkAuth();
+startActivityTracking();
 
-// Prevent back navigation
 window.history.pushState(null, null, window.location.href);
 window.addEventListener("popstate", () => {
     window.history.pushState(null, null, window.location.href);
 });
 
 // =========================
+// ELEMENTS
+// =========================
+const vaultContainer    = document.getElementById("vault-container");
+const searchInput       = document.getElementById("search-input");
+const expandedCard      = document.getElementById("expanded-card");
+const expandedName      = document.getElementById("expanded-name");
+const expandedUrl       = document.getElementById("expanded-url");
+const expandedUsername  = document.getElementById("expanded-username");
+const expandedPassword  = document.getElementById("expanded-password");
+const expandedNotes     = document.getElementById("expanded-notes");
+const editBtn           = document.getElementById("edit-btn");
+const saveCancelWrapper = document.getElementById("save-cancel-wrapper");
+const saveBtn           = document.getElementById("save-btn");
+const cancelBtn         = document.getElementById("cancel-btn");
+const copyBtn           = document.getElementById("copy-btn");
+const copyUsernameBtn   = document.getElementById("copy-username-btn");
+const removeBtn         = document.getElementById("remove-btn");
+const togglePasswordBtn = document.getElementById("toggle-password");
+const confirmOverlay    = document.getElementById("confirmation-overlay");
+const confirmYes        = document.getElementById("confirm-yes");
+const confirmNo         = document.getElementById("confirm-no");
+const copyToast         = document.getElementById("copy-toast");
+
+// =========================
 // LOAD / SAVE VAULT
 // =========================
 function loadVault() {
     const key = getStoredKey();
-    if (!key) { window.location.replace("login.html"); return; }
+    if (!key) { logout(); return; }
     const encrypted = localStorage.getItem("vault");
     if (!encrypted) { vault = []; return; }
     try {
@@ -88,27 +67,39 @@ function loadVault() {
 
 function saveVault() {
     const key = getStoredKey();
-    if (!key) { window.location.replace("login.html"); return; }
+    if (!key) { logout(); return; }
     localStorage.setItem("vault", encryptData(vault, key));
 }
 
 // =========================
-// SETTINGS AND VIEW MODE
+// APPLY SETTINGS
 // =========================
 function applyDarkMode() {
     document.body.classList.toggle("dark", settings.darkMode);
 }
 
 function applyViewMode(mode) {
+    mode = mode || settings.viewMode || "grid";
     document.body.classList.remove("grid-view", "list-view", "gallery-view");
     document.body.classList.add(mode + "-view");
-
-    // Add/remove container class
     if (mode === "list") {
         vaultContainer.classList.add("list-view");
     } else {
         vaultContainer.classList.remove("list-view");
     }
+}
+
+// =========================
+// COPY TOAST
+// =========================
+function showToast(msg = "Copied!") {
+    copyToast.textContent = msg;
+    copyToast.classList.add("show");
+    setTimeout(() => copyToast.classList.remove("show"), 1800);
+}
+
+function copyToClipboard(text, msg) {
+    navigator.clipboard.writeText(text).then(() => showToast(msg));
 }
 
 // =========================
@@ -120,18 +111,19 @@ function renderVault(filter = "") {
 
     const q = filter.toLowerCase();
     if (q) {
-        displayVault = displayVault.filter(
-            e => (e.name||"").toLowerCase().includes(q) ||
-                 (e.username||"").toLowerCase().includes(q) ||
-                 (e.notes||"").toLowerCase().includes(q)
+        displayVault = displayVault.filter(e =>
+            (e.name     || "").toLowerCase().includes(q) ||
+            (e.username || "").toLowerCase().includes(q) ||
+            (e.url      || "").toLowerCase().includes(q) ||
+            (e.notes    || "").toLowerCase().includes(q)
         );
     }
 
     displayVault.sort((a, b) => {
-        const valA = (a[sortField]||"").toLowerCase();
-        const valB = (b[sortField]||"").toLowerCase();
-        if (valA < valB) return sortOrder==="asc"?-1:1;
-        if (valA > valB) return sortOrder==="asc"?1:-1;
+        const valA = (a[sortField] || "").toLowerCase();
+        const valB = (b[sortField] || "").toLowerCase();
+        if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+        if (valA > valB) return sortOrder === "asc" ? 1 : -1;
         return 0;
     });
 
@@ -140,7 +132,7 @@ function renderVault(filter = "") {
     if (!displayVault.length) {
         const emptyDiv = document.createElement("div");
         emptyDiv.classList.add("empty-state");
-        emptyDiv.innerHTML = `<h2>No results</h2><p>Try a different search or add a new entry</p>`;
+        emptyDiv.innerHTML = `<h2>No entries</h2><p>Add your first entry to get started</p>`;
         vaultContainer.appendChild(emptyDiv);
         return;
     }
@@ -148,41 +140,29 @@ function renderVault(filter = "") {
     if (viewMode === "list") {
         vaultContainer.style.display = "flex";
         vaultContainer.style.justifyContent = "center";
-
         const table = document.createElement("table");
         table.classList.add("vault-list-table");
-
-        const thead = document.createElement("thead");
-        thead.innerHTML = `<tr>
-            <th>Site Name</th>
-            <th>Username</th>
-            <th>Password</th>
-            <th>Notes</th>
-        </tr>`;
-        table.appendChild(thead);
-
+        table.innerHTML = `<thead><tr>
+            <th>Name</th><th>URL</th><th>Username</th><th>Password</th>
+        </tr></thead>`;
         const tbody = document.createElement("tbody");
         displayVault.forEach(entry => {
             const realIndex = vault.indexOf(entry);
             const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${entry.name||""}</td>
-                            <td>${entry.username||""}</td>
-                            <td>••••••••</td>
-                            <td>${entry.notes||"No notes"}</td>`;
-
-            // Click a row to open expanded card
+            tr.innerHTML = `
+                <td>${entry.name || ""}</td>
+                <td>${entry.url || "—"}</td>
+                <td>${entry.username || ""}</td>
+                <td>••••••••</td>`;
             tr.addEventListener("click", () => openExpandedCard(entry, realIndex));
-
             tbody.appendChild(tr);
         });
         table.appendChild(tbody);
         vaultContainer.appendChild(table);
-        return; // only return for list view
-    } else {
-        vaultContainer.style.display = ""; // reset for grid/gallery
+        return;
     }
 
-    // GRID or GALLERY view
+    vaultContainer.style.display = "";
     displayVault.forEach(entry => {
         const realIndex = vault.indexOf(entry);
         const card = document.createElement("div");
@@ -190,20 +170,18 @@ function renderVault(filter = "") {
         if (viewMode === "grid") {
             card.classList.add("vault-card");
             card.innerHTML = `
-                <h2>${entry.name||"No Title"}</h2>
-                <p>${entry.username||""}</p>
-                <p>••••••••</p>
-            `;
+                <h2>${entry.name || "No Title"}</h2>
+                <p>${entry.url || ""}</p>
+                <p>${entry.username || ""}</p>`;
         } else if (viewMode === "gallery") {
             card.classList.add("vault-gallery-card");
             card.innerHTML = `
-                <div class="gallery-title">${entry.name||"No Title"}</div>
+                <div class="gallery-title">${entry.name || "No Title"}</div>
                 <div class="gallery-details">
-                    <p><strong>Username:</strong> ${entry.username||""}</p>
+                    <p><strong>URL:</strong> ${entry.url || "—"}</p>
+                    <p><strong>Username:</strong> ${entry.username || ""}</p>
                     <p><strong>Password:</strong> ••••••••</p>
-                    <p><strong>Notes:</strong> ${entry.notes||""}</p>
-                </div>
-            `;
+                </div>`;
         }
 
         card.dataset.id = realIndex;
@@ -212,7 +190,9 @@ function renderVault(filter = "") {
     });
 }
 
-// Close expanded card if clicking outside it
+// =========================
+// EXPANDED CARD
+// =========================
 expandedCard.addEventListener("click", e => {
     if (e.target === expandedCard) {
         expandedCard.style.display = "none";
@@ -220,103 +200,168 @@ expandedCard.addEventListener("click", e => {
     }
 });
 
-// =========================
-// EXPANDED CARD + EDIT MODE
-// =========================
-function openExpandedCard(entry,index){
-    currentIndex=index;
-    expandedName.textContent = entry.name||"No Title";
+function openExpandedCard(entry, index) {
+    currentIndex = index;
+    expandedName.textContent = entry.name || "No Title";
 
-    expandedUsername.innerHTML = `<div class="value">${entry.username||""}</div>`;
-    expandedPassword.innerHTML = `<div class="value" id="password-text">••••••••</div>`;
-    expandedNotes.innerHTML = `<div class="value" style="min-height:60px;">${entry.notes||"No notes"}</div>`;
+    // URL — show as clickable link if present
+    if (entry.url) {
+        expandedUrl.innerHTML = `<a href="${entry.url}" target="_blank" rel="noopener">${entry.url}</a>`;
+        document.getElementById("url-field").style.display = "";
+    } else {
+        document.getElementById("url-field").style.display = "none";
+    }
 
-    expandedCard.style.display="flex";
-    editBtn.style.display="inline-block";
-    saveCancelWrapper.style.display="none";
+    expandedUsername.textContent = entry.username || "—";
+    expandedPassword.textContent = "••••••••";
+    expandedNotes.textContent    = entry.notes || "No notes";
 
-    passwordVisible=false;
-    togglePasswordBtn.innerHTML='<i class="fa-solid fa-eye-slash"></i>';
+    expandedCard.style.display = "flex";
+    editBtn.style.display = "inline-block";
+    saveCancelWrapper.style.display = "none";
+
+    passwordVisible = false;
+    togglePasswordBtn.querySelector("i").className = "fa-solid fa-eye-slash";
 }
 
-editBtn.addEventListener("click",enterEditMode);
-function enterEditMode(){
-    if(currentIndex===null) return;
-    editBtn.style.display="none";
-    saveCancelWrapper.style.display="flex";
-    const e=vault[currentIndex];
-    expandedUsername.innerHTML=`<input type="text" id="edit-username" class="value" value="${e.username||""}">`;
-    expandedPassword.innerHTML=`<input type="${passwordVisible?"text":"password"}" id="edit-password" class="value" value="${e.password||""}">`;
-    expandedNotes.innerHTML=`<textarea id="edit-notes" class="value" rows="1">${e.notes||""}</textarea>`;
+// =========================
+// EDIT MODE
+// =========================
+editBtn.addEventListener("click", enterEditMode);
+
+function enterEditMode() {
+    if (currentIndex === null) return;
+    editBtn.style.display = "none";
+    saveCancelWrapper.style.display = "flex";
+    const e = vault[currentIndex];
+    document.getElementById("url-field").style.display = "";
+    expandedUrl.innerHTML      = `<input type="text" id="edit-url" class="value" value="${e.url || ""}">`;
+    expandedUsername.innerHTML = `<input type="text" id="edit-username" class="value" value="${e.username || ""}">`;
+    expandedPassword.innerHTML = `<input type="${passwordVisible ? "text" : "password"}" id="edit-password" class="value" value="${e.password || ""}">`;
+    expandedNotes.innerHTML    = `<textarea id="edit-notes" class="value">${e.notes || ""}</textarea>`;
 }
 
-saveBtn.addEventListener("click",()=>{
-    if(currentIndex===null) return;
-    vault[currentIndex].username=document.getElementById("edit-username").value.trim();
-    vault[currentIndex].password=document.getElementById("edit-password").value.trim();
-    vault[currentIndex].notes=document.getElementById("edit-notes").value.trim();
+saveBtn.addEventListener("click", () => {
+    if (currentIndex === null) return;
+    vault[currentIndex].url      = (document.getElementById("edit-url")?.value || "").trim();
+    vault[currentIndex].username = document.getElementById("edit-username").value.trim();
+    vault[currentIndex].password = document.getElementById("edit-password").value.trim();
+    vault[currentIndex].notes    = document.getElementById("edit-notes").value.trim();
     saveVault();
     exitEditMode();
     renderVault(searchInput.value);
 });
 
-cancelBtn.addEventListener("click",()=>{
+cancelBtn.addEventListener("click", () => {
     exitEditMode();
-    renderVault(searchInput.value);
 });
 
-function exitEditMode(){
-    if(currentIndex===null) return;
-    editBtn.style.display="inline-block";
-    saveCancelWrapper.style.display="none";
-    const e=vault[currentIndex];
-    expandedUsername.innerHTML=`<div class="value">${e.username}</div>`;
-    expandedPassword.innerHTML=`<div class="value" id="password-text">${passwordVisible?e.password:"••••••••"}</div>`;
-    expandedNotes.innerHTML=`<div class="value" style="min-height:60px;">${e.notes||"No notes"}</div>`;
+function exitEditMode() {
+    if (currentIndex === null) return;
+    editBtn.style.display = "inline-block";
+    saveCancelWrapper.style.display = "none";
+    const e = vault[currentIndex];
+    if (e.url) {
+        expandedUrl.innerHTML = `<a href="${e.url}" target="_blank" rel="noopener">${e.url}</a>`;
+        document.getElementById("url-field").style.display = "";
+    } else {
+        document.getElementById("url-field").style.display = "none";
+    }
+    expandedUsername.textContent = e.username || "—";
+    expandedPassword.textContent = passwordVisible ? e.password : "••••••••";
+    expandedNotes.textContent    = e.notes || "No notes";
 }
 
 // =========================
-// COPY / DELETE ENTRY
+// TOGGLE PASSWORD
 // =========================
-togglePasswordBtn.addEventListener("click",()=>{
-    if(currentIndex===null) return;
-    const pwdInput=document.getElementById("edit-password");
-    const pwdText=document.getElementById("password-text");
-    passwordVisible=!passwordVisible;
-    if(pwdInput) pwdInput.type=passwordVisible?"text":"password";
-    if(pwdText) pwdText.textContent=passwordVisible?vault[currentIndex].password:"••••••••";
+togglePasswordBtn.addEventListener("click", () => {
+    if (currentIndex === null) return;
+    const pwdInput = document.getElementById("edit-password");
+    passwordVisible = !passwordVisible;
+    if (pwdInput) {
+        pwdInput.type = passwordVisible ? "text" : "password";
+    } else {
+        expandedPassword.textContent = passwordVisible ? vault[currentIndex].password : "••••••••";
+    }
+    togglePasswordBtn.querySelector("i").className = passwordVisible
+        ? "fa-solid fa-eye" : "fa-solid fa-eye-slash";
 });
 
-removeBtn.addEventListener("click",()=>{
-    if(currentIndex===null) return;
-    if(!settings.confirmDelete){ deleteCurrentEntry(); return; }
-    confirmOverlay.style.display="flex";
+// =========================
+// COPY BUTTONS
+// =========================
+copyBtn.addEventListener("click", () => {
+    if (currentIndex === null) return;
+    copyToClipboard(vault[currentIndex].password, "Password copied!");
 });
-confirmYes.addEventListener("click",deleteCurrentEntry);
-confirmNo.addEventListener("click",()=>confirmOverlay.style.display="none");
-confirmOverlay.addEventListener("click",(e)=>{if(e.target===confirmOverlay) confirmOverlay.style.display="none";});
 
-function deleteCurrentEntry(){
-    if(currentIndex===null) return;
-    vault.splice(currentIndex,1);
+copyUsernameBtn.addEventListener("click", () => {
+    if (currentIndex === null) return;
+    copyToClipboard(vault[currentIndex].username, "Username copied!");
+});
+
+// =========================
+// DELETE
+// =========================
+removeBtn.addEventListener("click", () => {
+    if (currentIndex === null) return;
+    if (!settings.confirmDelete) { deleteCurrentEntry(); return; }
+    confirmOverlay.style.display = "flex";
+});
+
+confirmYes.addEventListener("click", deleteCurrentEntry);
+confirmNo.addEventListener("click", () => confirmOverlay.style.display = "none");
+confirmOverlay.addEventListener("click", e => {
+    if (e.target === confirmOverlay) confirmOverlay.style.display = "none";
+});
+
+function deleteCurrentEntry() {
+    if (currentIndex === null) return;
+    vault.splice(currentIndex, 1);
     saveVault();
-    expandedCard.style.display="none";
-    confirmOverlay.style.display="none";
+    expandedCard.style.display = "none";
+    confirmOverlay.style.display = "none";
+    currentIndex = null;
     renderVault(searchInput.value);
 }
 
 // =========================
 // SEARCH + SORT
 // =========================
-searchInput.addEventListener("input",()=>renderVault(searchInput.value));
+searchInput.addEventListener("input", () => renderVault(searchInput.value));
 
-// Sort indicator logic left same as before...
-// View mode radio
-document.querySelectorAll('[name="vault-view"]').forEach(radio=>{
-    radio.addEventListener("change",()=>{
-        settings.viewMode=radio.value;
-        localStorage.setItem("vaultSettings",JSON.stringify(settings));
-        applyViewMode();
+const sortToggle = document.getElementById("sort-toggle");
+const sortMenu   = document.getElementById("sort-menu");
+
+sortToggle.addEventListener("click", e => {
+    e.stopPropagation();
+    const open = sortMenu.style.display === "flex";
+    sortMenu.style.display = open ? "none" : "flex";
+    sortToggle.classList.toggle("active", !open);
+});
+
+document.addEventListener("click", () => {
+    sortMenu.style.display = "none";
+    sortToggle.classList.remove("active");
+});
+
+document.querySelectorAll(".sort-field").forEach(el => {
+    el.addEventListener("click", e => {
+        e.stopPropagation();
+        sortField = el.dataset.field;
+        document.querySelectorAll(".sort-field .indicator").forEach(i => i.classList.remove("active"));
+        el.querySelector(".indicator").classList.add("active");
+        renderVault(searchInput.value);
+    });
+});
+
+document.querySelectorAll(".sort-order").forEach(el => {
+    el.addEventListener("click", e => {
+        e.stopPropagation();
+        sortOrder = el.dataset.order;
+        document.querySelectorAll(".sort-order .indicator").forEach(i => i.classList.remove("active"));
+        el.querySelector(".indicator").classList.add("active");
         renderVault(searchInput.value);
     });
 });
@@ -324,17 +369,13 @@ document.querySelectorAll('[name="vault-view"]').forEach(radio=>{
 // =========================
 // LOGOUT
 // =========================
-document.getElementById("logout-btn").addEventListener("click", () => {
-    localStorage.removeItem("authenticated");
-    sessionStorage.removeItem("vaultKey");
-    window.location.replace("login.html");
-});
+document.getElementById("logout-btn").addEventListener("click", logout);
 
 // =========================
 // INIT
 // =========================
 loadVault();
 applyDarkMode();
-applyViewMode();
-sortField=settings.defaultSort||"name";
+applyViewMode(settings.viewMode || "grid");
+sortField = settings.defaultSort || "name";
 renderVault();

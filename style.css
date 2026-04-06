@@ -50,7 +50,6 @@ html, body {
     margin: 0;
     padding: 0;
     min-height: 100%;
-    height: 100%;
     background: var(--bg);
     color: var(--text);
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -63,16 +62,6 @@ html, body {
 ========================= */
 main {
     padding: var(--section-gap) var(--page-padding); /* Top/bottom and left/right page padding */
-    flex: 1; /* main takes all remaining space */
-    background: var(--bg); /* dark or light */
-}
-
-
-/* Ensure main content fills the rest of the screen */
-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
 }
 
 
@@ -90,7 +79,7 @@ header {
 
 /* App name / brand */
 header .logo {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: -0.02em;
 }
@@ -99,8 +88,8 @@ header .logo {
 header .menu a {
     margin-left: 1.5rem;         /* Space between nav items */
     text-decoration: none;
-    color: var(--text);       /* Muted by default */
-    font-size: 1rem;
+    color: var(--subtext);       /* Muted by default */
+    font-size: 0.9rem;
     font-weight: 500;
     transition: color 0.15s;
 }
@@ -297,8 +286,6 @@ header .menu a:hover {
     transition: box-shadow 0.15s;
 }
 
-.vault-card:active { transform: scale(0.97); }
-
 .vault-card:hover { box-shadow: var(--shadow-hover); }
 
 /* Entry name */
@@ -324,90 +311,6 @@ header .menu a:hover {
     color: var(--subtext);
 }
 
-/* GRID VIEW (default) */
-body.grid-view #vault-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-}
-
-/* =========================
-   LIST VIEW TABLE
-========================= */
-.vault-container.list-view {
-    display: flex;
-    justify-content: center; /* horizontally center table */
-    width: 100%;
-    align-self: center;
-}
-
-.vault-list-table {
-    border-collapse: collapse;
-    width: 100%;           /* Or any width you want */
-    margin: 0 auto;       /* Centre horizontally */
-    text-align: left;
-    font-size: 0.9rem;
-}
-
-.vault-list-table th,
-.vault-list-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border);
-}
-
-.vault-list-table th {
-    background: var(--bg);
-    font-weight: 600;
-    cursor: auto;
-}
-
-.vault-list-table tr:hover {
-    background: var(--input-focus);
-    cursor: pointer;
-}
-
-.vault-list-table tr:active { transform: scale(0.99); }
-
-
-
-/* Specific columns */
-.vault-list-table th:nth-child(1),
-.vault-list-table td:nth-child(1) { width: 20%; }
-.vault-list-table th:nth-child(2),
-.vault-list-table td:nth-child(2) { width: 30%; }
-.vault-list-table th:nth-child(3),
-.vault-list-table td:nth-child(3) { width: 20%; }
-.vault-list-table th:nth-child(4),
-.vault-list-table td:nth-child(4) { width: 30%; }
-
-/* =========================
-   GALLERY VIEW
-========================= */
-body.gallery-view #vault-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-}
-
-.vault-gallery-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.8rem;
-    display: flex;
-    flex-direction: column;
-}
-
-.vault-gallery-card .gallery-title {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.vault-gallery-card .gallery-details p {
-    margin: 0.2rem 0;
-    font-size: 0.85rem;
-    color: var(--subtext);
-}
 
 /* =========================
    EXPANDED CARD MODAL
@@ -496,14 +399,6 @@ body.gallery-view #vault-container {
     font-size: 0.875rem;
     line-height: 1.4;
     color: var(--text);
-    box-sizing: border-box;
-}
-
-#expanded-notes .value {
-    display: flex;          /* keep flex for styling if needed */
-    align-items: flex-start; /* aligns content to top */
-    padding: 8px 10px;
-    min-height: 60px;
     box-sizing: border-box;
 }
 
@@ -714,233 +609,167 @@ textarea {
    SETTINGS PAGE
 ========================= */
 
-/* Container */
+/* Centred wide container */
 .settings-container {
     max-width: 900px;
     margin: 2rem auto;
-    padding: 0 var(--page-padding);
+    padding: 2rem;
     display: flex;
     flex-direction: column;
-    gap: var(--section-gap);
+    gap: 2rem;
 }
 
-/* Section title */
+/* Horizontal row of setting cards */
+.settings-section {
+    display: flex;
+    gap: 2rem;
+}
+
+/* Page heading */
 .settings-title {
     font-size: 2rem;
     font-weight: 600;
-    margin-bottom: -0.5rem;
+    margin-bottom: 1rem;
+    text-align: left;
 }
 
-/* =========================
-   CARD (SECTION)
-========================= */
+/* Responsive: wrap cards at medium widths */
+@media (max-width: 900px) {
+    .settings-section {
+        flex-wrap: wrap;
+    }
+}
 
-.settings-card {
+/* Responsive: stack cards on small screens */
+@media (max-width: 500px) {
+    .settings-section {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+/* Individual setting card */
+.settings-field {
     background: var(--card);
+    padding: 1.5rem;
+    border-radius: 12px;
     border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow);
-    padding: 1rem 1.2rem;
     display: flex;
     flex-direction: column;
+    gap: 10px;
 }
 
-/* =========================
-   INDIVIDUAL SETTINGS
-========================= */
-
-.setting-item {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 0.9rem 0;
-}
-
-/* Divider between settings */
-.setting-item:not(:last-child) {
-    border-bottom: 1px solid var(--border);
-}
-
-/* Labels */
-.setting-item label {
-    font-size: 0.7rem;
+/* Card title */
+.settings-field h3 {
+    font-size: 1.1rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+/* Field label inside a card */
+.settings-field label {
+    font-size: 0.75rem;
     color: var(--subtext);
 }
 
-/* =========================
-   INPUTS
-========================= */
-
-.setting-item input,
-.setting-item select {
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: var(--radius-sm);
-    font-size: 0.875rem;
-    background: var(--input);
+/* Text/select inputs inside settings cards */
+.settings-field input,
+.settings-field select {
+    padding: 0.7rem 0.9rem;
+    border-radius: 8px;
     border: none;
-    outline: none;
+    background: var(--input);
     color: var(--text);
-    transition: background 0.15s;
+    font-size: 0.95rem;
 }
 
-.setting-item input:focus,
-.setting-item select:focus {
-    background: var(--input-focus);
-}
-
-/* =========================
-   TOGGLE ROW
-========================= */
-
+/* Row with a label on the left and toggle on the right */
 .toggle-field {
-    flex-direction: row;
-    justify-content: space-between;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
 }
 
-.toggle-field span {
-    font-size: 0.9rem;
-    color: var(--text);
-}
-
-/* =========================
-   SWITCH (TOGGLE)
-========================= */
-
+/* --- Toggle switch --- */
 .switch {
     position: relative;
     display: inline-block;
-    width: 42px;
-    height: 22px;
+    width: 46px;
+    height: 24px;
 }
 
+/* Hide the real checkbox — only the styled slider is visible */
 .switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
+/* The pill-shaped track */
 .slider {
     position: absolute;
-    inset: 0;
     cursor: pointer;
-    background: var(--border);
-    border-radius: 20px;
-    transition: 0.25s;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--border);   /* Grey when off */
+    border-radius: 34px;
+    transition: 0.3s;
 }
 
+/* The circular knob inside the track */
 .slider::before {
-    content: "";
     position: absolute;
-    height: 18px;
-    width: 18px;
+    content: "";
+    height: 20px;
+    width: 20px;
     left: 2px;
     top: 2px;
     background: var(--card);
     border-radius: 50%;
-    transition: 0.25s;
+    transition: 0.3s;
 }
 
-.switch input:checked + .slider {
-    background: var(--text);
-}
+.switch input:checked + .slider            { background: var(--text); }        /* Dark when on */
+.switch input:checked + .slider::before   { transform: translateX(22px); }    /* Knob slides right */
 
-.switch input:checked + .slider::before {
-    transform: translateX(20px);
-}
-
-/* =========================
-   SEGMENTED CONTROL
-========================= */
-/* 2-option segmented control (Appearance) */
-.segmented-control-2 {
-    position: relative;
-    display: flex;
-    border-radius: 8px;
-    overflow: hidden;
-    background: var(--input);
-    padding: 4px;
-}
-.segmented-control-2 label {
-    flex: 1;
-    text-align: center;
-    padding: 0.5rem 0;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--text);
-    z-index: 1;
-}
-.segmented-control-2 input[type="radio"] { display: none; }
-.segmented-slider-2 {
-    position: absolute;
-    top: 4px;
-    bottom: 4px;
-    left: 4px;
-    width: calc(50% - 4px);
-    background: var(--card);
-    border-radius: var(--radius-sm);
-    transition: transform 0.3s ease, width 0.3s ease;
-}
-
-/* 3-option segmented control (Default Sort) */
-.segmented-control-3 {
-    position: relative;
-    display: flex;
-    border-radius: 8px;
-    overflow: hidden;
-    background: var(--input);
-    padding: 4px;
-}
-.segmented-control-3 label {
-    flex: 1;
-    text-align: center;
-    padding: 0.5rem 0;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--text);
-    z-index: 1;
-}
-.segmented-control-3 input[type="radio"] { display: none; }
-.segmented-slider-3 {
-    position: absolute;
-    top: 4px;
-    bottom: 4px;
-    left: 4px;
-    width: calc(calc(100% / 3) - 3px);
-    background: var(--card);
-    border-radius: var(--radius-sm);
-    transition: transform 0.3s ease, width 0.3s ease;
-}
-
-/* =========================
-   ACTION BUTTONS
-========================= */
-
+/* Sticky save/cancel bar at the bottom of the page */
 .settings-actions {
     display: flex;
     gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 2rem;
+    justify-content: flex-end;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);       /* Covers content scrolling behind it */
+    padding-top: 1rem;
 }
 
 .settings-actions button {
-    flex: 1;
-    padding: 0.75rem;
-    border-radius: var(--radius-sm);
+    flex: none;
+    width: 140px;
+    padding: 0.8rem;
+    border-radius: 6px;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 500px) {
-    .settings-container {
-        padding: 0 1rem;
-    }
+/* Save button: loading state */
+#save-settings.saving {
+    background: #555;
+    pointer-events: none;        /* Prevent double-clicks while saving */
 }
+
+/* Save button: success state */
+#save-settings.saved {
+    background: #2e7d32;
+    color: #fff;
+}
+
+/* Sub-section heading within a settings card */
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+
 /* =========================
    SAVE SETTINGS MODAL
    — Confirmation dialog before applying settings changes
@@ -1021,129 +850,146 @@ textarea {
 
 
 /* =========================
-   LOGIN PAGE
+   PASSWORD GENERATOR
 ========================= */
-
-/* Full-page center layout */
-body.login-page {
+.generator-row {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background: var(--bg);
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: var(--text);
-    padding: 1rem;
+    gap: 0.75rem;
+    margin-top: 8px;
+    flex-wrap: wrap;
 }
 
-/* Login container */
-.login-container {
-    max-width: 900px;
-    margin: 2rem auto;
-    padding: 0 var(--page-padding);
+.generator-btn {
+    width: auto;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.generator-options {
     display: flex;
-    flex-direction: column;
-    gap: var(--section-gap);
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
-/* Page title */
-.login-title {
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: -0.5rem;
-}
-
-/* Form fields */
-.login-container .field {
+.gen-option {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--subtext);
+    cursor: pointer;
+    user-select: none;
+}
+
+.gen-option input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}
+
+.gen-length {
     gap: 6px;
 }
 
-.login-container input[type="password"],
-.login-container input[type="text"] {
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: var(--radius-sm);
-    font-size: 0.875rem;
-    background: var(--input);
-    border: none;
-    outline: none;
-    color: var(--text);
-    transition: background 0.15s;
+#gen-length {
+    width: 80px;
+    cursor: pointer;
+    accent-color: var(--text);
 }
 
-.login-container input:focus {
-    background: var(--input-focus);
+/* =========================
+   STRENGTH INDICATOR
+========================= */
+.strength-bar-wrap {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
 }
 
-/* Show/hide password button */
-.login-container .password-wrapper {
-    position: relative;
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.3s, background 0.3s;
 }
 
-.login-container #toggle-password {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
+.strength-label {
+    font-size: 0.75rem;
+    margin-top: 4px;
+    font-weight: 600;
+    min-height: 1em;
+}
+
+/* =========================
+   VAULT — VALUE ROW (username/password + copy)
+========================= */
+.value-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.value-row .password-wrapper {
+    flex: 1;
+}
+
+.copy-icon-btn {
     background: none;
     border: none;
     cursor: pointer;
     color: var(--subtext);
+    padding: 4px 6px;
+    font-size: 0.9rem;
+    transition: color 0.15s;
+    flex-shrink: 0;
 }
 
-/* Error message */
-.login-container .error {
-    color: #ff4d4f;
-    font-size: 0.85rem;
-    display: none;
-    text-align: center;
+.copy-icon-btn:hover { color: var(--text); }
+
+/* URL link inside expanded card */
+.url-value a {
+    color: var(--text);
+    font-size: 0.875rem;
+    word-break: break-all;
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
 }
 
-/* Buttons */
-.login-container button {
-    padding: 0.8rem 1rem;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: 0.95rem;
-    border: none;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
+.url-value a:hover {
+    border-bottom-color: var(--text);
 }
 
-.login-container #login-btn {
+/* =========================
+   COPY TOAST
+========================= */
+.copy-toast {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
     background: var(--text);
     color: var(--bg);
-}
-
-.login-container #login-btn:hover {
-    opacity: 0.85;
-}
-
-.login-container #reset-btn {
-    background: var(--card);
-    color: var(--text);
-}
-
-.login-container #reset-btn:hover {
-    background: var(--input);
-}
-
-/* Optional: small links row */
-.login-container .links {
-    display: flex;
-    justify-content: space-between;
+    padding: 6px 14px;
+    border-radius: 20px;
     font-size: 0.8rem;
-    color: var(--subtext);
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    white-space: nowrap;
 }
 
-/* Dark mode overrides */
-body.dark.login-page {
-    background: var(--bg);
+.copy-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
-body.dark.login-container {
-    background: var(--card);
+/* Make expanded-content position:relative so toast is anchored */
+.expanded-content {
+    position: relative;
 }
