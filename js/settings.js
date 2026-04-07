@@ -199,6 +199,21 @@ function attachEventListeners() {
     });
 }
 
+
+// Info tooltips
+document.addEventListener("DOMContentLoaded", () => {
+    ["pat", "gist"].forEach(key => {
+        const btn     = document.getElementById(`${key}-info-btn`);
+        const tooltip = document.getElementById(`${key}-tooltip`);
+        if (!btn || !tooltip) return;
+        btn.addEventListener("click", e => {
+            e.stopPropagation();
+            tooltip.classList.toggle("show");
+        });
+        document.addEventListener("click", () => tooltip.classList.remove("show"));
+    });
+});
+
 // =========================
 // SEGMENTED CONTROLS
 // =========================
@@ -227,17 +242,6 @@ function initSegmentedControls3() {
         if (radio.checked) slider.style.transform = `translateX(${i * 100}%)`;
     });
 }
-
-// Info tooltips
-["pat", "gist"].forEach(key => {
-    const btn     = document.getElementById(`${key}-info-btn`);
-    const tooltip = document.getElementById(`${key}-tooltip`);
-    btn.addEventListener("click", e => {
-        e.stopPropagation();
-        tooltip.classList.toggle("show");
-    });
-    document.addEventListener("click", () => tooltip.classList.remove("show"));
-});
 
 // =========================
 // CONFIRMATION MODAL
