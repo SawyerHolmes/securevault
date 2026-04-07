@@ -176,27 +176,31 @@ function attachEventListeners() {
     // Logout
     document.getElementById("logout-btn").addEventListener("click", logout);
 
-    // Push to Gist
-    document.getElementById("push-btn").addEventListener("click", async () => {
-        saveSyncConfig();
-        setSyncStatus("Pushing...", "var(--subtext)");
-        const result = await pushToGist();
-        setSyncStatus(
-            result.ok ? "✓ Pushed successfully" : `✗ ${result.error}`,
-            result.ok ? "#2e7d32" : "#c0392b"
-        );
-    });
-
-    // Pull from Gist
-    document.getElementById("pull-btn").addEventListener("click", async () => {
-        saveSyncConfig();
-        setSyncStatus("Pulling...", "var(--subtext)");
-        const result = await pullFromGist();
-        setSyncStatus(
-            result.ok ? "✓ Pulled — refresh vault to see changes" : `✗ ${result.error}`,
-            result.ok ? "#2e7d32" : "#c0392b"
-        );
-    });
+    const pushBtn = document.getElementById("push-btn");
+    if (pushBtn) {
+        pushBtn.addEventListener("click", async () => {
+            saveSyncConfig();
+            setSyncStatus("Pushing...", "var(--subtext)");
+            const result = await pushToGist();
+            setSyncStatus(
+                result.ok ? "✓ Pushed successfully" : `✗ ${result.error}`,
+                result.ok ? "#2e7d32" : "#c0392b"
+            );
+        });
+    }
+    
+    const pullBtn = document.getElementById("pull-btn");
+    if (pullBtn) {
+        pullBtn.addEventListener("click", async () => {
+            saveSyncConfig();
+            setSyncStatus("Pulling...", "var(--subtext)");
+            const result = await pullFromGist();
+            setSyncStatus(
+                result.ok ? "✓ Pulled — refresh vault to see changes" : `✗ ${result.error}`,
+                result.ok ? "#2e7d32" : "#c0392b"
+            );
+        });
+    }
 }
 
 
@@ -214,31 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-const pushBtn = document.getElementById("push-btn");
-if (pushBtn) {
-    pushBtn.addEventListener("click", async () => {
-        saveSyncConfig();
-        setSyncStatus("Pushing...", "var(--subtext)");
-        const result = await pushToGist();
-        setSyncStatus(
-            result.ok ? "✓ Pushed successfully" : `✗ ${result.error}`,
-            result.ok ? "#2e7d32" : "#c0392b"
-        );
-    });
-}
 
-const pullBtn = document.getElementById("pull-btn");
-if (pullBtn) {
-    pullBtn.addEventListener("click", async () => {
-        saveSyncConfig();
-        setSyncStatus("Pulling...", "var(--subtext)");
-        const result = await pullFromGist();
-        setSyncStatus(
-            result.ok ? "✓ Pulled — refresh vault to see changes" : `✗ ${result.error}`,
-            result.ok ? "#2e7d32" : "#c0392b"
-        );
-    });
-}
 
 // =========================
 // SEGMENTED CONTROLS
