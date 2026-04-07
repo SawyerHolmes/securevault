@@ -1178,7 +1178,41 @@ body.dark.login-container {
     user-select: none;
 }
 .gen-option input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
-#gen-length { width: 80px; cursor: pointer; accent-color: var(--text); }
+
+#gen-length {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+#gen-length::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+
+#gen-length::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+#gen-length::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--text);
+    border: none;
+    cursor: pointer;
+}
 
 /* STRENGTH INDICATOR */
 .strength-bar-wrap {
