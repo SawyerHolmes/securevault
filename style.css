@@ -1147,3 +1147,110 @@ body.dark.login-page {
 body.dark.login-container {
     background: var(--card);
 }
+
+/* PASSWORD GENERATOR */
+.generator-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+.generator-btn {
+    width: auto;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+.generator-options {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.gen-option {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--subtext);
+    cursor: pointer;
+    user-select: none;
+}
+.gen-option input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
+#gen-length { width: 80px; cursor: pointer; accent-color: var(--text); }
+
+/* STRENGTH INDICATOR */
+.strength-bar-wrap {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.3s, background 0.3s;
+}
+.strength-label {
+    font-size: 0.75rem;
+    margin-top: 4px;
+    font-weight: 600;
+    min-height: 1em;
+}
+
+/* VALUE ROW — field + copy icon side by side */
+.value-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.value-row .password-wrapper { flex: 1; }
+
+/* COPY ICON BUTTON */
+.copy-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--subtext);
+    padding: 4px 6px;
+    font-size: 0.9rem;
+    transition: color 0.15s;
+    flex-shrink: 0;
+}
+.copy-icon-btn:hover { color: var(--text); }
+
+/* URL link in expanded card */
+.url-value a {
+    color: var(--text);
+    font-size: 0.875rem;
+    word-break: break-all;
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+}
+.url-value a:hover { border-bottom-color: var(--text); }
+
+/* COPY TOAST */
+.copy-toast {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    white-space: nowrap;
+}
+.copy-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.expanded-content { position: relative; }
