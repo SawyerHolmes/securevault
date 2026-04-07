@@ -933,8 +933,8 @@ textarea {
     line-height: 1;
     transition: color 0.15s;
     flex-shrink: 0;
+   width: auto !important;
 }
-
 .info-btn:hover { color: var(--text); }
 
 .tooltip {
