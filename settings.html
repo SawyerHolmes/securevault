@@ -118,23 +118,39 @@
         </div>
 
         <!-- Sync -->
-        <h2 class="settings-title">Sync</h2>
-        <div class="settings-section">
-        <div class="settings-card">
-            <div class="setting-item">
+        <div class="setting-item">
+            <div class="info-wrap">
                 <label for="github-token">GitHub Personal Access Token</label>
-                <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+                <div style="position:relative;">
+                    <button class="info-btn" id="pat-info-btn">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </button>
+                    <div class="tooltip" id="pat-tooltip">
+                        A token that lets the app access your Gist. 
+                        Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> 
+                        → Generate new token (classic) → tick <strong>gist</strong> scope only.
+                    </div>
+                </div>
             </div>
-            <div class="setting-item">
-                <label for="gist-id">Gist ID</label>
-                <input type="text" id="gist-id" placeholder="e.g. 4b2c8f1a9d3e7f0c2a1b">
-            </div>
-            <div class="setting-item" style="flex-direction:row; gap:0.75rem;">
-                <button class="btn-black" id="push-btn" style="flex:1">Push to Gist</button>
-                <button class="btn-white" id="pull-btn" style="flex:1">Pull from Gist</button>
-            </div>
-            <div id="sync-status" style="font-size:0.8rem; color:var(--subtext); min-height:1.2em;"></div>
+            <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
         </div>
+        
+        <div class="setting-item">
+            <div class="info-wrap">
+                <label for="gist-id">Gist ID</label>
+                <div style="position:relative;">
+                    <button class="info-btn" id="gist-info-btn">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </button>
+                    <div class="tooltip" id="gist-tooltip">
+                        The ID from your Gist URL. Go to 
+                        <a href="https://gist.github.com" target="_blank">gist.github.com</a>, 
+                        create a secret Gist with a file called <strong>vault.json</strong>, 
+                        then copy the ID from the URL.
+                    </div>
+                </div>
+            </div>
+            <input type="text" id="gist-id" placeholder="e.g. 4b2c8f1a9d3e7f0c2a1b">
         </div>
 
         <!-- Actions -->
