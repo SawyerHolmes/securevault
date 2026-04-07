@@ -1,49 +1,81 @@
-/* =========================
-   TOKENS
-   — All design variables live here.
-     Change these to retheme the whole app.
-========================= */
+/* ============================================================
+   SECUREVAULT — STYLESHEET
+   
+   TABLE OF CONTENTS
+   1.  Tokens (variables)
+   2.  Reset & Base
+   3.  Layout
+   4.  Header & Nav
+   5.  Buttons
+   6.  Vault Controls (search + sort)
+   7.  Vault Grid
+   8.  Vault List View
+   9.  Vault Gallery View
+   10. Expanded Card Modal
+   11. Fields (shared)
+   12. Modal Action Buttons
+   13. Confirmation Modal
+   14. Add Entry Page
+   15. Settings Page
+   16. Settings Card & Items
+   17. Toggle Switch
+   18. Segmented Controls
+   19. Info Tooltip
+   20. Save Settings Modal
+   21. Login Page
+   22. Password Generator
+   23. Strength Indicator
+   24. Copy (value row, icon btn, toast)
+   25. Responsive
+============================================================ */
+
+
+/* ============================================================
+   1. TOKENS
+   All design variables live here.
+   Change these to retheme the whole app.
+============================================================ */
 :root {
-    /* --- Spacing --- */
-    --page-padding: 2rem;        /* Left/right padding on all full-width sections */
-    --section-gap: 2rem;         /* Vertical gap between major page sections */
+    /* Spacing */
+    --page-padding: 2rem;
+    --section-gap:  2rem;
 
-    /* --- Border radius --- */
-    --radius-sm: 6px;            /* Small elements: buttons, inputs, tags */
-    --radius-md: 10px;           /* Medium elements: cards, dropdowns */
-    --radius-lg: 16px;           /* Large elements: modals */
+    /* Border radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
 
-    /* --- Light mode colours --- */
-    --bg: #ffffff;               /* Page background */
-    --card: #ffffff;             /* Card / surface background */
-    --text: #111111;             /* Primary text */
-    --subtext: #888888;          /* Secondary / muted text */
-    --input: #f4f4f4;            /* Input and inactive surface fill */
-    --input-focus: #ebebeb;      /* Input fill on focus */
-    --border: #e5e5e5;           /* Borders and dividers */
-    --shadow: 0 1px 4px rgba(0, 0, 0, 0.06);          /* Subtle resting shadow */
-    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.1);    /* Elevated hover shadow */
+    /* Light mode */
+    --bg:          #ffffff;
+    --card:        #ffffff;
+    --text:        #111111;
+    --subtext:     #888888;
+    --input:       #f4f4f4;
+    --input-focus: #ebebeb;
+    --border:      #e5e5e5;
+    --shadow:       0 1px 4px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-/* --- Dark mode overrides --- */
+/* Dark mode overrides */
 body.dark {
-    --bg: #111111;
-    --card: #1a1a1a;
-    --text: #f0f0f0;
-    --subtext: #888888;
-    --input: #252525;
+    --bg:          #111111;
+    --card:        #1a1a1a;
+    --text:        #f0f0f0;
+    --subtext:     #888888;
+    --input:       #252525;
     --input-focus: #2e2e2e;
-    --border: #2e2e2e;
-    --shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    --border:      #2e2e2e;
+    --shadow:       0 1px 4px rgba(0, 0, 0, 0.3);
     --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 
-/* =========================
-   RESET & BASE
-========================= */
+/* ============================================================
+   2. RESET & BASE
+============================================================ */
 *, *::before, *::after {
-    box-sizing: border-box;      /* Padding and border included in element width */
+    box-sizing: border-box;
 }
 
 html, body {
@@ -54,66 +86,63 @@ html, body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased; /* Smoother font rendering on Mac/iOS */
+    -webkit-font-smoothing: antialiased;
 }
 
 
-/* =========================
-   LAYOUT
-========================= */
-main {
-    padding: var(--section-gap) var(--page-padding); /* Top/bottom and left/right page padding */
-    flex: 1; /* main takes all remaining space */
-    background: var(--bg); /* dark or light */
-}
-
-
-/* Ensure main content fills the rest of the screen */
+/* ============================================================
+   3. LAYOUT
+============================================================ */
 body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
+main {
+    flex: 1;
+    padding: var(--section-gap) var(--page-padding);
+    background: var(--bg);
+}
 
-/* =========================
-   HEADER
-========================= */
+
+/* ============================================================
+   4. HEADER & NAV
+============================================================ */
 header {
     display: flex;
-    justify-content: space-between; /* Logo left, nav right */
+    justify-content: space-between;
     align-items: center;
     padding: 1rem var(--page-padding);
     background: var(--bg);
-    border-bottom: 1px solid var(--border); /* Thin separator under header */
+    border-bottom: 1px solid var(--border);
 }
 
-/* App name / brand */
 header .logo {
     font-size: 1.4rem;
     font-weight: 700;
     letter-spacing: -0.02em;
 }
 
-/* Nav links */
 header .menu a {
-    margin-left: 1.5rem;         /* Space between nav items */
+    margin-left: 1.5rem;
     text-decoration: none;
-    color: var(--text);       /* Muted by default */
+    color: var(--text);
     font-size: 1rem;
     font-weight: 500;
     transition: color 0.15s;
 }
 
 header .menu a:hover {
-    color: var(--text);          /* Full colour on hover */
+    color: var(--subtext);
 }
 
 
-/* =========================
-   BUTTONS
-   — Shared base styles for both button variants
-========================= */
+/* ============================================================
+   5. BUTTONS
+   .btn-black — primary filled
+   .btn-white — secondary outlined
+============================================================ */
 .btn-black,
 .btn-white {
     display: inline-flex;
@@ -124,20 +153,18 @@ header .menu a:hover {
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
-    width: 100%;                 /* Full width within parent by default */
+    width: 100%;
     transition: background 0.15s, transform 0.1s;
 }
 
-/* Primary filled button */
 .btn-black {
-    background: var(--text);     /* Black in light, white in dark */
+    background: var(--text);
     color: var(--bg);
     border: none;
 }
 
 .btn-black:hover { opacity: 0.85; }
 
-/* Secondary outlined button */
 .btn-white {
     background: var(--card);
     color: var(--text);
@@ -146,30 +173,29 @@ header .menu a:hover {
 
 .btn-white:hover { background: var(--input); }
 
-/* Press feedback for both */
 .btn-black:active,
 .btn-white:active { transform: scale(0.97); }
 
 
-/* =========================
-   VAULT CONTROLS
-   — Search bar and sort icon above the vault grid
-========================= */
+/* ============================================================
+   6. VAULT CONTROLS
+   Search bar + sort icon above the vault grid
+============================================================ */
 .vault-controls {
     max-width: 400px;
-    padding: 18px var(--page-padding) 0; /* Top padding, sides match page */
+    padding: 18px var(--page-padding) 0;
 }
 
-/* Wrapper needed to position icons inside the input */
+/* Positions search icon and sort icon inside the input */
 .search-wrapper {
     position: relative;
     width: 100%;
 }
 
-/* Underline-style search input */
+/* Underline-style input */
 #search-input {
     width: 100%;
-    padding: 10px 36px 8px 28px;  /* Left room for search icon, right for sort icon */
+    padding: 10px 36px 8px 28px;
     background: transparent;
     border: none;
     border-bottom: 1px solid var(--border);
@@ -179,10 +205,10 @@ header .menu a:hover {
     transition: border-color 0.15s;
 }
 
-#search-input:focus        { border-bottom-color: var(--text); }  /* Darken underline on focus */
+#search-input:focus        { border-bottom-color: var(--text); }
 #search-input::placeholder { color: var(--subtext); }
 
-/* Magnifying glass icon — left side of input */
+/* Magnifying glass — left of input */
 .search-icon {
     position: absolute;
     left: 4px;
@@ -191,10 +217,10 @@ header .menu a:hover {
     width: 14px;
     height: 14px;
     color: var(--subtext);
-    pointer-events: none;        /* Don't block clicks on the input */
+    pointer-events: none;
 }
 
-/* Sort icon — right side of input */
+/* Sort icon — right of input */
 .sort-icon {
     position: absolute;
     right: 4px;
@@ -208,15 +234,15 @@ header .menu a:hover {
 }
 
 .sort-icon:hover,
-.sort-icon.active { color: var(--text); } /* Highlight when active or hovered */
+.sort-icon.active { color: var(--text); }
 
-/* --- Sort dropdown --- */
+/* Sort dropdown panel */
 .sort-menu {
     position: absolute;
-    top: calc(100% + 6px);       /* Just below the search bar */
+    top: calc(100% + 6px);
     left: 0;
     width: 100%;
-    display: none;               /* Shown via JS when sort icon clicked */
+    display: none;
     flex-direction: column;
     background: var(--card);
     border: 1px solid var(--border);
@@ -241,14 +267,14 @@ header .menu a:hover {
 .sort-field:hover,
 .sort-order:hover { background: var(--input); }
 
-/* Thin line between field options and order options */
+/* Divider between field and order options */
 .divider {
     height: 1px;
     background: var(--border);
     margin: 4px 0;
 }
 
-/* Radio-style dot indicator for selected sort option */
+/* Radio-style selection dot */
 .indicator {
     width: 14px;
     height: 14px;
@@ -260,28 +286,33 @@ header .menu a:hover {
     flex-shrink: 0;
 }
 
-.indicator.active {
-    border-color: var(--text);   /* Dark ring when selected */
-}
+.indicator.active { border-color: var(--text); }
 
 .indicator.active::after {
     content: '';
     width: 8px;
     height: 8px;
-    background: var(--text);     /* Filled dot inside ring */
+    background: var(--text);
     border-radius: 50%;
 }
 
 
-/* =========================
-   VAULT GRID
-   — The main card grid on the home page
-========================= */
+/* ============================================================
+   7. VAULT GRID
+   Default card grid on the main vault page
+============================================================ */
 #vault-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive columns */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 1.25rem;
     padding: 18px var(--page-padding);
+}
+
+/* Enforces grid layout when body has .grid-view class */
+body.grid-view #vault-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
 }
 
 /* Individual vault entry card */
@@ -297,9 +328,8 @@ header .menu a:hover {
     transition: box-shadow 0.15s;
 }
 
+.vault-card:hover  { box-shadow: var(--shadow-hover); }
 .vault-card:active { transform: scale(0.97); }
-
-.vault-card:hover { box-shadow: var(--shadow-hover); }
 
 /* Entry name */
 .vault-card h2 {
@@ -309,42 +339,36 @@ header .menu a:hover {
     letter-spacing: -0.01em;
 }
 
-/* Entry metadata (username, URL etc.) */
+/* Entry metadata (URL, username) */
 .vault-card p {
     margin: 0;
     font-size: 0.8rem;
     color: var(--subtext);
 }
 
-/* Shown when vault is empty */
+/* Shown when vault has no entries or no search results */
 .empty-state {
-    grid-column: 1 / -1;        /* Span full grid width */
+    grid-column: 1 / -1;
     text-align: center;
     margin-top: 60px;
     color: var(--subtext);
 }
 
-/* GRID VIEW (default) */
-body.grid-view #vault-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-}
 
-/* =========================
-   LIST VIEW TABLE
-========================= */
+/* ============================================================
+   8. VAULT LIST VIEW
+============================================================ */
 .vault-container.list-view {
     display: flex;
-    justify-content: center; /* horizontally center table */
+    justify-content: center;
     width: 100%;
     align-self: center;
 }
 
 .vault-list-table {
     border-collapse: collapse;
-    width: 100%;           /* Or any width you want */
-    margin: 0 auto;       /* Centre horizontally */
+    width: 100%;
+    margin: 0 auto;
     text-align: left;
     font-size: 0.9rem;
 }
@@ -361,28 +385,23 @@ body.grid-view #vault-container {
     cursor: auto;
 }
 
-.vault-list-table tr:hover {
-    background: var(--input-focus);
-    cursor: pointer;
-}
-
+.vault-list-table tr:hover  { background: var(--input-focus); cursor: pointer; }
 .vault-list-table tr:active { transform: scale(0.99); }
 
-
-
-/* Specific columns */
+/* Column widths */
 .vault-list-table th:nth-child(1),
 .vault-list-table td:nth-child(1) { width: 20%; }
 .vault-list-table th:nth-child(2),
-.vault-list-table td:nth-child(2) { width: 30%; }
+.vault-list-table td:nth-child(2) { width: 25%; }
 .vault-list-table th:nth-child(3),
-.vault-list-table td:nth-child(3) { width: 20%; }
+.vault-list-table td:nth-child(3) { width: 25%; }
 .vault-list-table th:nth-child(4),
 .vault-list-table td:nth-child(4) { width: 30%; }
 
-/* =========================
-   GALLERY VIEW
-========================= */
+
+/* ============================================================
+   9. VAULT GALLERY VIEW
+============================================================ */
 body.gallery-view #vault-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -392,7 +411,7 @@ body.gallery-view #vault-container {
 .vault-gallery-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     padding: 0.8rem;
     display: flex;
     flex-direction: column;
@@ -409,25 +428,27 @@ body.gallery-view #vault-container {
     color: var(--subtext);
 }
 
-/* =========================
-   EXPANDED CARD MODAL
-   — Full-detail view of a vault entry
-========================= */
+
+/* ============================================================
+   10. EXPANDED CARD MODAL
+   Full-detail view when you click a vault entry
+============================================================ */
 
 /* Dimmed backdrop */
 .expanded-card {
     position: fixed;
     inset: 0;
-    display: none;               /* Shown via JS */
+    display: none;
     justify-content: center;
     align-items: center;
     background: rgba(0, 0, 0, 0.6);
     z-index: 1000;
-    backdrop-filter: blur(2px);  /* Frosted glass blur behind modal */
+    backdrop-filter: blur(2px);
 }
 
-/* Modal panel */
+/* Modal panel — position:relative anchors the copy toast */
 .expanded-content {
+    position: relative;
     background: var(--card);
     width: 90%;
     max-width: 420px;
@@ -438,29 +459,38 @@ body.gallery-view #vault-container {
     gap: 12px;
 }
 
-/* Title row with close button */
+/* Title row with edit / save / cancel buttons */
 .expanded-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
+/* URL link shown inside expanded card */
+.url-value a {
+    color: var(--text);
+    font-size: 0.875rem;
+    word-break: break-all;
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+}
 
-/* =========================
-   FIELDS
-   — Shared label + value layout used in modal and add-entry
-========================= */
+.url-value a:hover { border-bottom-color: var(--text); }
+
+
+/* ============================================================
+   11. FIELDS (SHARED)
+   Label + value layout used in modal and add-entry
+============================================================ */
 .field {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.field + .field {
-    margin-top: 10px;            /* Vertical breathing room between fields */
-}
+.field + .field { margin-top: 10px; }
 
-/* Uppercase micro-label above each field */
+/* Uppercase micro-label */
 .field label {
     font-size: 0.7rem;
     font-weight: 600;
@@ -469,7 +499,7 @@ body.gallery-view #vault-container {
     color: var(--subtext);
 }
 
-/* Read-only value display box (username, URL etc.) */
+/* Read-only value display box */
 .value,
 #edit-password,
 #password-text {
@@ -483,11 +513,11 @@ body.gallery-view #vault-container {
     font-size: 0.875rem;
 }
 
-/* Notes textarea inside the expanded modal */
+/* Notes area inside expanded modal */
 #expanded-notes textarea {
     width: 100%;
     min-height: 60px;
-    resize: none;                /* Prevent manual resize handle */
+    resize: none;
     border: none;
     outline: none;
     background: var(--input);
@@ -500,19 +530,16 @@ body.gallery-view #vault-container {
 }
 
 #expanded-notes .value {
-    display: flex;          /* keep flex for styling if needed */
-    align-items: flex-start; /* aligns content to top */
+    align-items: flex-start;
     padding: 8px 10px;
     min-height: 60px;
     box-sizing: border-box;
 }
 
-/* Wrapper that holds input + eye toggle absolutely positioned */
-.password-wrapper {
-    position: relative;
-}
+/* Holds password input + eye toggle */
+.password-wrapper { position: relative; }
 
-/* Show/hide password toggle button */
+/* Show/hide password toggle */
 #toggle-password {
     position: absolute;
     right: 8px;
@@ -529,7 +556,7 @@ body.gallery-view #vault-container {
 .password-wrapper input {
     width: 100%;
     padding: 8px;
-    padding-right: 32px;         /* Room for icon on the right */
+    padding-right: 32px;
     background: var(--input);
     border: none;
     border-radius: var(--radius-sm);
@@ -538,13 +565,20 @@ body.gallery-view #vault-container {
     outline: none;
 }
 
+/* Global textarea defaults */
+textarea {
+    min-height: 60px;
+    resize: none;
+    line-height: 1.4;
+}
 
-/* =========================
-   MODAL ACTION BUTTONS
-   — Icon buttons and copy/remove inside the expanded card
-========================= */
 
-/* Small icon-only button (e.g. edit, close) */
+/* ============================================================
+   12. MODAL ACTION BUTTONS
+   Icon buttons and copy/remove inside the expanded card
+============================================================ */
+
+/* Small icon-only button (edit, close, eye) */
 .icon-btn {
     background: none;
     border: none;
@@ -556,9 +590,8 @@ body.gallery-view #vault-container {
 
 .icon-btn:hover { color: var(--text); }
 
-/* Full-width action buttons at the bottom of the modal */
-#remove-btn,
-#copy-btn {
+/* Remove button — full width at bottom of modal */
+#remove-btn {
     width: 100%;
     padding: 10px;
     border-radius: var(--radius-sm);
@@ -567,31 +600,21 @@ body.gallery-view #vault-container {
     cursor: pointer;
 }
 
-/* Copy button is ghost-style (no background) */
-#copy-btn {
-    background: none;
-    border: none;
-    color: var(--subtext);
-    transition: color 0.15s;
-}
 
-#copy-btn:hover { color: var(--text); }
+/* ============================================================
+   13. CONFIRMATION MODAL
+   "Are you sure?" dialog before destructive actions
+============================================================ */
 
-
-/* =========================
-   CONFIRMATION MODAL
-   — "Are you sure?" dialog before destructive actions
-========================= */
-
-/* Dimmed backdrop — sits above everything else */
+/* Backdrop — sits above expanded card */
 .confirmation-overlay {
     position: fixed;
     inset: 0;
-    display: none;               /* Shown via JS */
+    display: none;
     justify-content: center;
     align-items: center;
     background: rgba(0, 0, 0, 0.6);
-    z-index: 2000;               /* Above the expanded card modal */
+    z-index: 2000;
     backdrop-filter: blur(2px);
 }
 
@@ -607,7 +630,6 @@ body.gallery-view #vault-container {
     gap: 16px;
 }
 
-/* Confirmation message text */
 .confirmation-modal p {
     margin: 0;
     font-size: 0.9rem;
@@ -615,14 +637,14 @@ body.gallery-view #vault-container {
     color: var(--text);
 }
 
-/* Side-by-side confirm/cancel buttons */
+/* Side-by-side Yes / No buttons */
 .confirmation-buttons {
     display: flex;
     gap: 10px;
 }
 
 .confirmation-buttons button {
-    flex: 1;                     /* Equal width */
+    flex: 1;
     padding: 0.6rem 1rem;
     font-size: 0.875rem;
     font-weight: 600;
@@ -634,29 +656,22 @@ body.gallery-view #vault-container {
 
 .confirmation-buttons button:active { transform: scale(0.97); }
 
-/* "No, keep it" — primary filled */
-#confirm-no {
-    background: var(--text);
-    color: var(--bg);
-}
-
+/* "No" — primary filled */
+#confirm-no { background: var(--text); color: var(--bg); }
 #confirm-no:hover { opacity: 0.85; }
 
-/* "Yes, delete" — secondary outlined */
+/* "Yes" — secondary outlined */
 #confirm-yes {
     background: var(--input);
     color: var(--text);
     border: 1px solid var(--border) !important;
 }
-
 #confirm-yes:hover { background: var(--input-focus); }
 
 
-/* =========================
-   ADD ENTRY PAGE
-========================= */
-
-/* Centred single-column form container */
+/* ============================================================
+   14. ADD ENTRY PAGE
+============================================================ */
 .add-entry-container {
     max-width: 600px;
     margin: 3rem auto;
@@ -666,14 +681,13 @@ body.gallery-view #vault-container {
     gap: 1.5rem;
 }
 
-/* Page heading */
 .add-entry-title {
     font-size: 2rem;
     font-weight: 600;
     text-align: left;
 }
 
-/* Input and textarea inside a .field on this page */
+/* Inputs and textareas inside fields on this page */
 .field input,
 .field textarea {
     width: 100%;
@@ -686,18 +700,9 @@ body.gallery-view #vault-container {
 }
 
 .field input:focus,
-.field textarea:focus {
-    background: var(--inputfocus); /* Slightly darker on focus */
-}
+.field textarea:focus { background: var(--input-focus); }
 
-/* Global textarea defaults (applies everywhere) */
-textarea {
-    min-height: 60px;
-    resize: none;
-    line-height: 1.4;
-}
-
-/* Add / Cancel button row */
+/* Save / Cancel button row */
 .add-entry-actions {
     display: flex;
     justify-content: center;
@@ -706,15 +711,13 @@ textarea {
 
 .add-entry-actions button {
     flex: none;
-    width: 120px;                /* Fixed width, not full-width */
+    width: 120px;
 }
 
 
-/* =========================
-   SETTINGS PAGE
-========================= */
-
-/* Container */
+/* ============================================================
+   15. SETTINGS PAGE — LAYOUT
+============================================================ */
 .settings-container {
     max-width: 900px;
     margin: 2rem auto;
@@ -724,17 +727,31 @@ textarea {
     gap: var(--section-gap);
 }
 
-/* Section title */
 .settings-title {
     font-size: 2rem;
     font-weight: 600;
     margin-bottom: -0.5rem;
 }
 
-/* =========================
-   CARD (SECTION)
-========================= */
+/* Save / Reset button row at the bottom */
+.settings-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
 
+.settings-actions button {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+}
+
+
+/* ============================================================
+   16. SETTINGS CARD & ITEMS
+============================================================ */
+
+/* Card wrapper for each section */
 .settings-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -745,10 +762,7 @@ textarea {
     flex-direction: column;
 }
 
-/* =========================
-   INDIVIDUAL SETTINGS
-========================= */
-
+/* Individual setting row */
 .setting-item {
     display: flex;
     flex-direction: column;
@@ -756,12 +770,11 @@ textarea {
     padding: 0.9rem 0;
 }
 
-/* Divider between settings */
-.setting-item:not(:last-child) {
-    border-bottom: 1px solid var(--border);
-}
+/* Divider between rows — not on last child or no-divider items */
+.setting-item:not(:last-child) { border-bottom: 1px solid var(--border); }
+.setting-item.no-divider        { border-bottom: none !important; }
 
-/* Labels */
+/* Row label */
 .setting-item label {
     font-size: 0.7rem;
     font-weight: 600;
@@ -770,10 +783,7 @@ textarea {
     color: var(--subtext);
 }
 
-/* =========================
-   INPUTS
-========================= */
-
+/* Inputs and selects inside settings rows */
 .setting-item input,
 .setting-item select {
     width: 100%;
@@ -788,14 +798,9 @@ textarea {
 }
 
 .setting-item input:focus,
-.setting-item select:focus {
-    background: var(--input-focus);
-}
+.setting-item select:focus { background: var(--input-focus); }
 
-/* =========================
-   TOGGLE ROW
-========================= */
-
+/* Row with label on left and toggle on right */
 .toggle-field {
     flex-direction: row;
     justify-content: space-between;
@@ -807,10 +812,10 @@ textarea {
     color: var(--text);
 }
 
-/* =========================
-   SWITCH (TOGGLE)
-========================= */
 
+/* ============================================================
+   17. TOGGLE SWITCH
+============================================================ */
 .switch {
     position: relative;
     display: inline-block;
@@ -818,12 +823,10 @@ textarea {
     height: 22px;
 }
 
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
+/* Hide native checkbox */
+.switch input { opacity: 0; width: 0; height: 0; }
 
+/* Track */
 .slider {
     position: absolute;
     inset: 0;
@@ -833,6 +836,7 @@ textarea {
     transition: 0.25s;
 }
 
+/* Knob */
 .slider::before {
     content: "";
     position: absolute;
@@ -845,48 +849,17 @@ textarea {
     transition: 0.25s;
 }
 
-.switch input:checked + .slider {
-    background: var(--text);
-}
+.switch input:checked + .slider             { background: var(--text); }
+.switch input:checked + .slider::before    { transform: translateX(20px); }
 
-.switch input:checked + .slider::before {
-    transform: translateX(20px);
-}
 
-/* =========================
-   SEGMENTED CONTROL
-========================= */
-/* 2-option segmented control (Appearance) */
-.segmented-control-2 {
-    position: relative;
-    display: flex;
-    border-radius: 8px;
-    overflow: hidden;
-    background: var(--input);
-    padding: 4px;
-}
-.segmented-control-2 label {
-    flex: 1;
-    text-align: center;
-    padding: 0.5rem 0;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--text);
-    z-index: 1;
-}
-.segmented-control-2 input[type="radio"] { display: none; }
-.segmented-slider-2 {
-    position: absolute;
-    top: 4px;
-    bottom: 4px;
-    left: 4px;
-    width: calc(50% - 4px);
-    background: var(--card);
-    border-radius: var(--radius-sm);
-    transition: transform 0.3s ease, width 0.3s ease;
-}
+/* ============================================================
+   18. SEGMENTED CONTROLS
+   2-option and 3-option pill selectors
+============================================================ */
 
-/* 3-option segmented control (Default Sort) */
+/* Shared base */
+.segmented-control-2,
 .segmented-control-3 {
     position: relative;
     display: flex;
@@ -895,6 +868,8 @@ textarea {
     background: var(--input);
     padding: 4px;
 }
+
+.segmented-control-2 label,
 .segmented-control-3 label {
     flex: 1;
     text-align: center;
@@ -904,25 +879,45 @@ textarea {
     color: var(--text);
     z-index: 1;
 }
+
+.segmented-control-2 input[type="radio"],
 .segmented-control-3 input[type="radio"] { display: none; }
+
+/* Sliding active indicator */
+.segmented-slider-2 {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    transition: transform 0.3s ease;
+}
+
 .segmented-slider-3 {
     position: absolute;
     top: 4px;
     bottom: 4px;
     left: 4px;
-    width: calc(calc(100% / 3) - 3px);
+    width: calc(100% / 3 - 3px);
     background: var(--card);
     border-radius: var(--radius-sm);
-    transition: transform 0.3s ease, width 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
-/* INFO TOOLTIP */
+
+/* ============================================================
+   19. INFO TOOLTIP
+   ⓘ icon next to labels in sync section
+============================================================ */
 .info-wrap {
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
+/* The ⓘ button */
 .info-btn {
     background: none;
     border: none;
@@ -931,12 +926,14 @@ textarea {
     font-size: 0.8rem;
     padding: 0;
     line-height: 1;
-    transition: color 0.15s;
+    width: auto !important;
     flex-shrink: 0;
-   width: auto !important;
+    transition: color 0.15s;
 }
+
 .info-btn:hover { color: var(--text); }
 
+/* Tooltip box — hidden by default, shown with .show */
 .tooltip {
     position: absolute;
     background: var(--card);
@@ -959,49 +956,22 @@ textarea {
 
 .tooltip.show { display: block; }
 
-/* =========================
-   ACTION BUTTONS
-========================= */
 
-.settings-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.settings-actions button {
-    flex: 1;
-    padding: 0.75rem;
-    border-radius: var(--radius-sm);
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 500px) {
-    .settings-container {
-        padding: 0 1rem;
-    }
-}
-/* =========================
-   SAVE SETTINGS MODAL
-   — Confirmation dialog before applying settings changes
-========================= */
-
-/* Dimmed backdrop */
+/* ============================================================
+   20. SAVE SETTINGS MODAL
+   Confirmation dialog before applying settings changes
+============================================================ */
 .modal-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
-    display: none;               /* Shown via JS */
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: 2000;
     backdrop-filter: blur(2px);
 }
 
-/* Modal panel */
 .modal-box {
     background: var(--card);
     padding: 1.5rem;
@@ -1012,7 +982,6 @@ textarea {
     gap: 14px;
 }
 
-/* Modal heading */
 .modal-box h3 {
     margin: 0;
     font-size: 1.1rem;
@@ -1020,7 +989,6 @@ textarea {
     letter-spacing: -0.02em;
 }
 
-/* Modal body text */
 .modal-box p {
     margin: 0;
     font-size: 0.875rem;
@@ -1028,7 +996,6 @@ textarea {
     color: var(--subtext);
 }
 
-/* Button row — right-aligned */
 .modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -1045,69 +1012,49 @@ textarea {
     transition: opacity 0.15s;
 }
 
-/* Cancel — outlined */
 .cancel-btn {
     background: var(--input);
     color: var(--text);
     border: 1px solid var(--border) !important;
 }
 
-.cancel-btn:hover { background: var(--input-focus); }
+.cancel-btn:hover  { background: var(--input-focus); }
 
-/* Confirm — filled */
-.confirm-btn {
-    background: var(--text);
-    color: var(--bg);
-}
-
+.confirm-btn { background: var(--text); color: var(--bg); }
 .confirm-btn:hover { opacity: 0.8; }
 
 
-/* =========================
-   LOGIN PAGE
-========================= */
-
-/* Full-page center layout */
-body.login-page {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: var(--bg);
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: var(--text);
-    padding: 1rem;
-}
-
-/* Login container */
+/* ============================================================
+   21. LOGIN PAGE
+============================================================ */
 .login-container {
-    max-width: 900px;
-    margin: 2rem auto;
-    padding: 0 var(--page-padding);
+    max-width: 480px;
+    margin: 4rem auto;
+    padding: 2rem var(--page-padding);
     display: flex;
     flex-direction: column;
-    gap: var(--section-gap);
+    gap: 1rem;
 }
 
-/* Page title */
 .login-title {
     font-size: 2rem;
     font-weight: 600;
     margin-bottom: -0.5rem;
 }
 
-/* Form fields */
-.login-container .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.login-subtitle {
+    font-size: 0.9rem;
+    color: var(--subtext);
+    margin: 0;
 }
+
+/* Password input wrapper */
+.login-container .password-wrapper { position: relative; }
 
 .login-container input[type="password"],
 .login-container input[type="text"] {
     width: 100%;
-    padding: 8px 12px;
+    padding: 10px 40px 10px 12px;
     border-radius: var(--radius-sm);
     font-size: 0.875rem;
     background: var(--input);
@@ -1117,16 +1064,11 @@ body.login-page {
     transition: background 0.15s;
 }
 
-.login-container input:focus {
-    background: var(--input-focus);
-}
+.login-container input:focus { background: var(--input-focus); }
 
-/* Show/hide password button */
-.login-container .password-wrapper {
-    position: relative;
-}
-
-.login-container #toggle-password {
+/* Eye toggle inside password field */
+.login-container #toggle-password,
+.login-container .toggle-password {
     position: absolute;
     right: 10px;
     top: 50%;
@@ -1135,63 +1077,58 @@ body.login-page {
     border: none;
     cursor: pointer;
     color: var(--subtext);
+    width: auto !important;
+    padding: 0;
 }
 
-/* Error message */
-.login-container .error {
-    color: #ff4d4f;
-    font-size: 0.85rem;
-    display: none;
-    text-align: center;
-}
-
-/* Buttons */
-.login-container button {
+/* Login / Reset buttons */
+.login-container .btn-black,
+.login-container #login-btn {
+    background: var(--text);
+    color: var(--bg);
     padding: 0.8rem 1rem;
     border-radius: var(--radius-sm);
     font-weight: 600;
     font-size: 0.95rem;
     border: none;
     cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
+    width: 100%;
+    transition: opacity 0.15s;
 }
 
-.login-container #login-btn {
-    background: var(--text);
-    color: var(--bg);
-}
+.login-container .btn-black:hover,
+.login-container #login-btn:hover { opacity: 0.85; }
 
-.login-container #login-btn:hover {
-    opacity: 0.85;
-}
-
+.login-container .link-btn,
 .login-container #reset-btn {
-    background: var(--card);
-    color: var(--text);
-}
-
-.login-container #reset-btn:hover {
-    background: var(--input);
-}
-
-/* Optional: small links row */
-.login-container .links {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
+    background: none;
+    border: none;
     color: var(--subtext);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+    width: auto;
 }
 
-/* Dark mode overrides */
-body.dark.login-page {
-    background: var(--bg);
+.login-container .link-btn:hover,
+.login-container #reset-btn:hover { color: var(--text); }
+
+/* Error message */
+.login-error {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    display: none;
+    min-height: 1.2em;
 }
 
-body.dark.login-container {
-    background: var(--card);
-}
 
-/* PASSWORD GENERATOR */
+/* ============================================================
+   22. PASSWORD GENERATOR
+   Shown below the password field on add-entry
+============================================================ */
+
+/* Row containing generate button + options */
 .generator-row {
     display: flex;
     align-items: center;
@@ -1199,18 +1136,24 @@ body.dark.login-container {
     margin-top: 8px;
     flex-wrap: wrap;
 }
+
+/* Generate button — auto width, not full-width */
 .generator-btn {
     width: auto;
     padding: 0.5rem 0.9rem;
     font-size: 0.8rem;
     white-space: nowrap;
 }
+
+/* Checkboxes + length slider row */
 .generator-options {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     flex-wrap: wrap;
 }
+
+/* Individual checkbox option */
 .gen-option {
     display: flex;
     align-items: center;
@@ -1220,8 +1163,14 @@ body.dark.login-container {
     cursor: pointer;
     user-select: none;
 }
-.gen-option input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
 
+.gen-option input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}
+
+/* Length slider — custom styled */
 #gen-length {
     -webkit-appearance: none;
     appearance: none;
@@ -1244,9 +1193,7 @@ body.dark.login-container {
     transition: transform 0.15s;
 }
 
-#gen-length::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-}
+#gen-length::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
 #gen-length::-moz-range-thumb {
     width: 14px;
@@ -1257,7 +1204,11 @@ body.dark.login-container {
     cursor: pointer;
 }
 
-/* STRENGTH INDICATOR */
+
+/* ============================================================
+   23. STRENGTH INDICATOR
+   Thin bar + label below the password field
+============================================================ */
 .strength-bar-wrap {
     height: 3px;
     background: var(--border);
@@ -1265,12 +1216,14 @@ body.dark.login-container {
     margin-top: 8px;
     overflow: hidden;
 }
+
 .strength-bar {
     height: 100%;
     width: 0%;
     border-radius: 2px;
     transition: width 0.3s, background 0.3s;
 }
+
 .strength-label {
     font-size: 0.75rem;
     margin-top: 4px;
@@ -1278,15 +1231,21 @@ body.dark.login-container {
     min-height: 1em;
 }
 
-/* VALUE ROW — field + copy icon side by side */
+
+/* ============================================================
+   24. COPY — VALUE ROW, ICON BUTTON, TOAST
+============================================================ */
+
+/* Field value + copy icon side by side */
 .value-row {
     display: flex;
     align-items: center;
     gap: 6px;
 }
+
 .value-row .password-wrapper { flex: 1; }
 
-/* COPY ICON BUTTON */
+/* Copy icon button next to fields */
 .copy-icon-btn {
     background: none;
     border: none;
@@ -1297,19 +1256,10 @@ body.dark.login-container {
     transition: color 0.15s;
     flex-shrink: 0;
 }
+
 .copy-icon-btn:hover { color: var(--text); }
 
-/* URL link in expanded card */
-.url-value a {
-    color: var(--text);
-    font-size: 0.875rem;
-    word-break: break-all;
-    text-decoration: none;
-    border-bottom: 1px solid var(--border);
-}
-.url-value a:hover { border-bottom-color: var(--text); }
-
-/* COPY TOAST */
+/* Toast notification — fades in/out */
 .copy-toast {
     position: absolute;
     bottom: 16px;
@@ -1326,8 +1276,17 @@ body.dark.login-container {
     transition: opacity 0.2s, transform 0.2s;
     white-space: nowrap;
 }
+
 .copy-toast.show {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
-.expanded-content { position: relative; }
+
+
+/* ============================================================
+   25. RESPONSIVE
+============================================================ */
+@media (max-width: 500px) {
+    .settings-container { padding: 0 1rem; }
+    .login-container    { margin: 2rem auto; }
+}
