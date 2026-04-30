@@ -50,7 +50,7 @@ function applyVaultSettings() {
 // =========================
 applyVaultSettings();
 
-const isAuth   = localStorage.getItem("authenticated") === "true";
+const isAuth = sessionStorage.getItem("authenticated") === "true";
 const vaultKey = sessionStorage.getItem("vaultKey");
 if (isAuth && vaultKey) {
     window.location.replace("vault.html");
@@ -129,8 +129,8 @@ loginBtn.addEventListener("click", () => {
     }
 
     resetAttempts();
-    localStorage.setItem("authenticated", "true");
-    localStorage.setItem("lastActive", Date.now());
+    sessionStorage.setItem("authenticated", "true");
+    sessionStorage.setItem("lastActive", Date.now());
     window.location.replace("vault.html");
 });
 
