@@ -70,6 +70,155 @@
             <div class="setting-item">
                 <label>Vault View</label>
                 <div class="segmented-control-3">
+                    <input type="radio" name="vault-view" id="view-grid" value="grid" checked>
+                    <label for="view-grid">Grid</label>
+
+                    <input type="radio" name="vault-view" id="view-list" value="list">
+                    <label for="view-list">List</label>
+
+                    <input type="radio" name="vault-view" id="view-gallery" value="gallery">
+                    <label for="view-gallery">Gallery</label>
+
+                    <div class="segmented-slider-3"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Preferences -->
+        <h2 class="settings-title">Preferences</h2>
+        <div class="settings-section">
+
+            <div class="setting-item">
+                <label>Default Vault Sort</label>
+                <div class="segmented-control-2">
+                    <input type="radio" name="default-sort" id="sort-name" value="name" checked>
+                    <label for="sort-name">Site Name</label>
+
+                    <input type="radio" name="default-sort" id="sort-username" value="username">
+                    <label for="sort-username">Username</label>
+
+                    <div class="segmented-slider-2"></div>
+                </div>
+            </div>
+
+            <div class="setting-item toggle-field">
+                <span>Confirm Before Delete</span>
+                <label class="switch">
+                    <input type="checkbox" id="confirm-delete">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+        </div>
+
+        <!-- Sync -->
+        <h2 class="settings-title">Sync</h2>
+        <div class="settings-section">
+            <div class="settings-card">
+
+                <div class="setting-item">
+                    <div class="info-wrap">
+                        <label for="github-token">GitHub Personal Access Token</label>
+                        <div style="position:relative;">
+                            <button class="info-btn" id="pat-info-btn">
+                                <i class="fa-solid fa-circle-info"></i>
+                            </button>
+                            <div class="tooltip" id="pat-tooltip">
+                                A token that lets the app access your Gist.
+                                Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a>
+                                → Generate new token (classic) → tick <strong>gist</strong> scope only.
+                            </div>
+                        </div>
+                    </div>
+                    <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+                </div>
+
+                <div class="setting-item">
+                    <div class="info-wrap">
+                        <label for="gist-id">Gist ID</label>
+                        <div style="position:relative;">
+                            <button class="info-btn" id="gist-info-btn">
+                                <i class="fa-solid fa-circle-info"></i>
+                            </button>
+                            <div class="tooltip" id="gist-tooltip">
+                                The ID from your Gist URL. Go to
+                                <a href="https://gist.github.com" target="_blank">gist.github.com</a>,
+                                create a secret Gist with a file called <strong>vault.json</strong>,
+                                then copy the ID from the URL.
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" id="gist-id" placeholder="e.g. 4b2c8f1a9d3e7f0c2a1b">
+                </div>
+
+                <div class="setting-item" style="flex-direction:row; gap:0.75rem;">
+                    <button class="btn-black" id="push-btn" style="flex:1">Push to Gist</button>
+                    <button class="btn-white" id="pull-btn" style="flex:1">Pull from Gist</button>
+                </div>
+
+                <div id="sync-status" style="font-size:0.8rem; color:var(--subtext); min-height:1.2em;"></div>
+
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="settings-actions">
+            <button id="save-settings" class="btn-black">Save Settings</button>
+            <button id="reset-settings" class="btn-white">Reset Defaults</button>
+        </div>
+
+    </div>
+</main>
+
+<!-- Confirmation Modal -->
+<div class="confirmation-overlay" id="confirmation-overlay">
+    <div class="confirmation-modal">
+        <p id="confirm-message">Are you sure?</p>
+        <div class="confirmation-buttons">
+            <button id="confirm-yes" class="btn-black">Confirm</button>
+            <button id="confirm-no" class="btn-white">Cancel</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+            <div class="setting-item">
+                <label for="confirm-password">New Password</label>
+                <input type="password" id="confirm-password" placeholder="Enter new password">
+            </div>
+
+            <div class="setting-item">
+                <button class="btn-black" id="change-password-btn">Change Password</button>
+                <div id="password-change-status" style="font-size:0.8rem; margin-top:6px; min-height:1.2em;"></div>
+            </div>
+
+            <div class="setting-item toggle-field">
+                <span>Auto-Lock Vault</span>
+                <label class="switch">
+                    <input type="checkbox" id="auto-lock">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+        </div>
+
+        <!-- Appearance -->
+        <h2 class="settings-title">Appearance</h2>
+        <div class="settings-section">
+
+            <div class="setting-item toggle-field">
+                <span>Dark Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="dark-mode">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <label>Vault View</label>
+                <div class="segmented-control-3">
                     
                     <input type="radio" name="vault-view" id="view-grid" value="grid" checked>
                     <label for="view-grid">Grid</label>
