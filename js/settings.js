@@ -13,10 +13,10 @@ window.addEventListener("popstate", () => {
 // DEFAULT SETTINGS
 // =========================
 const DEFAULT_SETTINGS = {
-    autoLock: false,
-    darkMode: false,
-    viewMode: "grid",
-    defaultSort: "name",
+    autoLock:      false,
+    darkMode:      false,
+    viewMode:      "grid",
+    defaultSort:   "name",
     confirmDelete: true
 };
 
@@ -31,10 +31,235 @@ document.addEventListener("DOMContentLoaded", () => {
     attachEventListeners();
     initSegmentedControls2();
     initSegmentedControls3();
+
+    // Info tooltips
+    ["pat", "gist"].forEach(key => {
+        const btn     = document.getElementById(`${key}-info-btn`);
+        const tooltip = document.getElementById(`${key}-tooltip`);
+        if (!btn || !tooltip) return;
+        btn.addEventListener("click", e => {
+            e.stopPropagation();
+            tooltip.classList.toggle("show");
+        });
+        document.addEventListener("click", () => tooltip.classList.remove("show"));
+    });
 });
 
 // =========================
 // LOAD / SAVE
+// =========================
+function loadSettings() {
+    const saved = localStorage.getItem("vaultSettings");
+    if (saved) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+}
+
+function saveSettings() {
+    localStorage.setItem("vaultSettings", JSON.stringify(settings));
+}
+
+// =========================
+// APPLY TO UI
+// =========================
+function applySettingsToUI() {
+    document.getElementById("auto-lock").checked      = settings.autoLock;
+    document.getElementById("dark-mode").checked      = settings.darkMode;
+    document.getElementById("confirm-delete").checked = settings.confirmDelete;
+
+    document.querySelectorAll('input[name="default-sort"]').forEach(r => {
+        r.checked = r.value === settings.defaultSort;
+    });
+    document.querySelectorAll('input[name="vault-view"]').forEach(r => {
+        r.checked = r.value === settings.viewMode;
+    });
+
+    applyDarkMode(settings.darkMode);
+    applyViewMode(settings.viewMode);
+
+    const cfg = getSyncConfig();
+    document.getElementById("github-token").value = cfg.token;
+    document.getElementById("gist-id").value      = cfg.gistId;
+
+    // Sync segmented slider positions after checking radios
+    initSegmentedControls2();
+    initSegmentedControls3();
+}
+
+function saveSyncConfig() {
+    const token  = document.getElementById("github-token").value.trim();
+    const gistId = document.getElementById("gist-id").value.trim();
+    localStorage.setItem("syncConfig", JSON.stringify({ token, gistId }));
+}
+
+function setSyncStatus(msg, color) {
+    const el = document.getElementById("sync-status");
+    el.textContent = msg;
+    el.style.color = color;
+}
+
+// =========================
+// LIVE EFFECTS
+// =========================
+function applyDarkMode(enabled) {
+    document.body.classList.toggle("dark", enabled);
+}
+
+function applyViewMode(mode) {
+    document.body.classList.remove("grid-view", "list-view", "gallery-view");
+    document.body.classList.add(mode + "-view");
+}
+
+// =========================
+// READ SETTINGS FROM UI
+// =========================
+function readSettingsFromUI() {
+    settings.autoLock      = document.getElementById("auto-lock").checked;
+    settings.darkMode      = document.getElementById("dark-mode").checked;
+    settings.confirmDelete = document.getElementById("confirm-delete").checked;
+
+    const sort = document.querySelector('input[name="default-sort"]:checked');
+    if (sort) settings.defaultSort = sort.value;
+
+    const view = document.querySelector('input[name="vault-view"]:checked');
+    if (view) settings.viewMode = view.value;
+}
+
+// =========================
+// EVENT LISTENERS
+// =========================
+function attachEventListeners() {
+
+    document.getElementById("save-settings").addEventListener("click", () => {
+        readSettingsFromUI();
+        showConfirmation("Save changes?", () => {
+            saveSettings();
+            saveSyncConfig();
+            applyDarkMode(settings.darkMode);
+            applyViewMode(settings.viewMode);
+        });
+    });
+
+    document.getElementById("reset-settings").addEventListener("click", () => {
+        showConfirmation("Reset all settings to default?", () => {
+            settings = { ...DEFAULT_SETTINGS };
+            saveSettings();
+            applySettingsToUI();
+        });
+    });
+
+    document.getElementById("dark-mode").addEventListener("change", e => {
+        applyDarkMode(e.target.checked);
+        settings.darkMode = e.target.checked;
+        saveSettings();
+    });
+
+    document.getElementById("change-password-btn").addEventListener("click", async () => {
+        const current  = document.getElementById("change-password").value.trim();
+        const newPwd   = document.getElementById("confirm-password").value.trim();
+        const statusEl = document.getElementById("password-change-status");
+
+        if (!current || !newPwd) {
+            statusEl.textContent = "Fill in both fields";
+            statusEl.style.color = "#c0392b";
+            return;
+        }
+        if (current === newPwd) {
+            statusEl.textContent = "New password must be different from current";
+            statusEl.style.color = "#c0392b";
+            return;
+        }
+
+        statusEl.textContent = "Changing...";
+        statusEl.style.color = "var(--subtext)";
+
+        const result = await changeMasterPassword(current, newPwd);
+
+        if (result.ok) {
+            statusEl.textContent = result.warning || "✓ Password changed successfully";
+            statusEl.style.color = result.warning ? "#e67e22" : "#2e7d32";
+            document.getElementById("change-password").value = "";
+            document.getElementById("confirm-password").value = "";
+        } else {
+            statusEl.textContent = "✗ " + result.error;
+            statusEl.style.color = "#c0392b";
+        }
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", logout);
+
+    const pushBtn = document.getElementById("push-btn");
+    if (pushBtn) {
+        pushBtn.addEventListener("click", async () => {
+            saveSyncConfig();
+            setSyncStatus("Pushing...", "var(--subtext)");
+            const result = await pushToGist();
+            setSyncStatus(
+                result.ok ? "✓ Pushed successfully" : `✗ ${result.error}`,
+                result.ok ? "#2e7d32" : "#c0392b"
+            );
+        });
+    }
+
+    const pullBtn = document.getElementById("pull-btn");
+    if (pullBtn) {
+        pullBtn.addEventListener("click", async () => {
+            saveSyncConfig();
+            setSyncStatus("Pulling...", "var(--subtext)");
+            const result = await pullFromGist();
+            setSyncStatus(
+                result.ok ? (result.reauth ? "✓ Pulled — please log in again" : "✓ Pulled successfully") : `✗ ${result.error}`,
+                result.ok ? "#2e7d32" : "#c0392b"
+            );
+        });
+    }
+}
+
+// =========================
+// SEGMENTED CONTROLS
+// =========================
+function initSegmentedControls2() {
+    const control = document.querySelector(".segmented-control-2");
+    if (!control) return;
+    const radios = control.querySelectorAll('input[type="radio"]');
+    const slider = control.querySelector(".segmented-slider-2");
+    if (!slider) return;
+    radios.forEach((radio, i) => {
+        radio.addEventListener("change", () => {
+            slider.style.transform = `translateX(${i * 100}%)`;
+        });
+        if (radio.checked) slider.style.transform = `translateX(${i * 100}%)`;
+    });
+}
+
+function initSegmentedControls3() {
+    const control = document.querySelector(".segmented-control-3");
+    if (!control) return;
+    const radios = control.querySelectorAll('input[type="radio"]');
+    const slider = control.querySelector(".segmented-slider-3");
+    if (!slider) return;
+    radios.forEach((radio, i) => {
+        radio.addEventListener("change", () => {
+            slider.style.transform = `translateX(${i * 100}%)`;
+        });
+        if (radio.checked) slider.style.transform = `translateX(${i * 100}%)`;
+    });
+}
+
+// =========================
+// CONFIRMATION MODAL
+// =========================
+function showConfirmation(message, onConfirm) {
+    const overlay   = document.getElementById("confirmation-overlay");
+    const messageEl = document.getElementById("confirm-message");
+    const btnYes    = document.getElementById("confirm-yes");
+    const btnNo     = document.getElementById("confirm-no");
+
+    messageEl.textContent = message;
+    overlay.style.display = "flex";
+
+    btnYes.onclick  = () => { overlay.style.display = "none"; onConfirm(); };
+    btnNo.onclick   = () => { overlay.style.display = "none"; };
+    overlay.onclick = e  => { if (e.target === overlay) overlay.style.display = "none"; };
+}// LOAD / SAVE
 // =========================
 function loadSettings() {
     const saved = localStorage.getItem("vaultSettings");
