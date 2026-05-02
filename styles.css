@@ -17,17 +17,18 @@
    13. Confirmation Modal
    14. Add Entry Page
    15. Password Generator
-   16. Strength Indicator
-   17. Settings Layout
-   18. Settings Card & Items
-   19. Toggle Switch
-   20. Segmented Controls
-   21. Info Tooltip
-   22. Save Settings Modal
-   23. Login Page
-   24. Copy (value row, icon btn, toast)
-   25. Empty State
-   26. Mobile / Responsive
+   16. Custom Range Slider
+   17. Strength Indicator
+   18. Settings Layout
+   19. Settings Section & Items
+   20. Toggle Switch
+   21. Segmented Controls
+   22. Info Tooltip
+   23. Confirmation / Save Modal
+   24. Login Page
+   25. Copy (value row, icon btn, toast)
+   26. Empty State
+   27. Mobile / Responsive
 ============================================================ */
 
 
@@ -40,6 +41,7 @@
     --radius-sm:    6px;
     --radius-md:    10px;
     --radius-lg:    16px;
+    --radius-pill:  999px;
 
     --bg:           #ffffff;
     --card:         #ffffff;
@@ -49,19 +51,23 @@
     --input-focus:  #ebebeb;
     --border:       #e5e5e5;
     --shadow:        0 1px 4px rgba(0, 0, 0, 0.06);
-    --shadow-hover:  0 4px 16px rgba(0, 0, 0, 0.1);
+    --shadow-hover:  0 4px 16px rgba(0, 0, 0, 0.10);
+    --shadow-thumb:  0 1px 4px rgba(0, 0, 0, 0.18);
+
+    --transition:   0.15s ease;
 }
 
 body.dark {
     --bg:           #111111;
     --card:         #1a1a1a;
     --text:         #f0f0f0;
-    --subtext:      #888888;
+    --subtext:      #777777;
     --input:        #252525;
     --input-focus:  #2e2e2e;
     --border:       #2e2e2e;
-    --shadow:        0 1px 4px rgba(0, 0, 0, 0.3);
-    --shadow-hover:  0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow:        0 1px 4px rgba(0, 0, 0, 0.30);
+    --shadow-hover:  0 4px 16px rgba(0, 0, 0, 0.40);
+    --shadow-thumb:  0 1px 4px rgba(0, 0, 0, 0.50);
 }
 
 
@@ -107,30 +113,40 @@ header {
     padding: 1rem var(--page-padding);
     background: var(--bg);
     border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 header .logo {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: -0.02em;
 }
 
-header .menu a {
-    margin-left: 1.5rem;
-    text-decoration: none;
-    color: var(--text);
-    font-size: 1rem;
-    font-weight: 500;
-    transition: color 0.15s;
+header .menu {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
-header .menu a:hover { color: var(--subtext); }
+header .menu a {
+    text-decoration: none;
+    color: var(--subtext);
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition), color var(--transition);
+}
+
+header .menu a:hover        { background: var(--input); color: var(--text); }
+header .menu a.active       { color: var(--text); }
+header .menu a#logout-btn   { color: var(--subtext); }
 
 
 /* ============================================================
    5. BUTTONS
-   .btn-black — primary filled
-   .btn-white — secondary outlined
 ============================================================ */
 .btn-black,
 .btn-white {
@@ -144,16 +160,17 @@ header .menu a:hover { color: var(--subtext); }
     font-weight: 600;
     cursor: pointer;
     width: 100%;
-    transition: background 0.15s, transform 0.1s, opacity 0.15s;
+    border: none;
+    transition: opacity var(--transition), background var(--transition), transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn-black {
     background: var(--text);
     color: var(--bg);
-    border: none;
 }
 
-.btn-black:hover { opacity: 0.85; }
+.btn-black:hover  { opacity: 0.85; }
 
 .btn-white {
     background: var(--card);
@@ -166,28 +183,32 @@ header .menu a:hover { color: var(--subtext); }
 .btn-black:active,
 .btn-white:active { transform: scale(0.97); }
 
+.btn-black:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 
 /* ============================================================
    6. VAULT CONTROLS
-   Search bar + sort icon above the vault grid
 ============================================================ */
 .vault-controls {
-    max-width: 400px;
-    padding: 18px var(--page-padding) 0;
+    max-width: 420px;
+    padding: 20px var(--page-padding) 0;
 }
 
 .search-wrapper { position: relative; width: 100%; }
 
 #search-input {
     width: 100%;
-    padding: 10px 36px 8px 28px;
+    padding: 10px 36px 10px 32px;
     background: transparent;
     border: none;
     border-bottom: 1px solid var(--border);
     font-size: 0.9rem;
     color: var(--text);
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color var(--transition);
 }
 
 #search-input:focus        { border-bottom-color: var(--text); }
@@ -213,7 +234,7 @@ header .menu a:hover { color: var(--subtext); }
     height: 16px;
     color: var(--subtext);
     cursor: pointer;
-    transition: color 0.15s;
+    transition: color var(--transition);
 }
 
 .sort-icon:hover,
@@ -221,7 +242,7 @@ header .menu a:hover { color: var(--subtext); }
 
 .sort-menu {
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 8px);
     left: 0;
     width: 100%;
     display: none;
@@ -239,10 +260,10 @@ header .menu a:hover { color: var(--subtext); }
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
+    padding: 9px 14px;
     font-size: 0.875rem;
     cursor: pointer;
-    transition: background 0.1s;
+    transition: background var(--transition);
 }
 
 .sort-field:hover,
@@ -259,13 +280,14 @@ header .menu a:hover { color: var(--subtext); }
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: border-color var(--transition);
 }
 
-.indicator.active              { border-color: var(--text); }
+.indicator.active            { border-color: var(--text); }
 .indicator.active::after {
     content: '';
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     background: var(--text);
     border-radius: 50%;
 }
@@ -276,15 +298,15 @@ header .menu a:hover { color: var(--subtext); }
 ============================================================ */
 #vault-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.25rem;
-    padding: 18px var(--page-padding);
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+    padding: 20px var(--page-padding);
 }
 
 body.grid-view #vault-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
 }
 
 .vault-card {
@@ -296,23 +318,27 @@ body.grid-view #vault-container {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    transition: box-shadow 0.15s, transform 0.1s;
+    transition: box-shadow var(--transition), transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .vault-card:hover  { box-shadow: var(--shadow-hover); }
-.vault-card:active { transform: scale(0.97); }
+.vault-card:active { transform: scale(0.98); }
 
 .vault-card h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     letter-spacing: -0.01em;
 }
 
 .vault-card p {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--subtext);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 
@@ -329,7 +355,7 @@ body.grid-view #vault-container {
     border-collapse: collapse;
     width: 100%;
     text-align: left;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
 }
 
 .vault-list-table th,
@@ -338,43 +364,44 @@ body.grid-view #vault-container {
     border-bottom: 1px solid var(--border);
 }
 
-.vault-list-table th     { background: var(--bg); font-weight: 600; }
-.vault-list-table tr:hover  { background: var(--input-focus); cursor: pointer; }
-.vault-list-table tr:active { transform: scale(0.99); }
+.vault-list-table th       { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--subtext); }
+.vault-list-table tr:hover { background: var(--input); cursor: pointer; }
 
-.vault-list-table th:nth-child(1), .vault-list-table td:nth-child(1) { width: 20%; }
-.vault-list-table th:nth-child(2), .vault-list-table td:nth-child(2) { width: 25%; }
+.vault-list-table th:nth-child(1), .vault-list-table td:nth-child(1) { width: 25%; }
+.vault-list-table th:nth-child(2), .vault-list-table td:nth-child(2) { width: 30%; }
 .vault-list-table th:nth-child(3), .vault-list-table td:nth-child(3) { width: 25%; }
-.vault-list-table th:nth-child(4), .vault-list-table td:nth-child(4) { width: 30%; }
+.vault-list-table th:nth-child(4), .vault-list-table td:nth-child(4) { width: 20%; }
 
 
 /* ============================================================
    9. VAULT GALLERY VIEW
 ============================================================ */
 body.gallery-view #vault-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
 }
 
 .vault-gallery-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 0.8rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    transition: box-shadow 0.15s;
+    transition: box-shadow var(--transition);
 }
 
 .vault-gallery-card:hover           { box-shadow: var(--shadow-hover); }
-.vault-gallery-card .gallery-title  { font-weight: 600; margin-bottom: 0.5rem; }
+.vault-gallery-card .gallery-title  { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.5rem; }
 
 .vault-gallery-card .gallery-details p {
     margin: 0.2rem 0;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--subtext);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 
@@ -387,12 +414,12 @@ body.gallery-view #vault-container {
     display: none;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
-/* position:relative anchors the copy toast inside */
 .expanded-content {
     position: relative;
     background: var(--card);
@@ -402,25 +429,39 @@ body.gallery-view #vault-container {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .expanded-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
 }
 
 .expanded-header h2 {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 700;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .top-right-buttons {
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-shrink: 0;
+}
+
+.top-right-buttons .btn-white,
+.top-right-buttons .btn-black {
+    width: auto;
+    padding: 5px 12px;
+    font-size: 0.8rem;
 }
 
 .url-value a {
@@ -429,6 +470,7 @@ body.gallery-view #vault-container {
     word-break: break-all;
     text-decoration: none;
     border-bottom: 1px solid var(--border);
+    transition: border-color var(--transition);
 }
 
 .url-value a:hover { border-bottom-color: var(--text); }
@@ -443,17 +485,16 @@ body.gallery-view #vault-container {
     gap: 6px;
 }
 
-.field + .field { margin-top: 10px; }
+.field + .field { margin-top: 8px; }
 
 .field label {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.07em;
     color: var(--subtext);
 }
 
-/* Read-only value display box */
 .value {
     background: var(--input);
     border-radius: var(--radius-sm);
@@ -464,16 +505,15 @@ body.gallery-view #vault-container {
     font-size: 0.875rem;
     min-height: 36px;
     word-break: break-all;
+    line-height: 1.4;
 }
 
-/* Notes area */
-.notes {
+.value.notes {
     align-items: flex-start;
-    min-height: 60px;
+    min-height: 56px;
     white-space: pre-wrap;
 }
 
-/* Holds password + eye toggle */
 .password-wrapper { position: relative; }
 
 #toggle-password {
@@ -485,47 +525,48 @@ body.gallery-view #vault-container {
     border: none;
     cursor: pointer;
     color: var(--subtext);
-    padding: 0;
-    transition: color 0.15s;
+    padding: 4px;
+    transition: color var(--transition);
+    -webkit-tap-highlight-color: transparent;
 }
 
 #toggle-password:hover { color: var(--text); }
 
-/* Inputs inside .value or .password-wrapper */
 .value input,
 .value textarea,
 .password-wrapper input {
     width: 100%;
-    padding: 8px;
-    padding-right: 32px;
+    padding: 0;
+    padding-right: 28px;
     background: transparent;
     border: none;
     color: var(--text);
     font-size: 0.875rem;
     outline: none;
+    font-family: inherit;
 }
 
-/* Inputs on add-entry page */
 .field input,
 .field textarea {
     width: 100%;
     border-radius: var(--radius-sm);
-    padding: 8px 12px;
+    padding: 9px 12px;
     font-size: 0.875rem;
     background: var(--input);
     border: none;
     outline: none;
     color: var(--text);
-    transition: background 0.15s;
+    font-family: inherit;
+    transition: background var(--transition);
 }
 
 .field input:focus,
 .field textarea:focus { background: var(--input-focus); }
 
 textarea {
-    min-height: 60px;
+    min-height: 72px;
     resize: none;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 
@@ -536,9 +577,11 @@ textarea {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px;
+    padding: 6px;
     color: var(--subtext);
-    transition: color 0.15s;
+    transition: color var(--transition);
+    border-radius: var(--radius-sm);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .icon-btn:hover { color: var(--text); }
@@ -550,6 +593,7 @@ textarea {
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
+    margin-top: 4px;
 }
 
 
@@ -562,9 +606,10 @@ textarea {
     display: none;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 2000;
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .confirmation-modal {
@@ -575,36 +620,38 @@ textarea {
     border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
-.confirmation-modal p {
+.confirmation-modal p,
+#confirmation-message {
     margin: 0;
     font-size: 0.9rem;
     line-height: 1.5;
     color: var(--text);
 }
 
-.confirmation-buttons         { display: flex; gap: 10px; }
+.confirmation-buttons { display: flex; gap: 10px; }
 
 .confirmation-buttons button {
     flex: 1;
-    padding: 0.6rem 1rem;
+    padding: 0.65rem 1rem;
     font-size: 0.875rem;
     font-weight: 600;
     border-radius: var(--radius-sm);
     border: none;
     cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
+    transition: opacity var(--transition), transform 0.1s;
 }
 
 .confirmation-buttons button:active { transform: scale(0.97); }
 
-#confirm-no          { background: var(--text); color: var(--bg); }
-#confirm-no:hover    { opacity: 0.85; }
+#confirm-no        { background: var(--text); color: var(--bg); }
+#confirm-no:hover  { opacity: 0.85; }
 
-#confirm-yes         { background: var(--input); color: var(--text); border: 1px solid var(--border) !important; }
-#confirm-yes:hover   { background: var(--input-focus); }
+#confirm-yes       { background: var(--input); color: var(--text); border: 1px solid var(--border) !important; }
+#confirm-yes:hover { background: var(--input-focus); }
 
 
 /* ============================================================
@@ -612,26 +659,27 @@ textarea {
 ============================================================ */
 .add-entry-container {
     max-width: 520px;
-    margin: 3rem auto;
-    padding: 2rem;
+    margin: 2.5rem auto;
+    padding: 0 1rem;
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
 }
 
 .add-entry-title {
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
     margin: 0;
 }
 
-.add-entry-actions            { display: flex; justify-content: center; gap: 1rem; }
-.add-entry-actions button     { flex: none; width: 120px; }
+.add-entry-actions          { display: flex; gap: 10px; }
+.add-entry-actions .btn-black,
+.add-entry-actions .btn-white { flex: 1; }
 
 
 /* ============================================================
    15. PASSWORD GENERATOR
-   Card-style panel below the password field
 ============================================================ */
 .generator-card {
     background: var(--input);
@@ -639,11 +687,10 @@ textarea {
     padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 8px;
+    gap: 14px;
+    margin-top: 4px;
 }
 
-/* Top row: Generate button + length display */
 .generator-top {
     display: flex;
     align-items: center;
@@ -653,37 +700,36 @@ textarea {
 
 .generator-btn {
     width: auto;
-    padding: 0.5rem 1rem;
+    padding: 6px 14px;
     font-size: 0.8rem;
-    white-space: nowrap;
     flex-shrink: 0;
 }
 
-/* Length label + slider grouped right */
 .gen-length-group {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
+    gap: 10px;
+    font-size: 0.78rem;
     color: var(--subtext);
+    flex: 1;
+    justify-content: flex-end;
 }
 
 .gen-length-value {
     font-weight: 700;
     font-size: 0.9rem;
     color: var(--text);
-    min-width: 20px;
+    min-width: 24px;
     text-align: right;
 }
 
-/* Bottom row: character type toggles */
 .generator-options {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
-/* Individual pill toggle */
+/* Pill toggles for character types */
 .gen-option {
     display: flex;
     align-items: center;
@@ -693,11 +739,12 @@ textarea {
     color: var(--subtext);
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    padding: 5px 12px;
     cursor: pointer;
     user-select: none;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .gen-option:has(input:checked) {
@@ -708,49 +755,95 @@ textarea {
 
 .gen-option input[type="checkbox"] { display: none; }
 
-/* Length slider */
-#gen-length {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100px;
-    height: 3px;
+
+/* ============================================================
+   16. CUSTOM RANGE SLIDER
+   Pill track, discrete snapping, inverted ticks on fill
+============================================================ */
+.slider-track {
+    position: relative;
+    height: 20px;
+    border-radius: var(--radius-pill);
     background: var(--border);
-    border-radius: 2px;
-    outline: none;
     cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    border: 1px solid var(--border);
 }
 
-#gen-length::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
+.slider-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    border-radius: var(--radius-pill);
     background: var(--text);
-    cursor: pointer;
-    transition: transform 0.15s;
+    pointer-events: none;
+    transition: width 0.15s ease;
 }
 
-#gen-length::-webkit-slider-thumb:hover { transform: scale(1.2); }
+/* Background tick marks (dark on light track) */
+.slider-ticks-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    pointer-events: none;
+}
 
-#gen-length::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
+/* Foreground tick marks (light on dark fill) */
+.slider-ticks-fg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    pointer-events: none;
+    transition: width 0.15s ease;
+}
+
+.slider-tick {
+    position: absolute;
+    top: 20%;
+    width: 2px;
+    height: 60%;
+    border-radius: 1px;
+    transform: translateX(-50%);
+}
+
+.slider-ticks-bg .slider-tick { background: rgba(0, 0, 0, 0.12); }
+.slider-ticks-fg .slider-tick { background: rgba(255, 255, 255, 0.45); }
+
+body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10); }
+
+.slider-thumb {
+    position: absolute;
+    top: 50%;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    background: var(--text);
-    border: none;
-    cursor: pointer;
+    background: var(--card);
+    border: 1px solid var(--border);
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    box-shadow: var(--shadow-thumb);
+    z-index: 2;
+    transition: left 0.15s ease, box-shadow var(--transition);
+    -webkit-tap-highlight-color: transparent;
 }
+
+.slider-thumb:active { cursor: grabbing; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); }
 
 
 /* ============================================================
-   16. STRENGTH INDICATOR
+   17. STRENGTH INDICATOR
 ============================================================ */
 .strength-wrap {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
 .strength-bar-wrap {
@@ -764,113 +857,136 @@ textarea {
     height: 100%;
     width: 0%;
     border-radius: 2px;
-    transition: width 0.3s, background 0.3s;
+    transition: width 0.3s ease, background 0.3s ease;
 }
 
 .strength-label {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 600;
     min-height: 1em;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
 }
 
 
 /* ============================================================
-   17. SETTINGS LAYOUT
+   18. SETTINGS LAYOUT
 ============================================================ */
 .settings-container {
-    max-width: 900px;
+    max-width: 640px;
     margin: 2rem auto;
     padding: 0 var(--page-padding);
     display: flex;
     flex-direction: column;
-    gap: var(--section-gap);
+    gap: 2rem;
 }
 
-.settings-title      { font-size: 2rem; font-weight: 600; margin-bottom: -0.5rem; }
+.settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 
-.settings-actions            { display: flex; gap: 1rem; margin-top: 1rem; }
-.settings-actions button     { flex: 1; padding: 0.75rem; border-radius: var(--radius-sm); }
+.settings-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--subtext);
+    padding: 0 0.25rem;
+}
 
+.settings-actions          { display: flex; gap: 10px; }
+.settings-actions .btn-black,
+.settings-actions .btn-white { flex: 1; }
+
+
+/* ============================================================
+   19. SETTINGS SECTION & ITEMS
+============================================================ */
 .settings-section {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow);
-    padding: 0 1.2rem;
-}
-
-
-/* ============================================================
-   18. SETTINGS CARD & ITEMS
-============================================================ */
-.settings-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow);
-    padding: 1rem 1.2rem;
-    display: flex;
-    flex-direction: column;
+    overflow: hidden;
 }
 
 .setting-item {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 0.9rem 0;
+    gap: 8px;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
 }
 
-.setting-item:not(:last-child) { border-bottom: 1px solid var(--border); }
-
-.setting-item.no-divider,
-.setting-item:has(#push-btn)   { border-bottom: none !important; }
+.setting-item:last-child    { border-bottom: none; }
+.setting-item.no-divider    { border-bottom: none; }
 
 .setting-item label {
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     color: var(--subtext);
 }
 
-.setting-item input,
-.setting-item select {
+.setting-item input[type="text"],
+.setting-item input[type="password"] {
     width: 100%;
-    padding: 8px 12px;
+    padding: 9px 12px;
     border-radius: var(--radius-sm);
     font-size: 0.875rem;
     background: var(--input);
     border: none;
     outline: none;
     color: var(--text);
-    transition: background 0.15s;
+    font-family: inherit;
+    transition: background var(--transition);
 }
 
-.setting-item input:focus,
-.setting-item select:focus { background: var(--input-focus); }
+.setting-item input:focus { background: var(--input-focus); }
 
 .toggle-field {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    padding: 0.9rem 1.25rem;
 }
 
-.toggle-field span { font-size: 0.9rem; color: var(--text); }
+.toggle-field span {
+    font-size: 0.9rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.setting-item-status {
+    font-size: 0.78rem;
+    min-height: 1.2em;
+    color: var(--subtext);
+}
+
+.sync-buttons {
+    display: flex;
+    gap: 8px;
+    padding: 1rem 1.25rem;
+}
+
+.sync-buttons .btn-black,
+.sync-buttons .btn-white { flex: 1; }
 
 
 /* ============================================================
-   19. TOGGLE SWITCH
+   20. TOGGLE SWITCH
 ============================================================ */
 .switch {
     position: relative;
     display: inline-block;
-    width: 42px;
+    width: 40px;
     height: 22px;
+    flex-shrink: 0;
 }
 
-.switch input          { opacity: 0; width: 0; height: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
 
 .slider {
     position: absolute;
@@ -878,73 +994,82 @@ textarea {
     cursor: pointer;
     background: var(--border);
     border-radius: 20px;
-    transition: 0.25s;
+    transition: background 0.25s;
 }
 
 .slider::before {
     content: "";
     position: absolute;
-    height: 18px;
-    width: 18px;
-    left: 2px;
-    top: 2px;
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    top: 3px;
     background: var(--card);
     border-radius: 50%;
-    transition: 0.25s;
+    transition: transform 0.25s;
 }
 
-.switch input:checked + .slider          { background: var(--text); }
-.switch input:checked + .slider::before { transform: translateX(20px); }
+.switch input:checked + .slider             { background: var(--text); }
+.switch input:checked + .slider::before    { transform: translateX(18px); }
 
 
 /* ============================================================
-   20. SEGMENTED CONTROLS
+   21. SEGMENTED CONTROLS
 ============================================================ */
 .segmented-control-2,
 .segmented-control-3 {
     position: relative;
     display: flex;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     overflow: hidden;
     background: var(--input);
-    padding: 4px;
+    padding: 3px;
+    gap: 0;
 }
 
 .segmented-control-2 label,
 .segmented-control-3 label {
     flex: 1;
     text-align: center;
-    padding: 0.5rem 0;
+    padding: 6px 0;
     cursor: pointer;
+    font-size: 0.82rem;
     font-weight: 600;
-    color: var(--text);
+    color: var(--subtext);
     z-index: 1;
+    transition: color var(--transition);
+    -webkit-tap-highlight-color: transparent;
 }
+
+.segmented-control-2 input[type="radio"]:checked + label,
+.segmented-control-3 input[type="radio"]:checked + label { color: var(--text); }
 
 .segmented-control-2 input[type="radio"],
 .segmented-control-3 input[type="radio"] { display: none; }
 
 .segmented-slider-2 {
     position: absolute;
-    top: 4px; bottom: 4px; left: 4px;
-    width: calc(50% - 4px);
+    top: 3px; bottom: 3px; left: 3px;
+    width: calc(50% - 3px);
     background: var(--card);
-    border-radius: var(--radius-sm);
-    transition: transform 0.3s ease;
+    border-radius: calc(var(--radius-sm) - 1px);
+    box-shadow: var(--shadow);
+    transition: transform 0.25s ease;
 }
 
 .segmented-slider-3 {
     position: absolute;
-    top: 4px; bottom: 4px; left: 4px;
-    width: calc(100% / 3 - 3px);
+    top: 3px; bottom: 3px; left: 3px;
+    width: calc(100% / 3 - 2px);
     background: var(--card);
-    border-radius: var(--radius-sm);
-    transition: transform 0.3s ease;
+    border-radius: calc(var(--radius-sm) - 1px);
+    box-shadow: var(--shadow);
+    transition: transform 0.25s ease;
 }
 
 
 /* ============================================================
-   21. INFO TOOLTIP
+   22. INFO TOOLTIP
 ============================================================ */
 .info-wrap { display: flex; align-items: center; gap: 6px; }
 
@@ -958,42 +1083,45 @@ textarea {
     line-height: 1;
     width: auto !important;
     flex-shrink: 0;
-    transition: color 0.15s;
+    transition: color var(--transition);
 }
 
 .info-btn:hover { color: var(--text); }
 
 .tooltip {
     position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 8px 10px;
+    padding: 10px 12px;
     font-size: 0.78rem;
     color: var(--subtext);
-    line-height: 1.4;
-    max-width: 240px;
+    line-height: 1.5;
+    max-width: 260px;
     box-shadow: var(--shadow-hover);
     z-index: 999;
     display: none;
 }
 
-.tooltip a      { color: var(--text); text-decoration: underline; }
-.tooltip.show   { display: block; }
+.tooltip a       { color: var(--text); text-decoration: underline; }
+.tooltip.show    { display: block; }
 
 
 /* ============================================================
-   22. SAVE SETTINGS MODAL
+   23. CONFIRMATION / SAVE MODAL
 ============================================================ */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.5);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 2000;
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .modal-box {
@@ -1004,12 +1132,13 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
-.modal-box h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
-.modal-box p  { margin: 0; font-size: 0.875rem; line-height: 1.5; color: var(--subtext); }
+.modal-box h3     { margin: 0; font-size: 1rem; font-weight: 700; }
+.modal-box p      { margin: 0; font-size: 0.875rem; line-height: 1.5; color: var(--subtext); }
 
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.modal-actions    { display: flex; justify-content: flex-end; gap: 8px; }
 
 .modal-actions button {
     padding: 0.55rem 1rem;
@@ -1018,7 +1147,8 @@ textarea {
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.15s;
+    width: auto;
+    transition: opacity var(--transition);
 }
 
 .cancel-btn        { background: var(--input); color: var(--text); border: 1px solid var(--border) !important; }
@@ -1028,39 +1158,48 @@ textarea {
 
 
 /* ============================================================
-   23. LOGIN PAGE
+   24. LOGIN PAGE
 ============================================================ */
 .login-container {
-    max-width: 480px;
-    margin: 4rem auto;
-    padding: 2rem;
+    max-width: 400px;
+    margin: 5rem auto;
+    padding: 0 1rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.login-title    { font-size: 2rem; font-weight: 600; margin: 0; }
-.login-subtitle { font-size: 0.9rem; color: var(--subtext); margin: 0; }
+.login-title    { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; margin: 0 0 0.25rem; }
+.login-subtitle { font-size: 0.875rem; color: var(--subtext); margin: 0 0 0.5rem; }
+
+.login-container label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--subtext);
+}
 
 .login-container .password-wrapper { position: relative; }
 
 .login-container input[type="password"],
 .login-container input[type="text"] {
     width: 100%;
-    padding: 10px 40px 10px 12px;
+    padding: 10px 42px 10px 12px;
     border-radius: var(--radius-sm);
-    font-size: 0.875rem;
+    font-size: 0.9rem;
     background: var(--input);
     border: none;
     outline: none;
     color: var(--text);
-    transition: background 0.15s;
+    font-family: inherit;
+    transition: background var(--transition);
 }
 
 .login-container input:focus { background: var(--input-focus); }
 
-.login-container #toggle-password,
-.login-container .toggle-password {
+.login-container .toggle-password,
+.login-container #toggle-password {
     position: absolute;
     right: 10px;
     top: 50%;
@@ -1070,47 +1209,56 @@ textarea {
     cursor: pointer;
     color: var(--subtext);
     width: auto !important;
-    padding: 0;
+    padding: 4px;
+    transition: color var(--transition);
 }
+
+.login-container .toggle-password:hover,
+.login-container #toggle-password:hover { color: var(--text); }
 
 .login-container #login-btn {
     background: var(--text);
     color: var(--bg);
-    padding: 0.8rem 1rem;
+    padding: 0.75rem 1rem;
     border-radius: var(--radius-sm);
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     border: none;
     cursor: pointer;
     width: 100%;
-    transition: opacity 0.15s;
+    transition: opacity var(--transition);
+    margin-top: 0.25rem;
 }
 
-.login-container #login-btn:hover { opacity: 0.85; }
+.login-container #login-btn:hover    { opacity: 0.85; }
+.login-container #login-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.login-container #reset-btn {
+.login-container #reset-btn,
+.login-container .link-btn {
     background: none;
     border: none;
     color: var(--subtext);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     cursor: pointer;
     padding: 0;
     width: auto;
     text-align: left;
+    transition: color var(--transition);
 }
 
-.login-container #reset-btn:hover { color: var(--text); }
+.login-container #reset-btn:hover,
+.login-container .link-btn:hover { color: var(--text); }
 
 .login-error {
     color: #e74c3c;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     min-height: 1.2em;
     display: none;
 }
 
 
 /* ============================================================
-   24. COPY — VALUE ROW, ICON BUTTON, TOAST
+   25. COPY — VALUE ROW, ICON BUTTON, TOAST
 ============================================================ */
 .value-row {
     display: flex;
@@ -1119,19 +1267,21 @@ textarea {
     width: 100%;
 }
 
-.value-row .password-wrapper { flex: 1; }
-.value-row .value             { flex: 1; }
+.value-row .password-wrapper { flex: 1; min-width: 0; }
+.value-row .value             { flex: 1; min-width: 0; }
 
 .copy-icon-btn {
     background: none;
     border: none;
     cursor: pointer;
     color: var(--subtext);
-    padding: 4px 6px;
-    font-size: 0.9rem;
-    transition: color 0.15s;
+    padding: 6px;
+    font-size: 0.875rem;
+    transition: color var(--transition);
     flex-shrink: 0;
     width: auto !important;
+    border-radius: var(--radius-sm);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .copy-icon-btn:hover { color: var(--text); }
@@ -1140,12 +1290,12 @@ textarea {
     position: absolute;
     bottom: 16px;
     left: 50%;
-    transform: translateX(-50%) translateY(8px);
+    transform: translateX(-50%) translateY(6px);
     background: var(--text);
     color: var(--bg);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+    padding: 6px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
     font-weight: 600;
     opacity: 0;
     pointer-events: none;
@@ -1158,7 +1308,7 @@ textarea {
 
 
 /* ============================================================
-   25. EMPTY STATE
+   26. EMPTY STATE
 ============================================================ */
 .empty-state {
     grid-column: 1 / -1;
@@ -1171,9 +1321,9 @@ textarea {
     color: var(--subtext);
 }
 
-.empty-icon         { font-size: 2.5rem; color: var(--border); }
-.empty-state h2     { margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text); }
-.empty-state p      { margin: 0; font-size: 0.875rem; }
+.empty-icon         { font-size: 2rem; color: var(--border); }
+.empty-state h2     { margin: 0; font-size: 1rem; font-weight: 600; color: var(--text); }
+.empty-state p      { margin: 0; font-size: 0.85rem; }
 
 .empty-add-btn {
     margin-top: 8px;
@@ -1188,39 +1338,42 @@ textarea {
     border-radius: var(--radius-sm);
     font-size: 0.875rem;
     font-weight: 600;
+    transition: opacity var(--transition);
 }
+
+.empty-add-btn:hover { opacity: 0.85; }
 
 
 /* ============================================================
-   26. MOBILE / RESPONSIVE
+   27. MOBILE / RESPONSIVE
 ============================================================ */
 @media (max-width: 600px) {
+    :root { --page-padding: 1rem; }
+
     header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.75rem;
-        padding: 0.9rem var(--page-padding);
+        padding: 0.9rem 1rem;
     }
 
     header .menu {
-        display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
+        gap: 4px;
     }
 
     header .menu a {
-        margin-left: 0;
-        font-size: 0.875rem;
-        padding: 4px 10px;
-        border-radius: 20px;
+        font-size: 0.8rem;
+        padding: 5px 10px;
         border: 1px solid var(--border);
+        border-radius: var(--radius-pill);
     }
 
-    .vault-controls      { max-width: 100%; }
-    .add-entry-container { margin: 1rem auto; padding: 1rem; }
-    .settings-container  { padding: 0 1rem; }
-    .login-container     { margin: 2rem auto; padding: 1rem; }
+    .vault-controls       { max-width: 100%; }
+    .add-entry-container  { margin: 1.5rem auto; }
+    .settings-container   { padding: 0 1rem; }
+    .login-container      { margin: 2.5rem auto; }
 
-    .generator-top { flex-wrap: wrap; }
-    #gen-length    { width: 80px; }
+    .generator-top        { flex-wrap: wrap; }
+    .gen-length-group     { justify-content: flex-start; }
 }
