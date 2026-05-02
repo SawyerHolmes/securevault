@@ -1,6 +1,10 @@
-// =========================
+// ============================================================
+// SETTINGS.JS — SecureVault
+// ============================================================
+
+// ============================================================
 // AUTH
-// =========================
+// ============================================================
 checkAuth();
 startActivityTracking();
 
@@ -9,9 +13,9 @@ window.addEventListener("popstate", () => {
     window.history.pushState(null, null, window.location.href);
 });
 
-// =========================
+// ============================================================
 // DEFAULT SETTINGS
-// =========================
+// ============================================================
 const DEFAULT_SETTINGS = {
     autoLock:      false,
     darkMode:      false,
@@ -22,9 +26,9 @@ const DEFAULT_SETTINGS = {
 
 let settings = { ...DEFAULT_SETTINGS };
 
-// =========================
+// ============================================================
 // INIT
-// =========================
+// ============================================================
 document.addEventListener("DOMContentLoaded", () => {
     loadSettings();
     applySettingsToUI();
@@ -45,9 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// =========================
+// ============================================================
 // LOAD / SAVE
-// =========================
+// ============================================================
 function loadSettings() {
     const saved = localStorage.getItem("vaultSettings");
     if (saved) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
@@ -57,9 +61,10 @@ function saveSettings() {
     localStorage.setItem("vaultSettings", JSON.stringify(settings));
 }
 
-// =========================
+// ============================================================
 // APPLY TO UI
-// =========================
+// Sets all controls to reflect current saved settings
+// ============================================================
 function applySettingsToUI() {
     document.getElementById("auto-lock").checked      = settings.autoLock;
     document.getElementById("dark-mode").checked      = settings.darkMode;
@@ -79,11 +84,14 @@ function applySettingsToUI() {
     document.getElementById("github-token").value = cfg.token;
     document.getElementById("gist-id").value      = cfg.gistId;
 
-    // Sync segmented slider positions after checking radios
+    // Sync segmented slider positions after radios are set
     initSegmentedControls2();
     initSegmentedControls3();
 }
 
+// ============================================================
+// SYNC CONFIG
+// ============================================================
 function saveSyncConfig() {
     const token  = document.getElementById("github-token").value.trim();
     const gistId = document.getElementById("gist-id").value.trim();
@@ -96,9 +104,9 @@ function setSyncStatus(msg, color) {
     el.style.color = color;
 }
 
-// =========================
+// ============================================================
 // LIVE EFFECTS
-// =========================
+// ============================================================
 function applyDarkMode(enabled) {
     document.body.classList.toggle("dark", enabled);
 }
@@ -108,9 +116,9 @@ function applyViewMode(mode) {
     document.body.classList.add(mode + "-view");
 }
 
-// =========================
+// ============================================================
 // READ SETTINGS FROM UI
-// =========================
+// ============================================================
 function readSettingsFromUI() {
     settings.autoLock      = document.getElementById("auto-lock").checked;
     settings.darkMode      = document.getElementById("dark-mode").checked;
@@ -123,11 +131,12 @@ function readSettingsFromUI() {
     if (view) settings.viewMode = view.value;
 }
 
-// =========================
+// ============================================================
 // EVENT LISTENERS
-// =========================
+// ============================================================
 function attachEventListeners() {
 
+    // Save settings
     document.getElementById("save-settings").addEventListener("click", () => {
         readSettingsFromUI();
         showConfirmation("Save changes?", () => {
@@ -138,6 +147,7 @@ function attachEventListeners() {
         });
     });
 
+    // Reset to defaults
     document.getElementById("reset-settings").addEventListener("click", () => {
         showConfirmation("Reset all settings to default?", () => {
             settings = { ...DEFAULT_SETTINGS };
@@ -146,12 +156,14 @@ function attachEventListeners() {
         });
     });
 
+    // Dark mode live toggle
     document.getElementById("dark-mode").addEventListener("change", e => {
         applyDarkMode(e.target.checked);
         settings.darkMode = e.target.checked;
         saveSettings();
     });
 
+    // Change master password
     document.getElementById("change-password-btn").addEventListener("click", async () => {
         const current  = document.getElementById("change-password").value.trim();
         const newPwd   = document.getElementById("confirm-password").value.trim();
@@ -159,63 +171,70 @@ function attachEventListeners() {
 
         if (!current || !newPwd) {
             statusEl.textContent = "Fill in both fields";
-            statusEl.style.color = "#c0392b";
-            return;
-        }
-        if (current === newPwd) {
-            statusEl.textContent = "New password must be different from current";
-            statusEl.style.color = "#c0392b";
+            statusEl.style.color = "#e74c3c";
             return;
         }
 
-        statusEl.textContent = "Changing...";
+        if (current === newPwd) {
+            statusEl.textContent = "New password must differ from current";
+            statusEl.style.color = "#e74c3c";
+            return;
+        }
+
+        statusEl.textContent = "Changing…";
         statusEl.style.color = "var(--subtext)";
 
         const result = await changeMasterPassword(current, newPwd);
 
         if (result.ok) {
-            statusEl.textContent = result.warning || "✓ Password changed successfully";
-            statusEl.style.color = result.warning ? "#e67e22" : "#2e7d32";
-            document.getElementById("change-password").value = "";
+            statusEl.textContent = result.warning || "Password changed successfully";
+            statusEl.style.color = result.warning ? "#e67e22" : "#2ecc71";
+            document.getElementById("change-password").value  = "";
             document.getElementById("confirm-password").value = "";
         } else {
-            statusEl.textContent = "✗ " + result.error;
-            statusEl.style.color = "#c0392b";
+            statusEl.textContent = result.error;
+            statusEl.style.color = "#e74c3c";
         }
     });
 
+    // Logout
     document.getElementById("logout-btn").addEventListener("click", logout);
 
+    // Push to Gist
     const pushBtn = document.getElementById("push-btn");
     if (pushBtn) {
         pushBtn.addEventListener("click", async () => {
             saveSyncConfig();
-            setSyncStatus("Pushing...", "var(--subtext)");
+            setSyncStatus("Pushing…", "var(--subtext)");
             const result = await pushToGist();
             setSyncStatus(
-                result.ok ? "✓ Pushed successfully" : `✗ ${result.error}`,
-                result.ok ? "#2e7d32" : "#c0392b"
+                result.ok ? "Pushed successfully" : result.error,
+                result.ok ? "#2ecc71" : "#e74c3c"
             );
         });
     }
 
+    // Pull from Gist
     const pullBtn = document.getElementById("pull-btn");
     if (pullBtn) {
         pullBtn.addEventListener("click", async () => {
             saveSyncConfig();
-            setSyncStatus("Pulling...", "var(--subtext)");
+            setSyncStatus("Pulling…", "var(--subtext)");
             const result = await pullFromGist();
             setSyncStatus(
-                result.ok ? (result.reauth ? "✓ Pulled — please log in again" : "✓ Pulled successfully") : `✗ ${result.error}`,
-                result.ok ? "#2e7d32" : "#c0392b"
+                result.ok
+                    ? (result.reauth ? "Pulled — please log in again" : "Pulled successfully")
+                    : result.error,
+                result.ok ? "#2ecc71" : "#e74c3c"
             );
         });
     }
 }
 
-// =========================
+// ============================================================
 // SEGMENTED CONTROLS
-// =========================
+// Moves the sliding indicator to match the checked radio
+// ============================================================
 function initSegmentedControls2() {
     const control = document.querySelector(".segmented-control-2");
     if (!control) return;
@@ -244,9 +263,9 @@ function initSegmentedControls3() {
     });
 }
 
-// =========================
+// ============================================================
 // CONFIRMATION MODAL
-// =========================
+// ============================================================
 function showConfirmation(message, onConfirm) {
     const overlay   = document.getElementById("confirmation-overlay");
     const messageEl = document.getElementById("confirm-message");
