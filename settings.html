@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVault — Settings</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -18,7 +19,7 @@
     <nav class="menu">
         <a href="vault.html">Vault</a>
         <a href="add-entry.html">Add Entry</a>
-        <a href="settings.html">Settings</a>
+        <a href="settings.html" class="active">Settings</a>
         <a href="login.html" id="logout-btn">Logout</a>
     </nav>
 </header>
@@ -27,105 +28,103 @@
     <div class="settings-container">
 
         <!-- Account & Security -->
-        <h2 class="settings-title">Account & Security</h2>
-        <div class="settings-section">
+        <div class="settings-group">
+            <div class="settings-title">Account & Security</div>
+            <div class="settings-section">
 
-            <div class="setting-item">
-                <label for="change-password">Current Password</label>
-                <input type="password" id="change-password" placeholder="Enter current password">
+                <div class="setting-item">
+                    <label for="change-password">Current password</label>
+                    <input type="password" id="change-password" placeholder="Enter current password" autocomplete="current-password">
+                </div>
+
+                <div class="setting-item">
+                    <label for="confirm-password">New password</label>
+                    <input type="password" id="confirm-password" placeholder="Enter new password" autocomplete="new-password">
+                </div>
+
+                <div class="setting-item no-divider">
+                    <button class="btn-black" id="change-password-btn" style="width:auto; align-self:flex-start; padding: 8px 18px;">Change password</button>
+                    <div id="password-change-status" class="setting-item-status"></div>
+                </div>
+
             </div>
-
-            <div class="setting-item">
-                <label for="confirm-password">New Password</label>
-                <input type="password" id="confirm-password" placeholder="Enter new password">
-            </div>
-
-            <div class="setting-item">
-                <button class="btn-black" id="change-password-btn">Change Password</button>
-                <div id="password-change-status" style="font-size:0.8rem; margin-top:6px; min-height:1.2em;"></div>
-            </div>
-
-            <div class="setting-item toggle-field">
-                <span>Auto-Lock Vault</span>
-                <label class="switch">
-                    <input type="checkbox" id="auto-lock">
-                    <span class="slider"></span>
-                </label>
-            </div>
-
         </div>
 
         <!-- Appearance -->
-        <h2 class="settings-title">Appearance</h2>
-        <div class="settings-section">
+        <div class="settings-group">
+            <div class="settings-title">Appearance</div>
+            <div class="settings-section">
 
-            <div class="setting-item toggle-field">
-                <span>Dark Mode</span>
-                <label class="switch">
-                    <input type="checkbox" id="dark-mode">
-                    <span class="slider"></span>
-                </label>
-            </div>
-
-            <div class="setting-item">
-                <label>Vault View</label>
-                <div class="segmented-control-3">
-                    <input type="radio" name="vault-view" id="view-grid" value="grid" checked>
-                    <label for="view-grid">Grid</label>
-
-                    <input type="radio" name="vault-view" id="view-list" value="list">
-                    <label for="view-list">List</label>
-
-                    <input type="radio" name="vault-view" id="view-gallery" value="gallery">
-                    <label for="view-gallery">Gallery</label>
-
-                    <div class="segmented-slider-3"></div>
+                <div class="setting-item toggle-field">
+                    <span>Dark mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-mode">
+                        <span class="slider"></span>
+                    </label>
                 </div>
-            </div>
 
+                <div class="setting-item">
+                    <label>Vault view</label>
+                    <div class="segmented-control-3">
+                        <input type="radio" name="vault-view" id="view-grid" value="grid" checked>
+                        <label for="view-grid">Grid</label>
+                        <input type="radio" name="vault-view" id="view-list" value="list">
+                        <label for="view-list">List</label>
+                        <input type="radio" name="vault-view" id="view-gallery" value="gallery">
+                        <label for="view-gallery">Gallery</label>
+                        <div class="segmented-slider-3"></div>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
         <!-- Preferences -->
-        <h2 class="settings-title">Preferences</h2>
-        <div class="settings-section">
+        <div class="settings-group">
+            <div class="settings-title">Preferences</div>
+            <div class="settings-section">
 
-            <div class="setting-item">
-                <label>Default Vault Sort</label>
-                <div class="segmented-control-2">
-                    <input type="radio" name="default-sort" id="sort-name" value="name" checked>
-                    <label for="sort-name">Site Name</label>
-
-                    <input type="radio" name="default-sort" id="sort-username" value="username">
-                    <label for="sort-username">Username</label>
-
-                    <div class="segmented-slider-2"></div>
+                <div class="setting-item">
+                    <label>Default sort</label>
+                    <div class="segmented-control-2">
+                        <input type="radio" name="default-sort" id="sort-name" value="name" checked>
+                        <label for="sort-name">Site name</label>
+                        <input type="radio" name="default-sort" id="sort-username" value="username">
+                        <label for="sort-username">Username</label>
+                        <div class="segmented-slider-2"></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="setting-item toggle-field">
-                <span>Confirm Before Delete</span>
-                <label class="switch">
-                    <input type="checkbox" id="confirm-delete">
-                    <span class="slider"></span>
-                </label>
-            </div>
+                <div class="setting-item toggle-field">
+                    <span>Confirm before delete</span>
+                    <label class="switch">
+                        <input type="checkbox" id="confirm-delete" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
 
+                <div class="setting-item toggle-field">
+                    <span>Auto-lock vault</span>
+                    <label class="switch">
+                        <input type="checkbox" id="auto-lock">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+            </div>
         </div>
 
         <!-- Sync -->
-        <h2 class="settings-title">Sync</h2>
-        <div class="settings-section">
-            <div class="settings-card">
+        <div class="settings-group">
+            <div class="settings-title">Sync</div>
+            <div class="settings-section">
 
                 <div class="setting-item">
                     <div class="info-wrap">
-                        <label for="github-token">GitHub Personal Access Token</label>
+                        <label for="github-token">GitHub personal access token</label>
                         <div style="position:relative;">
-                            <button class="info-btn" id="pat-info-btn">
-                                <i class="fa-solid fa-circle-info"></i>
-                            </button>
+                            <button class="info-btn" id="pat-info-btn"><i class="fa-solid fa-circle-info"></i></button>
                             <div class="tooltip" id="pat-tooltip">
-                                A token that lets the app access your Gist.
                                 Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a>
                                 → Generate new token (classic) → tick <strong>gist</strong> scope only.
                             </div>
@@ -138,34 +137,32 @@
                     <div class="info-wrap">
                         <label for="gist-id">Gist ID</label>
                         <div style="position:relative;">
-                            <button class="info-btn" id="gist-info-btn">
-                                <i class="fa-solid fa-circle-info"></i>
-                            </button>
+                            <button class="info-btn" id="gist-info-btn"><i class="fa-solid fa-circle-info"></i></button>
                             <div class="tooltip" id="gist-tooltip">
-                                The ID from your Gist URL. Go to
-                                <a href="https://gist.github.com" target="_blank">gist.github.com</a>,
-                                create a secret Gist with a file called <strong>vault.json</strong>,
-                                then copy the ID from the URL.
+                                Create a secret Gist at <a href="https://gist.github.com" target="_blank">gist.github.com</a>
+                                with a file called <strong>vault.json</strong>, then copy the ID from the URL.
                             </div>
                         </div>
                     </div>
                     <input type="text" id="gist-id" placeholder="e.g. 4b2c8f1a9d3e7f0c2a1b">
                 </div>
 
-                <div class="setting-item" style="flex-direction:row; gap:0.75rem;">
-                    <button class="btn-black" id="push-btn" style="flex:1">Push to Gist</button>
-                    <button class="btn-white" id="pull-btn" style="flex:1">Pull from Gist</button>
+                <div class="sync-buttons">
+                    <button class="btn-black" id="push-btn">Push to Gist</button>
+                    <button class="btn-white" id="pull-btn">Pull from Gist</button>
                 </div>
 
-                <div id="sync-status" style="font-size:0.8rem; color:var(--subtext); min-height:1.2em;"></div>
+                <div class="setting-item no-divider" style="padding-top:0;">
+                    <div id="sync-status" class="setting-item-status"></div>
+                </div>
 
             </div>
         </div>
 
-        <!-- Actions -->
+        <!-- Save / Reset -->
         <div class="settings-actions">
-            <button id="save-settings" class="btn-black">Save Settings</button>
-            <button id="reset-settings" class="btn-white">Reset Defaults</button>
+            <button id="save-settings" class="btn-black">Save settings</button>
+            <button id="reset-settings" class="btn-white">Reset defaults</button>
         </div>
 
     </div>
@@ -176,8 +173,8 @@
     <div class="confirmation-modal">
         <p id="confirm-message">Are you sure?</p>
         <div class="confirmation-buttons">
-            <button id="confirm-yes" class="btn-black">Confirm</button>
-            <button id="confirm-no" class="btn-white">Cancel</button>
+            <button id="confirm-yes" class="btn-white">Confirm</button>
+            <button id="confirm-no" class="btn-black">Cancel</button>
         </div>
     </div>
 </div>
