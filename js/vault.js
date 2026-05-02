@@ -280,10 +280,16 @@ function openCard(entry, index) {
 expandedCard.addEventListener("click", e => {
     if (e.target === expandedCard) {
         haptic(4);
-        expandedCard.style.display = "none";
-        exitEditMode();
+        closeCard();
     }
 });
+
+function closeCard() {
+    expandedCard.style.display      = "none";
+    editBtn.style.display           = "inline-flex";
+    saveCancelWrapper.style.display = "none";
+    currentIndex = null;
+}
 
 // ============================================================
 // EDIT MODE
@@ -340,8 +346,26 @@ cancelBtn.addEventListener("click", () => { haptic(4); exitEditMode(); });
 function exitEditMode() {
     if (currentIndex === null) return;
     const e = vault[currentIndex];
-    openCard(e, currentIndex);
-    expandedCard.style.display = "flex";
+    // Restore read-only view without closing the card
+    editBtn.style.display           = "inline-flex";
+    saveCancelWrapper.style.display = "none";
+
+    const urlField = document.getElementById("url-field");
+    if (e.url) {
+        expandedUrl.innerHTML = "";
+        const safeUrl = /^https?:\/\//i.test(e.url) ? e.url : "#";
+        const a = document.createElement("a");
+        a.href = safeUrl; a.target = "_blank"; a.rel = "noopener noreferrer";
+        a.textContent = e.url;
+        expandedUrl.appendChild(a);
+        urlField.style.display = "";
+    } else {
+        urlField.style.display = "none";
+    }
+
+    expandedUsername.textContent = e.username || "—";
+    expandedPassword.textContent = passwordVisible ? e.password : "••••••••";
+    expandedNotes.textContent    = e.notes || "No notes";
 }
 
 // ============================================================
