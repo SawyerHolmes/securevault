@@ -1,17 +1,17 @@
-// =========================
-// AUTH UTILITIES
+// ============================================================
+// AUTH.JS — SecureVault
 // Shared across vault.js, settings.js, add-entry.js
-// =========================
+// ============================================================
 
-const SESSION_TIMEOUT  = 5 * 60 * 1000; // 5 minutes
+const SESSION_TIMEOUT    = 5 * 60 * 1000; // 5 minutes
 const MAX_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_DURATION   = 30 * 1000; // 30 seconds
+const LOCKOUT_DURATION   = 30 * 1000;     // 30 seconds
 
-// =========================
+// ============================================================
 // AUTH GUARD
-// =========================
+// Called at the top of every protected page
+// ============================================================
 function checkAuth() {
-    // Use sessionStorage for auth state — clears on tab/browser close
     const isAuth   = sessionStorage.getItem("authenticated") === "true";
     const vaultKey = sessionStorage.getItem("vaultKey");
 
@@ -29,9 +29,10 @@ function checkAuth() {
     updateActivity();
 }
 
-// =========================
+// ============================================================
 // ACTIVITY TRACKING
-// =========================
+// Resets the session timeout on any user interaction
+// ============================================================
 function updateActivity() {
     sessionStorage.setItem("lastActive", Date.now());
 }
@@ -49,9 +50,9 @@ function startActivityTracking() {
     }, 30000);
 }
 
-// =========================
+// ============================================================
 // BRUTE FORCE PROTECTION
-// =========================
+// ============================================================
 function getLoginAttempts() {
     return parseInt(localStorage.getItem("loginAttempts") || "0", 10);
 }
@@ -64,7 +65,6 @@ function isLockedOut() {
     const lockoutUntil = getLockoutTime();
     if (!lockoutUntil) return false;
     if (Date.now() < lockoutUntil) return true;
-    // Lockout expired — clear it
     localStorage.removeItem("lockoutUntil");
     localStorage.removeItem("loginAttempts");
     return false;
@@ -74,8 +74,7 @@ function recordFailedAttempt() {
     const attempts = getLoginAttempts() + 1;
     localStorage.setItem("loginAttempts", attempts);
     if (attempts >= MAX_LOGIN_ATTEMPTS) {
-        const lockoutUntil = Date.now() + LOCKOUT_DURATION;
-        localStorage.setItem("lockoutUntil", lockoutUntil);
+        localStorage.setItem("lockoutUntil", Date.now() + LOCKOUT_DURATION);
         localStorage.setItem("loginAttempts", "0");
         return { locked: true, seconds: LOCKOUT_DURATION / 1000 };
     }
@@ -87,9 +86,9 @@ function clearLoginAttempts() {
     localStorage.removeItem("lockoutUntil");
 }
 
-// =========================
+// ============================================================
 // LOGOUT
-// =========================
+// ============================================================
 function logout() {
     sessionStorage.removeItem("authenticated");
     sessionStorage.removeItem("vaultKey");
@@ -97,13 +96,14 @@ function logout() {
     window.location.replace("login.html");
 }
 
-// =========================
+// ============================================================
 // CHANGE MASTER PASSWORD
-// =========================
+// Verifies current password, derives new key, re-encrypts vault
+// ============================================================
 async function changeMasterPassword(currentPassword, newPassword) {
-    const currentKey = deriveKey(currentPassword);
+    const currentKey     = deriveKey(currentPassword);
     const encryptedVault = localStorage.getItem("vault");
-    let vaultData = [];
+    let vaultData        = [];
 
     if (encryptedVault) {
         try {
@@ -117,7 +117,6 @@ async function changeMasterPassword(currentPassword, newPassword) {
     localStorage.removeItem("vaultSalt");
     const newKey = loginAndStoreKey(newPassword);
 
-    // Re-encrypt vault with new key
     localStorage.setItem("vault", encryptData(vaultData, newKey));
     sessionStorage.setItem("authenticated", "true");
 
