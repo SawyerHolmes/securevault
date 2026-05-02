@@ -10,79 +10,96 @@
 <body>
 
 <header>
-  <div class="logo">SecureVault</div>
-  <nav class="menu">
-    <a href="vault.html">Vault</a>
-    <a href="add-entry.html">Add Entry</a>
-    <a href="settings.html">Settings</a>
-    <a href="login.html" id="logout-btn">Logout</a>
-  </nav>
+    <div class="logo">SecureVault</div>
+    <nav class="menu">
+        <a href="vault.html">Vault</a>
+        <a href="add-entry.html">Add Entry</a>
+        <a href="settings.html">Settings</a>
+        <a href="login.html" id="logout-btn">Logout</a>
+    </nav>
 </header>
 
 <main>
     <div class="add-entry-container">
+
         <h2 class="add-entry-title">Add New Entry</h2>
 
         <div class="field">
             <label for="entry-name">Name</label>
-            <input type="text" id="entry-name" placeholder="Gmail Account">
+            <input type="text" id="entry-name" placeholder="Gmail Account" autocomplete="off">
         </div>
 
         <div class="field">
             <label for="entry-url">URL</label>
-            <input type="text" id="entry-url" placeholder="https://gmail.com">
+            <input type="text" id="entry-url" placeholder="https://gmail.com" autocomplete="off">
         </div>
 
         <div class="field">
             <label for="entry-username">Username</label>
-            <input type="text" id="entry-username" placeholder="example@gmail.com">
+            <input type="text" id="entry-username" placeholder="example@gmail.com" autocomplete="off">
         </div>
 
         <div class="field">
             <label for="entry-password">Password</label>
             <div class="password-wrapper">
-                <input type="password" id="entry-password" placeholder="••••••••">
-                <button id="toggle-password" class="icon-btn" title="Show/hide">
+                <input type="password" id="entry-password" placeholder="••••••••" autocomplete="new-password">
+                <button id="toggle-password" class="icon-btn" title="Show/hide password">
                     <i class="fa-solid fa-eye-slash"></i>
                 </button>
             </div>
-            <!-- Generator row -->
-            <div class="generator-row">
-                <button id="generate-btn" class="btn-white generator-btn">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
-                </button>
+
+            <!-- Strength indicator -->
+            <div class="strength-wrap">
+                <div class="strength-bar-wrap">
+                    <div class="strength-bar" id="strength-bar"></div>
+                </div>
+                <div class="strength-label" id="strength-label"></div>
+            </div>
+
+            <!-- Password generator card -->
+            <div class="generator-card">
+
+                <!-- Top row: Generate button + length slider -->
+                <div class="generator-top">
+                    <button id="generate-btn" class="btn-white generator-btn">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
+                    </button>
+                    <div class="gen-length-group">
+                        <span>Length</span>
+                        <input type="range" id="gen-length" min="8" max="64" value="20">
+                        <span class="gen-length-value" id="gen-length-label">20</span>
+                    </div>
+                </div>
+
+                <!-- Bottom row: Character type pill toggles -->
                 <div class="generator-options">
                     <label class="gen-option">
-                        <input type="checkbox" id="gen-upper" checked> A–Z
+                        <input type="checkbox" id="gen-upper" checked>
+                        A–Z
                     </label>
                     <label class="gen-option">
-                        <input type="checkbox" id="gen-numbers" checked> 0–9
+                        <input type="checkbox" id="gen-numbers" checked>
+                        0–9
                     </label>
                     <label class="gen-option">
-                        <input type="checkbox" id="gen-symbols" checked> !@#
-                    </label>
-                    <label class="gen-option gen-length">
-                        <input type="range" id="gen-length" min="8" max="32" value="16">
-                        <span id="gen-length-label">16</span>
+                        <input type="checkbox" id="gen-symbols" checked>
+                        !@#
                     </label>
                 </div>
+
             </div>
-            <!-- Strength indicator -->
-            <div class="strength-bar-wrap">
-                <div class="strength-bar" id="strength-bar"></div>
-            </div>
-            <div class="strength-label" id="strength-label"></div>
         </div>
 
         <div class="field">
             <label for="entry-notes">Notes</label>
-            <textarea id="entry-notes" placeholder="No notes"></textarea>
+            <textarea id="entry-notes" placeholder="Optional notes"></textarea>
         </div>
 
         <div class="add-entry-actions">
             <button class="btn-black" id="save-entry">Save</button>
             <button class="btn-white" id="cancel-entry">Cancel</button>
         </div>
+
     </div>
 </main>
 
