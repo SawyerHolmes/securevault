@@ -13,9 +13,16 @@ window.addEventListener("popstate", () => {
     window.history.pushState(null, null, window.location.href);
 });
 
-// Apply dark mode from saved settings
 const _settings = JSON.parse(localStorage.getItem("vaultSettings")) || {};
 document.body.classList.toggle("dark", _settings.darkMode);
+
+// ============================================================
+// HAPTIC FEEDBACK
+// Triggers device vibration where supported (mobile)
+// ============================================================
+function haptic(pattern) {
+    if (navigator.vibrate) navigator.vibrate(pattern);
+}
 
 // ============================================================
 // ELEMENTS
@@ -30,10 +37,142 @@ const notesInput     = document.getElementById("entry-notes");
 const toggleBtn      = document.getElementById("toggle-password");
 const toggleIcon     = toggleBtn.querySelector("i");
 const generateBtn    = document.getElementById("generate-btn");
-const genLength      = document.getElementById("gen-length");
 const genLengthLabel = document.getElementById("gen-length-label");
 const strengthBar    = document.getElementById("strength-bar");
 const strengthLabel  = document.getElementById("strength-label");
+
+// ============================================================
+// CUSTOM SLIDER
+// Pill track, discrete steps, inverted ticks on fill
+// ============================================================
+const SLIDER_MIN   = 8;
+const SLIDER_MAX   = 64;
+const SLIDER_STEPS = 14;
+
+const sliderTrack   = document.getElementById("gen-slider");
+const sliderFill    = document.getElementById("slider-fill");
+const sliderTicksBg = document.getElementById("slider-ticks-bg");
+const sliderTicksFg = document.getElementById("slider-ticks-fg");
+const sliderThumb   = document.getElementById("slider-thumb");
+
+let sliderValue = 20;
+let isDragging  = false;
+
+// Build evenly spaced snap values
+function buildSnapValues() {
+    const vals = [];
+    for (let i = 0; i <= SLIDER_STEPS; i++) {
+        vals.push(Math.round(SLIDER_MIN + (SLIDER_MAX - SLIDER_MIN) * i / SLIDER_STEPS));
+    }
+    return vals;
+}
+
+const snapValues = buildSnapValues();
+
+function nearestSnap(val) {
+    return snapValues.reduce((a, b) =>
+        Math.abs(b - val) < Math.abs(a - val) ? b : a
+    );
+}
+
+function valueToPct(val) {
+    return (val - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
+}
+
+function buildTicks() {
+    let bgHtml = "", fgHtml = "";
+    snapValues.forEach(v => {
+        const x = valueToPct(v) * 100;
+        const tick = `<div class="slider-tick" style="left:${x}%"></div>`;
+        bgHtml += tick;
+        fgHtml += tick;
+    });
+    sliderTicksBg.innerHTML = bgHtml;
+    // Preserve the fill overlay inside fg
+    sliderTicksFg.innerHTML =
+        `<div style="position:absolute;inset:0;background:var(--text);border-radius:999px;z-index:0;"></div>` +
+        fgHtml.replace(/class="slider-tick"/g, `class="slider-tick" style="left:REPLACE%;z-index:1;"`);
+
+    // Rebuild properly since template above was lazy — redo correctly
+    sliderTicksFg.innerHTML = `<div style="position:absolute;inset:0;background:var(--text);border-radius:999px;"></div>`;
+    snapValues.forEach(v => {
+        const x = valueToPct(v) * 100;
+        const d = document.createElement("div");
+        d.className = "slider-tick";
+        d.style.left = x + "%";
+        sliderTicksFg.appendChild(d);
+    });
+}
+
+function renderSlider() {
+    const p = valueToPct(sliderValue) * 100;
+    sliderFill.style.width    = p + "%";
+    sliderThumb.style.left    = p + "%";
+    sliderTicksFg.style.width = p + "%";
+    genLengthLabel.textContent = sliderValue;
+}
+
+function setSliderValue(val) {
+    const snapped = nearestSnap(Math.max(SLIDER_MIN, Math.min(SLIDER_MAX, val)));
+    if (snapped !== sliderValue) {
+        haptic(4); // tick feedback on each step change
+    }
+    sliderValue = snapped;
+    renderSlider();
+}
+
+function valFromClientX(clientX) {
+    const rect  = sliderTrack.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    return nearestSnap(SLIDER_MIN + (SLIDER_MAX - SLIDER_MIN) * ratio);
+}
+
+// Mouse events
+sliderThumb.addEventListener("mousedown", e => {
+    isDragging = true;
+    sliderThumb.style.cursor = "grabbing";
+    e.preventDefault();
+});
+
+document.addEventListener("mousemove", e => {
+    if (!isDragging) return;
+    setSliderValue(valFromClientX(e.clientX));
+});
+
+document.addEventListener("mouseup", () => {
+    if (!isDragging) return;
+    isDragging = false;
+    sliderThumb.style.cursor = "grab";
+    haptic([6, 20, 6]); // release feedback
+});
+
+// Touch events
+sliderThumb.addEventListener("touchstart", e => {
+    isDragging = true;
+    e.preventDefault();
+}, { passive: false });
+
+document.addEventListener("touchmove", e => {
+    if (!isDragging) return;
+    setSliderValue(valFromClientX(e.touches[0].clientX));
+}, { passive: false });
+
+document.addEventListener("touchend", () => {
+    if (!isDragging) return;
+    isDragging = false;
+    haptic([6, 20, 6]);
+});
+
+// Click on track (not thumb)
+sliderTrack.addEventListener("click", e => {
+    if (e.target === sliderThumb) return;
+    setSliderValue(valFromClientX(e.clientX));
+    haptic(8);
+});
+
+// Init slider
+setTimeout(() => { buildTicks(); renderSlider(); }, 0);
+window.addEventListener("resize", () => { buildTicks(); renderSlider(); });
 
 // ============================================================
 // TOGGLE PASSWORD VISIBILITY
@@ -42,20 +181,17 @@ toggleBtn.addEventListener("click", () => {
     const isVisible      = passwordInput.type === "text";
     passwordInput.type   = isVisible ? "password" : "text";
     toggleIcon.className = isVisible ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+    haptic(6);
 });
 
 // ============================================================
 // PASSWORD GENERATOR
 // ============================================================
-genLength.addEventListener("input", () => {
-    genLengthLabel.textContent = genLength.value;
-});
-
 generateBtn.addEventListener("click", () => {
     const upper   = document.getElementById("gen-upper").checked;
     const numbers = document.getElementById("gen-numbers").checked;
     const symbols = document.getElementById("gen-symbols").checked;
-    const length  = parseInt(genLength.value, 10);
+    const length  = sliderValue;
 
     let chars = "abcdefghijklmnopqrstuvwxyz";
     if (upper)   chars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -67,7 +203,7 @@ generateBtn.addEventListener("click", () => {
         return;
     }
 
-    // Use crypto.getRandomValues for cryptographically secure randomness
+    // crypto.getRandomValues for cryptographically secure randomness
     const array    = new Uint32Array(length);
     crypto.getRandomValues(array);
     const password = Array.from(array).map(n => chars[n % chars.length]).join("");
@@ -76,6 +212,13 @@ generateBtn.addEventListener("click", () => {
     passwordInput.type   = "text";
     toggleIcon.className = "fa-solid fa-eye";
     checkStrength(password);
+
+    haptic([10, 30, 10]); // generate feedback
+});
+
+// Haptic on pill toggle clicks
+document.querySelectorAll(".gen-option").forEach(el => {
+    el.addEventListener("click", () => haptic(6));
 });
 
 // ============================================================
@@ -120,6 +263,7 @@ saveBtn.addEventListener("click", () => {
 
     if (!name || !username || !password) {
         alert("Name, username, and password are required.");
+        haptic([20, 40, 20]); // error feedback
         return;
     }
 
@@ -135,6 +279,8 @@ saveBtn.addEventListener("click", () => {
 
     vault.push({ name, url, username, password, notes });
     localStorage.setItem("vault", encryptData(vault, key));
+
+    haptic([10, 20, 30]); // success feedback
     window.location.href = "vault.html";
 });
 
@@ -142,6 +288,7 @@ saveBtn.addEventListener("click", () => {
 // CANCEL
 // ============================================================
 cancelBtn.addEventListener("click", () => {
+    haptic(6);
     window.location.href = "vault.html";
 });
 
