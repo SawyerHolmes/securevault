@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Entry — SecureVault</title>
+    <title>SecureVault — Add Entry</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -13,7 +13,7 @@
     <div class="logo">SecureVault</div>
     <nav class="menu">
         <a href="vault.html">Vault</a>
-        <a href="add-entry.html">Add Entry</a>
+        <a href="add-entry.html" class="active">Add Entry</a>
         <a href="settings.html">Settings</a>
         <a href="login.html" id="logout-btn">Logout</a>
     </nav>
@@ -22,11 +22,11 @@
 <main>
     <div class="add-entry-container">
 
-        <h2 class="add-entry-title">Add New Entry</h2>
+        <h1 class="add-entry-title">Add entry</h1>
 
         <div class="field">
             <label for="entry-name">Name</label>
-            <input type="text" id="entry-name" placeholder="Gmail Account" autocomplete="off">
+            <input type="text" id="entry-name" placeholder="Gmail" autocomplete="off">
         </div>
 
         <div class="field">
@@ -43,7 +43,7 @@
             <label for="entry-password">Password</label>
             <div class="password-wrapper">
                 <input type="password" id="entry-password" placeholder="••••••••" autocomplete="new-password">
-                <button id="toggle-password" class="icon-btn" title="Show/hide password">
+                <button id="toggle-password" class="icon-btn" title="Show/hide">
                     <i class="fa-solid fa-eye-slash"></i>
                 </button>
             </div>
@@ -56,34 +56,38 @@
                 <div class="strength-label" id="strength-label"></div>
             </div>
 
-            <!-- Password generator card -->
+            <!-- Generator card -->
             <div class="generator-card">
 
-                <!-- Top row: Generate button + length slider -->
                 <div class="generator-top">
                     <button id="generate-btn" class="btn-white generator-btn">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
                     </button>
                     <div class="gen-length-group">
                         <span>Length</span>
-                        <input type="range" id="gen-length" min="8" max="64" value="20">
+                        <!-- Custom slider — JS builds ticks and thumb -->
+                        <div class="slider-track" id="gen-slider">
+                            <div class="slider-fill"     id="slider-fill"></div>
+                            <div class="slider-ticks-bg" id="slider-ticks-bg"></div>
+                            <div class="slider-ticks-fg" id="slider-ticks-fg">
+                                <div class="slider-fill" style="position:absolute;inset:0;background:var(--text);border-radius:999px;"></div>
+                            </div>
+                            <div class="slider-thumb" id="slider-thumb"></div>
+                        </div>
                         <span class="gen-length-value" id="gen-length-label">20</span>
                     </div>
                 </div>
 
-                <!-- Bottom row: Character type pill toggles -->
+                <!-- Character type pill toggles -->
                 <div class="generator-options">
                     <label class="gen-option">
-                        <input type="checkbox" id="gen-upper" checked>
-                        A–Z
+                        <input type="checkbox" id="gen-upper" checked> A–Z
                     </label>
                     <label class="gen-option">
-                        <input type="checkbox" id="gen-numbers" checked>
-                        0–9
+                        <input type="checkbox" id="gen-numbers" checked> 0–9
                     </label>
                     <label class="gen-option">
-                        <input type="checkbox" id="gen-symbols" checked>
-                        !@#
+                        <input type="checkbox" id="gen-symbols" checked> !@#
                     </label>
                 </div>
 
@@ -96,7 +100,7 @@
         </div>
 
         <div class="add-entry-actions">
-            <button class="btn-black" id="save-entry">Save</button>
+            <button class="btn-black" id="save-entry">Save entry</button>
             <button class="btn-white" id="cancel-entry">Cancel</button>
         </div>
 
