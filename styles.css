@@ -110,39 +110,49 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem var(--page-padding);
-    background: var(--bg);
+    padding: 0 var(--page-padding);
+    height: 52px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
+body.dark header {
+    background: rgba(17, 17, 17, 0.88);
+}
+
 header .logo {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
+    color: var(--text);
 }
 
 header .menu {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 2px;
 }
 
 header .menu a {
     text-decoration: none;
     color: var(--subtext);
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     font-weight: 500;
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: var(--radius-sm);
     transition: background var(--transition), color var(--transition);
+    white-space: nowrap;
 }
 
-header .menu a:hover        { background: var(--input); color: var(--text); }
-header .menu a.active       { color: var(--text); }
-header .menu a#logout-btn   { color: var(--subtext); }
+header .menu a:hover            { background: var(--input); color: var(--text); }
+header .menu a.active           { color: var(--text); font-weight: 600; }
+header .menu a#logout-btn       { color: var(--subtext); margin-left: 8px; }
+header .menu a#logout-btn:hover { background: none; color: var(--text); }
 
 
 /* ============================================================
@@ -1351,10 +1361,10 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     :root { --page-padding: 1rem; }
 
     header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-        padding: 0.9rem 1rem;
+        height: auto;
+        padding: 10px 1rem;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
     header .menu {
@@ -1363,11 +1373,11 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     }
 
     header .menu a {
-        font-size: 0.8rem;
-        padding: 5px 10px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius-pill);
+        font-size: 0.75rem;
+        padding: 4px 9px;
     }
+
+    header .menu a#logout-btn { margin-left: 0; }
 
     .vault-controls       { max-width: 100%; }
     .add-entry-container  { margin: 1.5rem auto; }
