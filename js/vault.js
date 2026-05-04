@@ -200,22 +200,35 @@ function renderVault(filter) {
 
         if (viewMode === "gallery") {
             card.className = "vault-gallery-card";
+
+            // Icon — tries favicon, falls back to first letter
+            const icon = document.createElement("div");
+            icon.className = "gallery-icon";
+            if (entry.url && /^https?:\/\//i.test(entry.url)) {
+                try {
+                    const domain = new URL(entry.url).hostname;
+                    const img = document.createElement("img");
+                    img.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+                    img.onerror = () => { icon.textContent = (entry.name || "?")[0].toUpperCase(); };
+                    icon.appendChild(img);
+                } catch {
+                    icon.textContent = (entry.name || "?")[0].toUpperCase();
+                }
+            } else {
+                icon.textContent = (entry.name || "?")[0].toUpperCase();
+            }
+
             const title = document.createElement("div");
             title.className   = "gallery-title";
             title.textContent = entry.name || "No title";
 
-            const details = document.createElement("div");
-            details.className = "gallery-details";
+            const sub = document.createElement("div");
+            sub.className   = "gallery-subtitle";
+            sub.textContent = entry.username || "";
 
-            [["URL", entry.url || "—"], ["Username", entry.username || ""], ["Password", "••••••••"]].forEach(([label, val]) => {
-                const p = document.createElement("p");
-                p.innerHTML = `<strong>${label}:</strong> `;
-                p.appendChild(document.createTextNode(val));
-                details.appendChild(p);
-            });
-
+            card.appendChild(icon);
             card.appendChild(title);
-            card.appendChild(details);
+            card.appendChild(sub);
         } else {
             card.className = "vault-card";
 
