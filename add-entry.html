@@ -63,18 +63,19 @@
                     <button id="generate-btn" class="btn-white generator-btn">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
                     </button>
-                    <div class="gen-length-group">
-                        <span>Length</span>
-                        <!-- Custom slider — JS builds ticks and thumb -->
-                        <div class="slider-track" id="gen-slider">
-                            <div class="slider-fill"     id="slider-fill"></div>
-                            <div class="slider-ticks-bg" id="slider-ticks-bg"></div>
-                            <div class="slider-ticks-fg" id="slider-ticks-fg">
-                                <div class="slider-fill" style="position:absolute;inset:0;background:var(--text);border-radius:999px;"></div>
-                            </div>
-                            <div class="slider-thumb" id="slider-thumb"></div>
-                        </div>
+                    <div class="gen-length-display">
                         <span class="gen-length-value" id="gen-length-label">20</span>
+                        <span class="gen-length-unit">chars</span>
+                    </div>
+                </div>
+
+                <!-- Slider — full width row -->
+                <div class="generator-slider-row">
+                    <div class="slider-track" id="gen-slider">
+                        <div class="slider-fill"     id="slider-fill"></div>
+                        <div class="slider-ticks-bg" id="slider-ticks-bg"></div>
+                        <div class="slider-ticks-fg" id="slider-ticks-fg"></div>
+                        <div class="slider-thumb"    id="slider-thumb"></div>
                     </div>
                 </div>
 
