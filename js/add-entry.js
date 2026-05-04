@@ -80,26 +80,22 @@ function valueToPct(val) {
 }
 
 function buildTicks() {
-    let bgHtml = "", fgHtml = "";
+    // Background ticks — dark marks on light track
+    sliderTicksBg.innerHTML = "";
     snapValues.forEach(v => {
-        const x = valueToPct(v) * 100;
-        const tick = `<div class="slider-tick" style="left:${x}%"></div>`;
-        bgHtml += tick;
-        fgHtml += tick;
-    });
-    sliderTicksBg.innerHTML = bgHtml;
-    // Preserve the fill overlay inside fg
-    sliderTicksFg.innerHTML =
-        `<div style="position:absolute;inset:0;background:var(--text);border-radius:999px;z-index:0;"></div>` +
-        fgHtml.replace(/class="slider-tick"/g, `class="slider-tick" style="left:REPLACE%;z-index:1;"`);
-
-    // Rebuild properly since template above was lazy — redo correctly
-    sliderTicksFg.innerHTML = `<div style="position:absolute;inset:0;background:var(--text);border-radius:999px;"></div>`;
-    snapValues.forEach(v => {
-        const x = valueToPct(v) * 100;
         const d = document.createElement("div");
-        d.className = "slider-tick";
-        d.style.left = x + "%";
+        d.className  = "slider-tick";
+        d.style.left = valueToPct(v) * 100 + "%";
+        sliderTicksBg.appendChild(d);
+    });
+
+    // Foreground ticks — light marks shown over the dark fill
+    // The fill colour comes from CSS (.slider-ticks-fg has background via sliderFill sibling)
+    sliderTicksFg.innerHTML = "";
+    snapValues.forEach(v => {
+        const d = document.createElement("div");
+        d.className  = "slider-tick";
+        d.style.left = valueToPct(v) * 100 + "%";
         sliderTicksFg.appendChild(d);
     });
 }
