@@ -57,6 +57,12 @@
     --transition:   0.15s ease;
 }
 
+html.dark {
+    background: #111111;
+    color-scheme: dark;
+}
+
+html.dark body,
 body.dark {
     --bg:           #111111;
     --card:         #1a1a1a;
@@ -720,7 +726,7 @@ textarea {
    14. ADD ENTRY PAGE
 ============================================================ */
 .add-entry-container {
-    max-width: 480px;
+    max-width: 600px;
     margin: 2.5rem auto;
     padding: 0 2rem;
     display: flex;
@@ -952,7 +958,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
    18. SETTINGS LAYOUT
 ============================================================ */
 .settings-container {
-    max-width: 480px;
+    max-width: 600px;
     margin: 2rem auto;
     padding: 0 2rem;
     display: flex;
@@ -1240,7 +1246,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
    24. LOGIN PAGE
 ============================================================ */
 .login-container {
-    max-width: 480px;
+    max-width: 600px;
     margin: 5rem auto;
     padding: 0 2rem;
     display: flex;
