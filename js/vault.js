@@ -84,6 +84,10 @@ function saveVault() {
     const key = getStoredKey();
     if (!key) { logout(); return; }
     localStorage.setItem("vault", encryptData(vault, key));
+    // Auto-push to Gist in background — silent, non-blocking
+    if (typeof pushToGist === "function") {
+        pushToGist().catch(() => {});
+    }
 }
 
 // ============================================================
