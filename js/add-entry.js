@@ -13,8 +13,10 @@ window.addEventListener("popstate", () => {
     window.history.pushState(null, null, window.location.href);
 });
 
+// Dark mode already applied to <html> via inline script in <head>
+// Ensure body class is also set for any CSS targeting body.dark
 const _settings = JSON.parse(localStorage.getItem("vaultSettings")) || {};
-document.body.classList.toggle("dark", _settings.darkMode);
+if (_settings.darkMode) document.body.classList.add("dark");
 
 // ============================================================
 // HAPTIC FEEDBACK
@@ -275,6 +277,8 @@ saveBtn.addEventListener("click", () => {
 
     vault.push({ name, url, username, password, notes });
     localStorage.setItem("vault", encryptData(vault, key));
+    // Auto-push to Gist in background
+    if (typeof pushToGist === "function") pushToGist().catch(() => {});
 
     haptic([10, 20, 30]); // success feedback
     window.location.href = "vault.html";
