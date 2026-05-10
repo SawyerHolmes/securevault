@@ -9,26 +9,27 @@
    5.  Buttons
    6.  Vault Controls
    7.  Vault Grid
-   8.  Vault List View
-   9.  Vault Gallery View
-   10. Expanded Card Modal
-   11. Fields (shared)
-   12. Modal Action Buttons
-   13. Confirmation Modal
-   14. Add Entry Page
-   15. Password Generator
-   16. Custom Range Slider
-   17. Strength Indicator
-   18. Settings Layout
-   19. Settings Section & Items
-   20. Toggle Switch
-   21. Segmented Controls
-   22. Info Tooltip
-   23. Confirmation / Save Modal
-   24. Login Page
-   25. Copy (value row, icon btn, toast)
-   26. Empty State
-   27. Mobile / Responsive
+   8.  Vault Card Copy Menu
+   9.  Vault List View
+   10. Vault Gallery View
+   11. Expanded Card Modal
+   12. Fields (shared)
+   13. Modal Action Buttons
+   14. Confirmation Modal
+   15. Add Entry Page
+   16. Password Generator
+   17. Custom Range Slider
+   18. Strength Indicator
+   19. Settings Layout
+   20. Settings Section & Items
+   21. Toggle Switch
+   22. Segmented Controls
+   23. Info Tooltip
+   24. Modal Overlay
+   25. Login Page
+   26. Copy (value row, icon btn, toast)
+   27. Empty State
+   28. Mobile / Responsive
 ============================================================ */
 
 
@@ -50,11 +51,10 @@
     --input:        #f4f4f4;
     --input-focus:  #ebebeb;
     --border:       #e5e5e5;
-    --shadow:        0 1px 4px rgba(0, 0, 0, 0.06);
-    --shadow-hover:  0 4px 16px rgba(0, 0, 0, 0.10);
-    --shadow-thumb:  0 1px 4px rgba(0, 0, 0, 0.18);
-
-    --transition:   0.15s ease;
+    --shadow:        0 1px 4px rgba(0,0,0,0.06);
+    --shadow-hover:  0 4px 16px rgba(0,0,0,0.10);
+    --shadow-thumb:  0 1px 4px rgba(0,0,0,0.18);
+    --transition:    0.15s ease;
 }
 
 html.dark {
@@ -71,9 +71,9 @@ body.dark {
     --input:        #252525;
     --input-focus:  #2e2e2e;
     --border:       #2e2e2e;
-    --shadow:        0 1px 4px rgba(0, 0, 0, 0.30);
-    --shadow-hover:  0 4px 16px rgba(0, 0, 0, 0.40);
-    --shadow-thumb:  0 1px 4px rgba(0, 0, 0, 0.50);
+    --shadow:        0 1px 4px rgba(0,0,0,0.30);
+    --shadow-hover:  0 4px 16px rgba(0,0,0,0.40);
+    --shadow-thumb:  0 1px 6px rgba(0,0,0,0.50);
 }
 
 
@@ -118,7 +118,7 @@ header {
     align-items: center;
     padding: 0 var(--page-padding);
     height: 52px;
-    background: rgba(255, 255, 255, 0.88);
+    background: rgba(255,255,255,0.88);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
@@ -127,8 +127,9 @@ header {
     z-index: 100;
 }
 
+html.dark header,
 body.dark header {
-    background: rgba(17, 17, 17, 0.88);
+    background: rgba(17,17,17,0.88);
 }
 
 header .logo {
@@ -151,14 +152,13 @@ header .menu a {
     font-weight: 500;
     padding: 5px 10px;
     border-radius: var(--radius-sm);
-    transition: background var(--transition), color var(--transition);
+    transition: color var(--transition);
     white-space: nowrap;
 }
 
-header .menu a:hover            { color: var(--text); }
-header .menu a.active           { color: var(--text); font-weight: 600; }
-header .menu a#logout-btn       { color: var(--subtext); margin-left: 8px; }
-header .menu a#logout-btn:hover { background: transparent; color: var(--text); }
+header .menu a:hover         { color: var(--text); }
+header .menu a.active        { color: var(--text); font-weight: 600; }
+header .menu a#logout-btn    { color: var(--subtext); margin-left: 8px; }
 
 
 /* ============================================================
@@ -181,35 +181,22 @@ header .menu a#logout-btn:hover { background: transparent; color: var(--text); }
     -webkit-tap-highlight-color: transparent;
 }
 
-.btn-black {
-    background: var(--text);
-    color: var(--bg);
-}
-
+.btn-black { background: var(--text); color: var(--bg); }
 .btn-black:hover  { opacity: 0.85; }
+.btn-black:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.btn-white {
-    background: var(--card);
-    color: var(--text);
-    border: 1px solid var(--border);
-}
-
+.btn-white { background: var(--card); color: var(--text); border: 1px solid var(--border); }
 .btn-white:hover  { background: var(--input); }
 
 .btn-black:active,
 .btn-white:active { transform: scale(0.97); }
-
-.btn-black:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
 
 
 /* ============================================================
    6. VAULT CONTROLS
 ============================================================ */
 .vault-controls {
-    max-width: 420px;
+    max-width: 480px;
     padding: 20px var(--page-padding) 0;
 }
 
@@ -225,6 +212,7 @@ header .menu a#logout-btn:hover { background: transparent; color: var(--text); }
     color: var(--text);
     outline: none;
     transition: border-color var(--transition);
+    font-family: inherit;
 }
 
 #search-input:focus        { border-bottom-color: var(--text); }
@@ -232,22 +220,18 @@ header .menu a#logout-btn:hover { background: transparent; color: var(--text); }
 
 .search-icon {
     position: absolute;
-    left: 4px;
-    top: 50%;
+    left: 4px; top: 50%;
     transform: translateY(-50%);
-    width: 14px;
-    height: 14px;
+    width: 14px; height: 14px;
     color: var(--subtext);
     pointer-events: none;
 }
 
 .sort-icon {
     position: absolute;
-    right: 4px;
-    top: 50%;
+    right: 4px; top: 50%;
     transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
+    width: 16px; height: 16px;
     color: var(--subtext);
     cursor: pointer;
     transition: color var(--transition);
@@ -288,8 +272,7 @@ header .menu a#logout-btn:hover { background: transparent; color: var(--text); }
 .divider { height: 1px; background: var(--border); margin: 4px 0; }
 
 .indicator {
-    width: 14px;
-    height: 14px;
+    width: 14px; height: 14px;
     border: 1.5px solid var(--border);
     border-radius: 50%;
     display: flex;
@@ -302,8 +285,7 @@ header .menu a#logout-btn:hover { background: transparent; color: var(--text); }
 .indicator.active            { border-color: var(--text); }
 .indicator.active::after {
     content: '';
-    width: 7px;
-    height: 7px;
+    width: 7px; height: 7px;
     background: var(--text);
     border-radius: 50%;
 }
@@ -334,6 +316,7 @@ body.grid-view #vault-container {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    position: relative;
     transition: box-shadow var(--transition), transform 0.1s;
     -webkit-tap-highlight-color: transparent;
 }
@@ -346,6 +329,7 @@ body.grid-view #vault-container {
     font-size: 0.95rem;
     font-weight: 600;
     letter-spacing: -0.01em;
+    padding-right: 28px; /* room for copy btn */
 }
 
 .vault-card p {
@@ -357,9 +341,80 @@ body.grid-view #vault-container {
     text-overflow: ellipsis;
 }
 
+/* Strength dot on card */
+.card-strength-dot {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: none;
+}
+
+.vault-card.has-strength .card-strength-dot { display: block; }
 
 /* ============================================================
-   8. VAULT LIST VIEW
+   8. VAULT CARD COPY MENU
+============================================================ */
+.card-copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--subtext);
+    padding: 4px;
+    font-size: 0.8rem;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition), background var(--transition);
+    z-index: 2;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1;
+}
+
+.card-copy-btn:hover { color: var(--text); background: var(--input); }
+
+.card-copy-menu {
+    position: absolute;
+    top: 32px;
+    right: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-hover);
+    padding: 4px 0;
+    z-index: 200;
+    min-width: 140px;
+    display: none;
+    flex-direction: column;
+}
+
+.card-copy-menu.open { display: flex; }
+
+.card-copy-menu button {
+    background: none;
+    border: none;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: background var(--transition);
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-copy-menu button:hover { background: var(--input); }
+.card-copy-menu button i      { color: var(--subtext); font-size: 0.75rem; width: 12px; }
+
+
+/* ============================================================
+   9. VAULT LIST VIEW
 ============================================================ */
 .vault-container.list-view {
     display: flex;
@@ -380,8 +435,15 @@ body.grid-view #vault-container {
     border-bottom: 1px solid var(--border);
 }
 
-.vault-list-table th       { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--subtext); }
-.vault-list-table tr:hover { background: var(--input); cursor: pointer; }
+.vault-list-table th {
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--subtext);
+}
+
+.vault-list-table tr:hover  { background: var(--input); cursor: pointer; }
 
 .vault-list-table th:nth-child(1), .vault-list-table td:nth-child(1) { width: 25%; }
 .vault-list-table th:nth-child(2), .vault-list-table td:nth-child(2) { width: 30%; }
@@ -390,13 +452,12 @@ body.grid-view #vault-container {
 
 
 /* ============================================================
-   9. VAULT GALLERY VIEW
+   10. VAULT GALLERY VIEW — Apple Finder style
 ============================================================ */
-/* Gallery view — Apple Finder style icon grid */
 body.gallery-view #vault-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 6px;
     padding: 20px var(--page-padding);
     align-items: start;
 }
@@ -405,8 +466,8 @@ body.gallery-view #vault-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 16px 8px 12px;
+    gap: 7px;
+    padding: 14px 8px 10px;
     border-radius: var(--radius-md);
     cursor: pointer;
     background: transparent;
@@ -414,33 +475,25 @@ body.gallery-view #vault-container {
     transition: background var(--transition), border-color var(--transition);
     -webkit-tap-highlight-color: transparent;
     text-align: center;
+    position: relative;
 }
 
-.vault-gallery-card:hover {
-    background: var(--input);
-}
+.vault-gallery-card:hover  { background: var(--input); }
+.vault-gallery-card:active { background: var(--input-focus); }
 
-.vault-gallery-card.selected,
-.vault-gallery-card:active {
-    background: var(--input-focus);
-    border-color: var(--border);
-}
-
-/* Site icon / avatar */
 .gallery-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     background: var(--input-focus);
     border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--text);
     flex-shrink: 0;
-    letter-spacing: -0.02em;
     overflow: hidden;
 }
 
@@ -448,11 +501,11 @@ body.gallery-view #vault-container {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 14px;
+    border-radius: 12px;
 }
 
 .gallery-title {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 500;
     color: var(--text);
     white-space: nowrap;
@@ -463,18 +516,17 @@ body.gallery-view #vault-container {
 }
 
 .gallery-subtitle {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     color: var(--subtext);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
-    display: none;
 }
 
 
 /* ============================================================
-   10. EXPANDED CARD MODAL
+   11. EXPANDED CARD MODAL
 ============================================================ */
 .expanded-card {
     position: fixed;
@@ -482,7 +534,7 @@ body.gallery-view #vault-container {
     display: none;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0,0,0,0.5);
     z-index: 1000;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -492,13 +544,13 @@ body.gallery-view #vault-container {
     position: relative;
     background: var(--card);
     width: 90%;
-    max-width: 420px;
+    max-width: 440px;
     border-radius: var(--radius-lg);
     padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
 }
 
 .expanded-header {
@@ -543,9 +595,15 @@ body.gallery-view #vault-container {
 
 .url-value a:hover { border-bottom-color: var(--text); }
 
+.expanded-meta {
+    font-size: 0.72rem;
+    color: var(--subtext);
+    margin-top: -6px;
+}
+
 
 /* ============================================================
-   11. FIELDS (SHARED)
+   12. FIELDS (SHARED)
 ============================================================ */
 .field {
     display: flex;
@@ -586,8 +644,7 @@ body.gallery-view #vault-container {
 
 #toggle-password {
     position: absolute;
-    right: 8px;
-    top: 50%;
+    right: 8px; top: 50%;
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -639,7 +696,7 @@ textarea {
 
 
 /* ============================================================
-   12. MODAL ACTION BUTTONS
+   13. MODAL ACTION BUTTONS
 ============================================================ */
 .icon-btn {
     background: none;
@@ -662,11 +719,17 @@ textarea {
     font-weight: 600;
     cursor: pointer;
     margin-top: 4px;
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    transition: opacity var(--transition);
 }
+
+#remove-btn:hover { opacity: 0.85; }
 
 
 /* ============================================================
-   13. CONFIRMATION MODAL
+   14. CONFIRMATION MODAL
 ============================================================ */
 .confirmation-overlay {
     position: fixed;
@@ -674,7 +737,7 @@ textarea {
     display: none;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0,0,0,0.5);
     z-index: 2000;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -682,14 +745,14 @@ textarea {
 
 .confirmation-modal {
     background: var(--card);
-    max-width: 340px;
+    max-width: 360px;
     width: 90%;
     padding: 24px;
     border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
     gap: 18px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
 }
 
 .confirmation-modal p,
@@ -700,7 +763,7 @@ textarea {
     color: var(--text);
 }
 
-.confirmation-buttons { display: flex; gap: 10px; }
+.confirmation-buttons        { display: flex; gap: 10px; }
 
 .confirmation-buttons button {
     flex: 1;
@@ -717,13 +780,12 @@ textarea {
 
 #confirm-no        { background: var(--text); color: var(--bg); }
 #confirm-no:hover  { opacity: 0.85; }
-
 #confirm-yes       { background: var(--input); color: var(--text); border: 1px solid var(--border) !important; }
 #confirm-yes:hover { background: var(--input-focus); }
 
 
 /* ============================================================
-   14. ADD ENTRY PAGE
+   15. ADD ENTRY PAGE
 ============================================================ */
 .add-entry-container {
     max-width: 600px;
@@ -741,13 +803,13 @@ textarea {
     margin: 0;
 }
 
-.add-entry-actions          { display: flex; gap: 10px; }
+.add-entry-actions            { display: flex; gap: 10px; }
 .add-entry-actions .btn-black,
 .add-entry-actions .btn-white { flex: 1; }
 
 
 /* ============================================================
-   15. PASSWORD GENERATOR
+   16. PASSWORD GENERATOR
 ============================================================ */
 .generator-card {
     background: var(--input);
@@ -755,7 +817,7 @@ textarea {
     padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     margin-top: 4px;
 }
 
@@ -764,7 +826,6 @@ textarea {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    flex-wrap: nowrap;
 }
 
 .generator-btn {
@@ -795,9 +856,7 @@ textarea {
     font-weight: 500;
 }
 
-.generator-slider-row {
-    width: 100%;
-}
+.generator-slider-row { width: 100%; }
 
 .generator-options {
     display: flex;
@@ -805,7 +864,6 @@ textarea {
     flex-wrap: wrap;
 }
 
-/* Pill toggles for character types */
 .gen-option {
     display: flex;
     align-items: center;
@@ -833,8 +891,7 @@ textarea {
 
 
 /* ============================================================
-   16. CUSTOM RANGE SLIDER
-   Pill track, discrete snapping, inverted ticks on fill
+   17. CUSTOM RANGE SLIDER
 ============================================================ */
 .slider-track {
     position: relative;
@@ -844,21 +901,18 @@ textarea {
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    border: 1px solid var(--border);
 }
 
 .slider-fill {
     position: absolute;
-    left: 0;
-    top: 0;
+    left: 0; top: 0;
     height: 100%;
     border-radius: var(--radius-pill);
     background: var(--text);
     pointer-events: none;
-    transition: width 0.15s ease;
+    transition: width 0.12s ease;
 }
 
-/* Background tick marks (dark on light track) */
 .slider-ticks-bg {
     position: absolute;
     inset: 0;
@@ -867,25 +921,16 @@ textarea {
     pointer-events: none;
 }
 
-/* Foreground tick marks (light on dark fill).
-   Background colour provided by ::before so ticks sit above it. */
+/* Fg layer — solid fill colour only, no ticks */
 .slider-ticks-fg {
     position: absolute;
-    left: 0;
-    top: 0;
+    left: 0; top: 0;
     height: 100%;
     border-radius: var(--radius-pill);
     overflow: hidden;
     pointer-events: none;
-    transition: width 0.15s ease;
-}
-
-.slider-ticks-fg::before {
-    content: "";
-    position: absolute;
-    inset: 0;
+    transition: width 0.12s ease;
     background: var(--text);
-    border-radius: var(--radius-pill);
 }
 
 .slider-tick {
@@ -895,18 +940,15 @@ textarea {
     height: 60%;
     border-radius: 1px;
     transform: translateX(-50%);
+    background: rgba(0,0,0,0.13);
 }
 
-.slider-ticks-bg .slider-tick { background: rgba(0, 0, 0, 0.12); }
-.slider-ticks-fg .slider-tick { background: rgba(255, 255, 255, 0.45); }
-
-body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10); }
+body.dark .slider-tick { background: rgba(255,255,255,0.12); }
 
 .slider-thumb {
     position: absolute;
     top: 50%;
-    width: 22px;
-    height: 22px;
+    width: 22px; height: 22px;
     border-radius: 50%;
     background: var(--card);
     border: 1px solid var(--border);
@@ -914,15 +956,15 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     cursor: grab;
     box-shadow: var(--shadow-thumb);
     z-index: 2;
-    transition: left 0.15s ease, box-shadow var(--transition);
+    transition: left 0.12s ease, box-shadow var(--transition);
     -webkit-tap-highlight-color: transparent;
 }
 
-.slider-thumb:active { cursor: grabbing; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); }
+.slider-thumb:active { cursor: grabbing; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
 
 
 /* ============================================================
-   17. STRENGTH INDICATOR
+   18. STRENGTH INDICATOR
 ============================================================ */
 .strength-wrap {
     display: flex;
@@ -955,7 +997,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
 
 
 /* ============================================================
-   18. SETTINGS LAYOUT
+   19. SETTINGS LAYOUT
 ============================================================ */
 .settings-container {
     max-width: 600px;
@@ -973,7 +1015,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
 }
 
 .settings-title {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -987,7 +1029,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
 
 
 /* ============================================================
-   19. SETTINGS SECTION & ITEMS
+   20. SETTINGS SECTION & ITEMS
 ============================================================ */
 .settings-section {
     background: var(--card);
@@ -1004,11 +1046,11 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     border-bottom: 1px solid var(--border);
 }
 
-.setting-item:last-child    { border-bottom: none; }
-.setting-item.no-divider    { border-bottom: none; }
+.setting-item:last-child { border-bottom: none; }
+.setting-item.no-divider { border-bottom: none; }
 
 .setting-item label {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -1039,7 +1081,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
 }
 
 .toggle-field span {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     color: var(--text);
     font-weight: 500;
 }
@@ -1050,24 +1092,18 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     color: var(--subtext);
 }
 
-.sync-buttons {
-    display: flex;
-    gap: 8px;
-    padding: 1rem 1.25rem;
-}
-
+.sync-buttons              { display: flex; gap: 8px; padding: 1rem 1.25rem; }
 .sync-buttons .btn-black,
-.sync-buttons .btn-white { flex: 1; }
+.sync-buttons .btn-white   { flex: 1; }
 
 
 /* ============================================================
-   20. TOGGLE SWITCH
+   21. TOGGLE SWITCH
 ============================================================ */
 .switch {
     position: relative;
     display: inline-block;
-    width: 40px;
-    height: 22px;
+    width: 40px; height: 22px;
     flex-shrink: 0;
 }
 
@@ -1085,10 +1121,8 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
 .slider::before {
     content: "";
     position: absolute;
-    height: 16px;
-    width: 16px;
-    left: 3px;
-    top: 3px;
+    height: 16px; width: 16px;
+    left: 3px; top: 3px;
     background: var(--card);
     border-radius: 50%;
     transition: transform 0.25s;
@@ -1099,7 +1133,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
 
 
 /* ============================================================
-   21. SEGMENTED CONTROLS
+   22. SEGMENTED CONTROLS
 ============================================================ */
 .segmented-control-2,
 .segmented-control-3 {
@@ -1109,7 +1143,6 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     overflow: hidden;
     background: var(--input);
     padding: 3px;
-    gap: 0;
 }
 
 .segmented-control-2 label,
@@ -1126,8 +1159,8 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     -webkit-tap-highlight-color: transparent;
 }
 
-.segmented-control-2 input[type="radio"]:checked + label,
-.segmented-control-3 input[type="radio"]:checked + label { color: var(--text); }
+.segmented-control-2 input[type="radio"]:checked ~ label,
+.segmented-control-3 input[type="radio"]:checked ~ label { color: var(--text); }
 
 .segmented-control-2 input[type="radio"],
 .segmented-control-3 input[type="radio"] { display: none; }
@@ -1140,6 +1173,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     border-radius: calc(var(--radius-sm) - 1px);
     box-shadow: var(--shadow);
     transition: transform 0.25s ease;
+    pointer-events: none;
 }
 
 .segmented-slider-3 {
@@ -1150,11 +1184,12 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     border-radius: calc(var(--radius-sm) - 1px);
     box-shadow: var(--shadow);
     transition: transform 0.25s ease;
+    pointer-events: none;
 }
 
 
 /* ============================================================
-   22. INFO TOOLTIP
+   23. INFO TOOLTIP
 ============================================================ */
 .info-wrap { display: flex; align-items: center; gap: 6px; }
 
@@ -1190,17 +1225,17 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     display: none;
 }
 
-.tooltip a       { color: var(--text); text-decoration: underline; }
-.tooltip.show    { display: block; }
+.tooltip a    { color: var(--text); text-decoration: underline; }
+.tooltip.show { display: block; }
 
 
 /* ============================================================
-   23. CONFIRMATION / SAVE MODAL
+   24. MODAL OVERLAY (shared)
 ============================================================ */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0,0,0,0.5);
     display: none;
     justify-content: center;
     align-items: center;
@@ -1217,13 +1252,13 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     display: flex;
     flex-direction: column;
     gap: 14px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
 }
 
-.modal-box h3     { margin: 0; font-size: 1rem; font-weight: 700; }
-.modal-box p      { margin: 0; font-size: 0.875rem; line-height: 1.5; color: var(--subtext); }
+.modal-box h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+.modal-box p  { margin: 0; font-size: 0.875rem; line-height: 1.5; color: var(--subtext); }
 
-.modal-actions    { display: flex; justify-content: flex-end; gap: 8px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 .modal-actions button {
     padding: 0.55rem 1rem;
@@ -1234,16 +1269,17 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     cursor: pointer;
     width: auto;
     transition: opacity var(--transition);
+    font-family: inherit;
 }
 
-.cancel-btn        { background: var(--input); color: var(--text); border: 1px solid var(--border) !important; }
-.cancel-btn:hover  { background: var(--input-focus); }
-.confirm-btn       { background: var(--text); color: var(--bg); }
-.confirm-btn:hover { opacity: 0.8; }
+.cancel-btn       { background: var(--input); color: var(--text); border: 1px solid var(--border) !important; }
+.cancel-btn:hover { background: var(--input-focus); }
+.confirm-btn      { background: var(--text); color: var(--bg); }
+.confirm-btn:hover{ opacity: 0.8; }
 
 
 /* ============================================================
-   24. LOGIN PAGE
+   25. LOGIN PAGE
 ============================================================ */
 .login-container {
     max-width: 600px;
@@ -1254,7 +1290,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     gap: 1rem;
 }
 
-.login-title    { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; margin: 0 0 0.25rem; }
+.login-title    { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; margin: 0; }
 .login-subtitle { font-size: 0.875rem; color: var(--subtext); margin: 0 0 0.5rem; }
 
 .login-container label {
@@ -1286,8 +1322,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
 .login-container .toggle-password,
 .login-container #toggle-password {
     position: absolute;
-    right: 10px;
-    top: 50%;
+    right: 10px; top: 50%;
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -1311,6 +1346,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     border: none;
     cursor: pointer;
     width: 100%;
+    font-family: inherit;
     transition: opacity var(--transition);
     margin-top: 0.25rem;
 }
@@ -1328,6 +1364,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     padding: 0;
     width: auto;
     text-align: left;
+    font-family: inherit;
     transition: color var(--transition);
 }
 
@@ -1343,7 +1380,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
 
 
 /* ============================================================
-   25. COPY — VALUE ROW, ICON BUTTON, TOAST
+   26. COPY — VALUE ROW, ICON BUTTON, TOAST
 ============================================================ */
 .value-row {
     display: flex;
@@ -1393,7 +1430,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
 
 
 /* ============================================================
-   26. EMPTY STATE
+   27. EMPTY STATE
 ============================================================ */
 .empty-state {
     grid-column: 1 / -1;
@@ -1406,9 +1443,9 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
     color: var(--subtext);
 }
 
-.empty-icon         { font-size: 2rem; color: var(--border); }
-.empty-state h2     { margin: 0; font-size: 1rem; font-weight: 600; color: var(--text); }
-.empty-state p      { margin: 0; font-size: 0.85rem; }
+.empty-icon     { font-size: 2rem; color: var(--border); }
+.empty-state h2 { margin: 0; font-size: 1rem; font-weight: 600; color: var(--text); }
+.empty-state p  { margin: 0; font-size: 0.85rem; }
 
 .empty-add-btn {
     margin-top: 8px;
@@ -1430,7 +1467,7 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
 
 
 /* ============================================================
-   27. MOBILE / RESPONSIVE
+   28. MOBILE / RESPONSIVE
 ============================================================ */
 @media (max-width: 600px) {
     :root { --page-padding: 1rem; }
@@ -1442,23 +1479,16 @@ body.dark .slider-ticks-bg .slider-tick { background: rgba(255, 255, 255, 0.10);
         gap: 8px;
     }
 
-    header .menu {
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-
-    header .menu a {
-        font-size: 0.75rem;
-        padding: 4px 9px;
-    }
-
+    header .menu { flex-wrap: wrap; gap: 4px; }
+    header .menu a { font-size: 0.75rem; padding: 4px 9px; }
     header .menu a#logout-btn { margin-left: 0; }
 
-    .vault-controls       { max-width: 100%; }
-    .add-entry-container  { margin: 1.5rem auto; }
-    .settings-container   { padding: 0 1rem; }
-    .login-container      { margin: 2.5rem auto; }
+    .vault-controls      { max-width: 100%; }
+    .add-entry-container { margin: 1.5rem auto; padding: 0 1rem; }
+    .settings-container  { padding: 0 1rem; }
+    .login-container     { margin: 2.5rem auto; padding: 0 1rem; }
 
-    .generator-top        { flex-wrap: wrap; }
-
+    body.gallery-view #vault-container {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
 }
