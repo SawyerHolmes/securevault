@@ -60,29 +60,53 @@ function logout() {
 
 // ============================================================
 // CHANGE MASTER PASSWORD
-// Verifies current password, derives new key, re-encrypts vault
+// Atomic-ish: decrypt with old key, build all new ciphertexts in
+// memory, then write salt + vault + sync token + session key
+// together so a mid-operation failure can't brick the vault.
 // ============================================================
 async function changeMasterPassword(currentPassword, newPassword) {
-    const currentKey     = deriveKey(currentPassword);
+    // 1) Verify with current key
+    const currentKey     = await deriveKey(currentPassword);
     const encryptedVault = localStorage.getItem("vault");
     let vaultData        = [];
 
     if (encryptedVault) {
         try {
-            vaultData = decryptData(encryptedVault, currentKey);
+            vaultData = await decryptData(encryptedVault, currentKey);
         } catch {
             return { ok: false, error: "Current password is incorrect" };
         }
     }
 
-    // Generate new salt and derive new key
-    localStorage.removeItem("vaultSalt");
-    const newKey = loginAndStoreKey(newPassword);
+    // 2) Decrypt the sync token (if any) with the OLD key
+    const rawCfg = JSON.parse(localStorage.getItem("syncConfig") || "{}");
+    const gistId = rawCfg.gistId || "";
+    let plainToken = "";
+    if (rawCfg.encryptedToken) {
+        try   { plainToken = await decryptData(rawCfg.encryptedToken, currentKey); }
+        catch { plainToken = ""; }
+    }
 
-    localStorage.setItem("vault", encryptData(vaultData, newKey));
+    // 3) Build all new ciphertexts under a fresh salt + key
+    const newSaltBytes  = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
+    const newSaltB64    = bytesToBase64(newSaltBytes);
+    const newKey        = await deriveKeyFromSalt(newPassword, newSaltBytes);
+    const newVaultBlob  = await encryptData(vaultData, newKey);
+    const newTokenBlob  = plainToken ? await encryptData(plainToken, newKey) : null;
+    const newKeyRaw     = await crypto.subtle.exportKey("raw", newKey);
+    const newSyncCfg    = newTokenBlob
+        ? { gistId, encryptedToken: newTokenBlob }
+        : (gistId ? { gistId } : null);
+
+    // 4) Commit — only after every new value is in hand
+    localStorage.setItem("vaultSalt", newSaltB64);
+    localStorage.setItem("vault",     newVaultBlob);
+    if (newSyncCfg) localStorage.setItem("syncConfig", JSON.stringify(newSyncCfg));
+    sessionStorage.setItem("vaultKey",      bytesToBase64(new Uint8Array(newKeyRaw)));
     sessionStorage.setItem("authenticated", "true");
 
-    if (typeof syncConfigured === "function" && syncConfigured()) {
+    // 5) Best-effort sync push
+    if (typeof syncConfigured === "function" && await syncConfigured()) {
         const result = await pushToGist();
         if (!result.ok) {
             return { ok: true, warning: "Password changed locally but Gist push failed: " + result.error };

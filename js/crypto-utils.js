@@ -1,71 +1,137 @@
 // ============================================================
 // CRYPTO-UTILS.JS — SecureVault
-// AES-256 encryption via CryptoJS + PBKDF2 key derivation
+// PBKDF2-HMAC-SHA-256 (600k iter) + AES-GCM, via WebCrypto.
+// All exports are async — callers must await.
 // ============================================================
 
-const PBKDF2_ITERATIONS = 100000;
-const KEY_SIZE          = 256 / 32;
+const PBKDF2_ITERATIONS = 600000;
+const KEY_BITS          = 256;
+const SALT_BYTES        = 16;
+const IV_BYTES          = 12; // 96-bit IV is the recommended size for GCM
+
+// ============================================================
+// ENCODING HELPERS
+// ============================================================
+function bytesToBase64(bytes) {
+    let s = "";
+    for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s);
+}
+
+function base64ToBytes(str) {
+    const s = atob(str);
+    const out = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+    return out;
+}
 
 // ============================================================
 // SALT
-// Created once per device/vault, stored in localStorage
+// 16 random bytes, base64-encoded, persisted per device/vault
 // ============================================================
 function getOrCreateSalt() {
     let salt = localStorage.getItem("vaultSalt");
     if (!salt) {
-        salt = CryptoJS.lib.WordArray.random(16).toString();
+        const bytes = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
+        salt = bytesToBase64(bytes);
         localStorage.setItem("vaultSalt", salt);
     }
-    return salt;
+    return base64ToBytes(salt);
 }
 
 // ============================================================
 // KEY DERIVATION
-// PBKDF2 with 100,000 iterations — slow enough to resist brute force
 // ============================================================
-function deriveKey(password) {
-    const salt = getOrCreateSalt();
-    return CryptoJS.PBKDF2(password, salt, {
-        keySize:    KEY_SIZE,
-        iterations: PBKDF2_ITERATIONS
-    });
+async function deriveKeyFromSalt(password, saltBytes) {
+    const baseKey = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(password),
+        "PBKDF2",
+        false,
+        ["deriveKey"]
+    );
+    return crypto.subtle.deriveKey(
+        {
+            name:       "PBKDF2",
+            salt:       saltBytes,
+            iterations: PBKDF2_ITERATIONS,
+            hash:       "SHA-256"
+        },
+        baseKey,
+        { name: "AES-GCM", length: KEY_BITS },
+        true, // extractable — needed to persist the key across page navigations
+        ["encrypt", "decrypt"]
+    );
 }
 
-function loginAndStoreKey(password) {
-    const key = deriveKey(password);
-    sessionStorage.setItem("vaultKey", key.toString());
+async function deriveKey(password) {
+    return deriveKeyFromSalt(password, getOrCreateSalt());
+}
+
+async function loginAndStoreKey(password) {
+    const key = await deriveKey(password);
+    const raw = await crypto.subtle.exportKey("raw", key);
+    sessionStorage.setItem("vaultKey", bytesToBase64(new Uint8Array(raw)));
     return key;
 }
 
-function getStoredKey() {
+async function getStoredKey() {
     const keyStr = sessionStorage.getItem("vaultKey");
     if (!keyStr) return null;
-    return CryptoJS.enc.Hex.parse(keyStr);
+    return crypto.subtle.importKey(
+        "raw",
+        base64ToBytes(keyStr),
+        { name: "AES-GCM", length: KEY_BITS },
+        false,
+        ["encrypt", "decrypt"]
+    );
 }
 
 // ============================================================
-// ENCRYPT
-// Generates a random IV per encryption, prepends as hex: "ivHex:ciphertext"
+// ENCRYPT / DECRYPT
+// Format: base64(iv12) + ":" + base64(ciphertext||authTag)
 // ============================================================
-function encryptData(data, key) {
-    const iv        = CryptoJS.lib.WordArray.random(16);
-    const encrypted = CryptoJS.AES.encrypt(JSON.stringify(data), key, { iv });
-    return iv.toString() + ":" + encrypted.toString();
+async function encryptData(data, key) {
+    const iv         = crypto.getRandomValues(new Uint8Array(IV_BYTES));
+    const plaintext  = new TextEncoder().encode(JSON.stringify(data));
+    const ciphertext = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv },
+        key,
+        plaintext
+    );
+    return bytesToBase64(iv) + ":" + bytesToBase64(new Uint8Array(ciphertext));
 }
 
-// ============================================================
-// DECRYPT
-// Splits IV from ciphertext, decrypts, parses JSON
-// ============================================================
-function decryptData(encrypted, key) {
+async function decryptData(encrypted, key) {
     const parts = encrypted.split(":");
-    if (parts.length < 2) throw new Error("Invalid encrypted format");
+    if (parts.length !== 2) throw new Error("Invalid encrypted format");
+    const iv         = base64ToBytes(parts[0]);
+    const ciphertext = base64ToBytes(parts[1]);
+    try {
+        const plaintext = await crypto.subtle.decrypt(
+            { name: "AES-GCM", iv },
+            key,
+            ciphertext
+        );
+        return JSON.parse(new TextDecoder().decode(plaintext));
+    } catch {
+        throw new Error("Decryption failed — wrong key or corrupt data");
+    }
+}
 
-    const iv         = CryptoJS.enc.Hex.parse(parts[0]);
-    const ciphertext = parts.slice(1).join(":");
-    const bytes      = CryptoJS.AES.decrypt(ciphertext, key, { iv });
-    const text       = bytes.toString(CryptoJS.enc.Utf8);
-
-    if (!text) throw new Error("Decryption failed — wrong key or corrupt data");
-    return JSON.parse(text);
+// ============================================================
+// SECURE PASSWORD GENERATOR
+// Rejection sampling to avoid modulo bias from non-power-of-2 alphabets
+// ============================================================
+function generatePassword(length, chars) {
+    if (length <= 0) return "";
+    if (!chars.length) throw new Error("Empty character set");
+    const max = Math.floor(0xFFFFFFFF / chars.length) * chars.length;
+    const buf = new Uint32Array(1);
+    let out   = "";
+    while (out.length < length) {
+        crypto.getRandomValues(buf);
+        if (buf[0] < max) out += chars[buf[0] % chars.length];
+    }
+    return out;
 }

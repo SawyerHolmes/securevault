@@ -1,19 +1,44 @@
 // ============================================================
 // SYNC.JS — GitHub Gist sync
+// The PAT is encrypted with the vault key before being persisted.
 // ============================================================
 
 const GIST_FILENAME = "vault.json";
 
 // ============================================================
 // CONFIG
+// Stored shape: { gistId, encryptedToken? }
+// In-memory shape returned to callers: { token, gistId }
 // ============================================================
-function getSyncConfig() {
-    const cfg = JSON.parse(localStorage.getItem("syncConfig")) || {};
-    return { token: cfg.token || "", gistId: cfg.gistId || "" };
+function readRawSyncConfig() {
+    return JSON.parse(localStorage.getItem("syncConfig") || "{}");
 }
 
-function syncConfigured() {
-    const { token, gistId } = getSyncConfig();
+async function getSyncConfig() {
+    const cfg = readRawSyncConfig();
+    let token = "";
+    if (cfg.encryptedToken) {
+        const key = await getStoredKey();
+        if (key) {
+            try   { token = await decryptData(cfg.encryptedToken, key); }
+            catch { token = ""; }
+        }
+    }
+    return { token, gistId: cfg.gistId || "" };
+}
+
+async function writeSyncConfig(token, gistId) {
+    const out = { gistId };
+    if (token) {
+        const key = await getStoredKey();
+        if (!key) throw new Error("Not logged in");
+        out.encryptedToken = await encryptData(token, key);
+    }
+    localStorage.setItem("syncConfig", JSON.stringify(out));
+}
+
+async function syncConfigured() {
+    const { token, gistId } = await getSyncConfig();
     return token.length > 0 && gistId.length > 0;
 }
 
@@ -21,9 +46,9 @@ function syncConfigured() {
 // PUSH — local vault → Gist
 // ============================================================
 async function pushToGist() {
-    if (!syncConfigured()) return { ok: false, error: "Sync not configured" };
+    const { token, gistId } = await getSyncConfig();
+    if (!token || !gistId) return { ok: false, error: "Sync not configured" };
 
-    const { token, gistId } = getSyncConfig();
     const vaultData = localStorage.getItem("vault") || "";
     const salt      = localStorage.getItem("vaultSalt") || "";
     const payload   = JSON.stringify({ vault: vaultData, salt, updatedAt: Date.now() });
@@ -52,9 +77,8 @@ async function pushToGist() {
 // and the user must re-authenticate.
 // ============================================================
 async function pullFromGist() {
-    if (!syncConfigured()) return { ok: false, error: "Sync not configured" };
-
-    const { token, gistId } = getSyncConfig();
+    const { token, gistId } = await getSyncConfig();
+    if (!token || !gistId) return { ok: false, error: "Sync not configured" };
 
     try {
         const res = await fetch(`https://api.github.com/gists/${gistId}`, {
@@ -85,19 +109,19 @@ async function pullFromGist() {
         }
 
         // Same salt — decrypt both sides and merge
-        const key = getStoredKey();
+        const key = await getStoredKey();
         if (!key) return { ok: false, error: "Not logged in" };
 
         let remoteEntries = [];
         let localEntries  = [];
 
         if (remoteEncrypted) {
-            try   { remoteEntries = decryptData(remoteEncrypted, key); }
+            try   { remoteEntries = await decryptData(remoteEncrypted, key); }
             catch { remoteEntries = []; }
         }
 
         if (localVault) {
-            try   { localEntries = decryptData(localVault, key); }
+            try   { localEntries = await decryptData(localVault, key); }
             catch { localEntries = []; }
         }
 
@@ -110,7 +134,7 @@ async function pullFromGist() {
             if (!exists) merged.push(local);
         }
 
-        localStorage.setItem("vault", encryptData(merged, key));
+        localStorage.setItem("vault", await encryptData(merged, key));
         return { ok: true, reauth: false };
 
     } catch (e) {

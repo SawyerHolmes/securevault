@@ -196,15 +196,7 @@ generateBtn.addEventListener("click", () => {
     if (numbers) chars += "0123456789";
     if (symbols) chars += "!@#$%^&*()_+-=[]{}|;:,.<>?";
 
-    if (!chars.length) {
-        alert("Select at least one character type.");
-        return;
-    }
-
-    // crypto.getRandomValues for cryptographically secure randomness
-    const array    = new Uint32Array(length);
-    crypto.getRandomValues(array);
-    const password = Array.from(array).map(n => chars[n % chars.length]).join("");
+    const password = generatePassword(length, chars);
 
     passwordInput.value  = password;
     passwordInput.type   = "text";
@@ -252,11 +244,11 @@ passwordInput.addEventListener("input", () => checkStrength(passwordInput.value)
 // ============================================================
 // SAVE ENTRY
 // ============================================================
-saveBtn.addEventListener("click", () => {
+saveBtn.addEventListener("click", async () => {
     const name     = nameInput.value.trim();
     const url      = urlInput.value.trim();
     const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
+    const password = passwordInput.value;
     const notes    = notesInput.value.trim();
 
     if (!name || !username || !password) {
@@ -265,18 +257,18 @@ saveBtn.addEventListener("click", () => {
         return;
     }
 
-    const key = getStoredKey();
+    const key = await getStoredKey();
     if (!key) { window.location.replace("login.html"); return; }
 
     let vault = [];
     const encrypted = localStorage.getItem("vault");
     if (encrypted) {
-        try   { vault = decryptData(encrypted, key); }
+        try   { vault = await decryptData(encrypted, key); }
         catch { vault = []; }
     }
 
-    vault.push({ name, url, username, password, notes });
-    localStorage.setItem("vault", encryptData(vault, key));
+    vault.push({ name, url, username, password, notes, createdAt: Date.now() });
+    localStorage.setItem("vault", await encryptData(vault, key));
     // Auto-push to Gist in background
     if (typeof pushToGist === "function") pushToGist().catch(() => {});
 

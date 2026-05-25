@@ -29,9 +29,9 @@ let settings = { ...DEFAULT_SETTINGS };
 // ============================================================
 // INIT
 // ============================================================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     loadSettings();
-    applySettingsToUI();
+    await applySettingsToUI();
     attachEventListeners();
     initSegmentedControls2();
     initSegmentedControls3();
@@ -65,7 +65,7 @@ function saveSettings() {
 // APPLY TO UI
 // Sets all controls to reflect current saved settings
 // ============================================================
-function applySettingsToUI() {
+async function applySettingsToUI() {
     document.getElementById("auto-lock").checked      = settings.autoLock;
     document.getElementById("dark-mode").checked      = settings.darkMode;
     document.getElementById("confirm-delete").checked = settings.confirmDelete;
@@ -80,7 +80,7 @@ function applySettingsToUI() {
     applyDarkMode(settings.darkMode);
     applyViewMode(settings.viewMode);
 
-    const cfg = getSyncConfig();
+    const cfg = await getSyncConfig();
     document.getElementById("github-token").value = cfg.token;
     document.getElementById("gist-id").value      = cfg.gistId;
 
@@ -92,10 +92,10 @@ function applySettingsToUI() {
 // ============================================================
 // SYNC CONFIG
 // ============================================================
-function saveSyncConfig() {
+async function saveSyncConfig() {
     const token  = document.getElementById("github-token").value.trim();
     const gistId = document.getElementById("gist-id").value.trim();
-    localStorage.setItem("syncConfig", JSON.stringify({ token, gistId }));
+    await writeSyncConfig(token, gistId);
 }
 
 function setSyncStatus(msg, color) {
@@ -139,9 +139,13 @@ function attachEventListeners() {
     // Save settings
     document.getElementById("save-settings").addEventListener("click", () => {
         readSettingsFromUI();
-        showConfirmation("Save changes?", () => {
+        showConfirmation("Save changes?", async () => {
             saveSettings();
-            saveSyncConfig();
+            try {
+                await saveSyncConfig();
+            } catch (e) {
+                setSyncStatus("Could not save token: " + e.message, "#e74c3c");
+            }
             applyDarkMode(settings.darkMode);
             applyViewMode(settings.viewMode);
         });
@@ -149,10 +153,10 @@ function attachEventListeners() {
 
     // Reset to defaults
     document.getElementById("reset-settings").addEventListener("click", () => {
-        showConfirmation("Reset all settings to default?", () => {
+        showConfirmation("Reset all settings to default?", async () => {
             settings = { ...DEFAULT_SETTINGS };
             saveSettings();
-            applySettingsToUI();
+            await applySettingsToUI();
         });
     });
 
@@ -204,7 +208,8 @@ function attachEventListeners() {
     const pushBtn = document.getElementById("push-btn");
     if (pushBtn) {
         pushBtn.addEventListener("click", async () => {
-            saveSyncConfig();
+            try { await saveSyncConfig(); }
+            catch (e) { setSyncStatus(e.message, "#e74c3c"); return; }
             setSyncStatus("Pushing…", "var(--subtext)");
             const result = await pushToGist();
             setSyncStatus(
@@ -218,7 +223,8 @@ function attachEventListeners() {
     const pullBtn = document.getElementById("pull-btn");
     if (pullBtn) {
         pullBtn.addEventListener("click", async () => {
-            saveSyncConfig();
+            try { await saveSyncConfig(); }
+            catch (e) { setSyncStatus(e.message, "#e74c3c"); return; }
             setSyncStatus("Pulling…", "var(--subtext)");
             const result = await pullFromGist();
             setSyncStatus(

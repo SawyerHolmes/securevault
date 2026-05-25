@@ -66,25 +66,25 @@ const confirmNo         = document.getElementById("confirm-no");
 // ============================================================
 // LOAD / SAVE VAULT
 // ============================================================
-function loadVault() {
-    const key = getStoredKey();
+async function loadVault() {
+    const key = await getStoredKey();
     if (!key) { logout(); return; }
 
     const encrypted = localStorage.getItem("vault");
     if (!encrypted) { vault = []; return; }
 
     try {
-        vault = decryptData(encrypted, key);
+        vault = await decryptData(encrypted, key);
     } catch {
         sessionStorage.clear();
         window.location.replace("login.html");
     }
 }
 
-function saveVault() {
-    const key = getStoredKey();
+async function saveVault() {
+    const key = await getStoredKey();
     if (!key) { logout(); return; }
-    localStorage.setItem("vault", encryptData(vault, key));
+    localStorage.setItem("vault", await encryptData(vault, key));
     if (typeof pushToGist === "function") pushToGist().catch(() => {});
 }
 
@@ -594,8 +594,7 @@ document.getElementById("logout-btn").addEventListener("click", async e => {
 // IMPORT / EXPORT
 // ============================================================
 function exportVault(format) {
-    const key = getStoredKey();
-    if (!key) return;
+    if (!sessionStorage.getItem("vaultKey")) return;
 
     if (format === "encrypted") {
         // Export raw encrypted blob — only restoreable with master password + same salt
@@ -650,8 +649,7 @@ function importFromFile(file) {
             } else if (file.name.endsWith(".csv")) {
                 // Plain CSV import
                 const lines   = text.split("\n").slice(1); // skip header
-                const key     = getStoredKey();
-                if (!key) return;
+                if (!sessionStorage.getItem("vaultKey")) return;
                 const imported = [];
                 lines.forEach(line => {
                     if (!line.trim()) return;
@@ -698,8 +696,10 @@ document.addEventListener("DOMContentLoaded", () => {
 // ============================================================
 // INIT
 // ============================================================
-loadVault();
-applyDarkMode();
-applyViewMode(settings.viewMode || "grid");
-sortField = settings.defaultSort || "name";
-renderVault();
+(async () => {
+    await loadVault();
+    applyDarkMode();
+    applyViewMode(settings.viewMode || "grid");
+    sortField = settings.defaultSort || "name";
+    renderVault();
+})();

@@ -111,10 +111,18 @@ function clearError() {
 async function autoSyncOnLogin(key) {
     try {
         const cfg = JSON.parse(localStorage.getItem("syncConfig")) || {};
-        if (!cfg.token || !cfg.gistId) return;
+        if (!cfg.gistId) return;
+
+        // PAT is stored encrypted with the vault key — decrypt before use
+        let token = "";
+        if (cfg.encryptedToken) {
+            try   { token = await decryptData(cfg.encryptedToken, key); }
+            catch { return; }
+        }
+        if (!token) return;
 
         const res = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
-            headers: { "Authorization": `Bearer ${cfg.token}` }
+            headers: { "Authorization": `Bearer ${token}` }
         });
         if (!res.ok) return;
 
@@ -138,11 +146,11 @@ async function autoSyncOnLogin(key) {
         let localEntries  = [];
 
         if (remoteEncrypted) {
-            try   { remoteEntries = decryptData(remoteEncrypted, key); }
+            try   { remoteEntries = await decryptData(remoteEncrypted, key); }
             catch { remoteEntries = []; }
         }
         if (localVault) {
-            try   { localEntries = decryptData(localVault, key); }
+            try   { localEntries = await decryptData(localVault, key); }
             catch { localEntries = []; }
         }
 
@@ -154,7 +162,7 @@ async function autoSyncOnLogin(key) {
             if (!exists) merged.push(local);
         }
 
-        localStorage.setItem("vault", encryptData(merged, key));
+        localStorage.setItem("vault", await encryptData(merged, key));
     } catch {
         // Sync failure is silent — don't block login
     }
@@ -174,13 +182,13 @@ loginBtn.addEventListener("click", async () => {
     loginBtn.disabled      = true;
     loginBtn.textContent   = "Unlocking…";
 
-    const key = loginAndStoreKey(password);
+    const key = await loginAndStoreKey(password);
 
     // Verify password against existing vault
     const encryptedVault = localStorage.getItem("vault");
     if (encryptedVault) {
         try {
-            decryptData(encryptedVault, key);
+            await decryptData(encryptedVault, key);
         } catch {
             sessionStorage.removeItem("vaultKey");
             recordFailedAttempt();
