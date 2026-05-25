@@ -2,8 +2,9 @@
 // LOGIN.JS — SecureVault
 // ============================================================
 
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_TIME = 30 * 1000; // 30 seconds
+const MAX_ATTEMPTS    = 5;
+const BASE_LOCKOUT_MS  = 30 * 1000;    // first lockout: 30s
+const MAX_LOCKOUT_MS   = 60 * 60 * 1000; // cap: 1 hour
 
 // ============================================================
 // DARK MODE
@@ -24,25 +25,47 @@ if (sessionStorage.getItem("authenticated") === "true" && sessionStorage.getItem
 // ============================================================
 // ELEMENTS
 // ============================================================
-const loginBtn      = document.getElementById("login-btn");
-const passwordInput = document.getElementById("master-password");
-const loginError    = document.getElementById("login-error");
-const toggleBtn     = document.getElementById("toggle-password");
-const toggleIcon    = toggleBtn.querySelector("i");
+const loginBtn          = document.getElementById("login-btn");
+const passwordInput     = document.getElementById("master-password");
+const confirmInput      = document.getElementById("confirm-master-password");
+const confirmField      = document.getElementById("confirm-password-field");
+const loginError        = document.getElementById("login-error");
+const toggleBtn         = document.getElementById("toggle-password");
+const toggleIcon        = toggleBtn.querySelector("i");
+
+// ============================================================
+// FIRST-TIME SETUP DETECTION
+// If there's no existing vault, force a confirm-password step
+// ============================================================
+const isFirstTime = !localStorage.getItem("vault");
+if (isFirstTime) {
+    confirmField.style.display = "";
+    loginBtn.textContent       = "Create vault";
+    passwordInput.autocomplete = "new-password";
+}
 
 // ============================================================
 // LOCKOUT HELPERS
+// During a brute-force run, each 5-attempt cycle escalates the
+// lockout window: 30s, 1m, 2m, 4m, 8m, 16m, 32m, then capped at 1h.
+// A successful login clears the level so legitimate users start fresh.
 // ============================================================
 function getLockoutState() {
-    const attempts = parseInt(localStorage.getItem("loginAttempts") || "0", 10);
-    const lockedAt = parseInt(localStorage.getItem("lockedAt")      || "0", 10);
-    return { attempts, lockedAt };
+    const attempts     = parseInt(localStorage.getItem("loginAttempts") || "0", 10);
+    const lockedAt     = parseInt(localStorage.getItem("lockedAt")      || "0", 10);
+    const lockoutLevel = parseInt(localStorage.getItem("lockoutLevel")  || "0", 10);
+    return { attempts, lockedAt, lockoutLevel };
+}
+
+function currentLockoutMs(level) {
+    return Math.min(BASE_LOCKOUT_MS * Math.pow(2, level), MAX_LOCKOUT_MS);
 }
 
 function isLockedOut() {
-    const { attempts, lockedAt } = getLockoutState();
+    const { attempts, lockedAt, lockoutLevel } = getLockoutState();
     if (attempts >= MAX_ATTEMPTS) {
-        const remaining = LOCKOUT_TIME - (Date.now() - lockedAt);
+        const window    = currentLockoutMs(lockoutLevel);
+        const remaining = window - (Date.now() - lockedAt);
         if (remaining > 0) return Math.ceil(remaining / 1000);
         localStorage.removeItem("loginAttempts");
         localStorage.removeItem("lockedAt");
@@ -51,17 +74,21 @@ function isLockedOut() {
 }
 
 function recordFailedAttempt() {
-    const { attempts } = getLockoutState();
-    const newAttempts  = attempts + 1;
+    const { attempts, lockoutLevel } = getLockoutState();
+    const newAttempts = attempts + 1;
     localStorage.setItem("loginAttempts", newAttempts);
     if (newAttempts >= MAX_ATTEMPTS) {
-        localStorage.setItem("lockedAt", Date.now());
+        localStorage.setItem("lockedAt",     Date.now());
+        localStorage.setItem("lockoutLevel", lockoutLevel + 1);
     }
 }
 
+// Only the per-lockout attempt counter resets on successful login.
+// lockoutLevel sticks around so a long brute-force run keeps escalating.
 function resetAttempts() {
     localStorage.removeItem("loginAttempts");
     localStorage.removeItem("lockedAt");
+    localStorage.removeItem("lockoutLevel");
 }
 
 // ============================================================
@@ -175,12 +202,20 @@ loginBtn.addEventListener("click", async () => {
     const remaining = isLockedOut();
     if (remaining) return;
 
-    const password = passwordInput.value.trim();
+    const password = passwordInput.value;
     if (!password) { showError("Enter your master password"); return; }
+
+    // First-time setup: require confirm-password to match
+    if (isFirstTime) {
+        const confirm = confirmInput.value;
+        if (!confirm) { showError("Confirm your master password"); return; }
+        if (password !== confirm) { showError("Passwords don't match"); return; }
+        if (password.length < 8) { showError("Use at least 8 characters"); return; }
+    }
 
     clearError();
     loginBtn.disabled      = true;
-    loginBtn.textContent   = "Unlocking…";
+    loginBtn.textContent   = isFirstTime ? "Creating…" : "Unlocking…";
 
     const key = await loginAndStoreKey(password);
 
@@ -231,6 +266,15 @@ toggleBtn.addEventListener("click", () => {
 });
 
 passwordInput.addEventListener("keyup", e => {
+    if (e.key !== "Enter") return;
+    if (isFirstTime && !confirmInput.value) {
+        confirmInput.focus();
+    } else {
+        loginBtn.click();
+    }
+});
+
+confirmInput.addEventListener("keyup", e => {
     if (e.key === "Enter") loginBtn.click();
 });
 
@@ -261,7 +305,8 @@ resetOverlay.addEventListener("click", e => {
 resetConfirmYes.addEventListener("click", () => {
     const keysToRemove = [
         "vault", "vaultSalt", "authenticated", "lastActive",
-        "loginAttempts", "lockedAt", "vaultSettings", "syncConfig"
+        "loginAttempts", "lockedAt", "lockoutLevel",
+        "vaultSettings", "syncConfig"
     ];
     keysToRemove.forEach(k => localStorage.removeItem(k));
     sessionStorage.clear();

@@ -39,10 +39,27 @@
                     autocorrect="off"
                     autocapitalize="off"
                     spellcheck="false">
-                <button type="button" id="toggle-password" class="toggle-password" title="Show/hide password">
+                <button type="button" id="toggle-password" class="toggle-password" title="Show/hide password" aria-label="Show or hide password">
                     <i class="fa-solid fa-eye-slash"></i>
                 </button>
             </div>
+        </div>
+
+        <div id="confirm-password-field" style="display:none;">
+            <label for="confirm-master-password" style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--subtext);">Confirm Password</label>
+            <div class="password-wrapper" style="margin-top:6px;">
+                <input
+                    type="password"
+                    id="confirm-master-password"
+                    placeholder="••••••••"
+                    autocomplete="new-password"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false">
+            </div>
+            <p style="font-size:0.78rem;color:var(--subtext);margin:8px 0 0;line-height:1.5;">
+                First-time setup: this password protects your vault. There is no way to recover it.
+            </p>
         </div>
 
         <button class="btn-black" id="login-btn">Unlock vault</button>

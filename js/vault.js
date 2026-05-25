@@ -6,10 +6,21 @@
 // STATE
 // ============================================================
 let vault           = [];
-let currentIndex    = null;
+let currentEntryId  = null;
 let passwordVisible = false;
 let sortField       = "name";
 let sortOrder       = "asc";
+
+function findEntry(id) {
+    return vault.find(e => e.id === id);
+}
+function findEntryIndex(id) {
+    return vault.findIndex(e => e.id === id);
+}
+function newEntryId() {
+    return (crypto.randomUUID && crypto.randomUUID()) ||
+           ("e_" + Date.now() + "_" + Math.random().toString(36).slice(2));
+}
 
 const settings = JSON.parse(localStorage.getItem("vaultSettings")) || {
     darkMode:      false,
@@ -78,7 +89,15 @@ async function loadVault() {
     } catch {
         sessionStorage.clear();
         window.location.replace("login.html");
+        return;
     }
+
+    // Backfill stable IDs on any legacy entries that don't have one
+    let mutated = false;
+    for (const entry of vault) {
+        if (!entry.id) { entry.id = newEntryId(); mutated = true; }
+    }
+    if (mutated) saveVault();
 }
 
 async function saveVault() {
@@ -236,8 +255,7 @@ function renderVault(filter) {
         </tr></thead>`;
         const tbody = document.createElement("tbody");
         items.forEach(entry => {
-            const realIndex = vault.indexOf(entry);
-            const tr        = document.createElement("tr");
+            const tr = document.createElement("tr");
 
             ["name", "url", "username"].forEach(f => {
                 const td = document.createElement("td");
@@ -252,6 +270,7 @@ function renderVault(filter) {
             const tdCopy = document.createElement("td");
             const cb = document.createElement("button");
             cb.className = "card-copy-btn";
+            cb.setAttribute("aria-label", "Copy credentials");
             cb.innerHTML = `<i class="fa-regular fa-copy"></i>`;
             cb.addEventListener("click", e => showCopyMenu(e, entry));
             tdCopy.appendChild(cb);
@@ -259,7 +278,7 @@ function renderVault(filter) {
 
             tr.addEventListener("click", e => {
                 if (e.target.closest(".card-copy-btn")) return;
-                haptic(6); openCard(entry, realIndex);
+                haptic(6); openCard(entry);
             });
             tbody.appendChild(tr);
         });
@@ -272,7 +291,6 @@ function renderVault(filter) {
     if (viewMode === "gallery") {
         vaultContainer.style.display = "";
         items.forEach(entry => {
-            const realIndex = vault.indexOf(entry);
             const card      = document.createElement("div");
             card.className  = "vault-gallery-card";
 
@@ -300,6 +318,7 @@ function renderVault(filter) {
 
             const cb = document.createElement("button");
             cb.className = "gallery-copy-btn";
+            cb.setAttribute("aria-label", "Copy credentials");
             cb.innerHTML = `<i class="fa-regular fa-copy"></i>`;
             cb.addEventListener("click", e => showCopyMenu(e, entry));
 
@@ -307,10 +326,10 @@ function renderVault(filter) {
             card.appendChild(title);
             card.appendChild(sub);
             card.appendChild(cb);
-            card.dataset.id = realIndex;
+            card.dataset.id = entry.id;
             card.addEventListener("click", e => {
                 if (e.target.closest(".gallery-copy-btn")) return;
-                haptic(6); openCard(entry, realIndex);
+                haptic(6); openCard(entry);
             });
             vaultContainer.appendChild(card);
         });
@@ -320,9 +339,8 @@ function renderVault(filter) {
     // ---- GRID VIEW ----
     vaultContainer.style.display = "";
     items.forEach(entry => {
-        const realIndex = vault.indexOf(entry);
-        const card      = document.createElement("div");
-        card.className  = "vault-card";
+        const card     = document.createElement("div");
+        card.className = "vault-card";
 
         const h2 = document.createElement("h2");
         h2.textContent = entry.name || "No title";
@@ -341,14 +359,15 @@ function renderVault(filter) {
 
         const cb = document.createElement("button");
         cb.className = "card-copy-btn";
+        cb.setAttribute("aria-label", "Copy credentials");
         cb.innerHTML = `<i class="fa-regular fa-copy"></i>`;
         cb.addEventListener("click", e => showCopyMenu(e, entry));
         card.appendChild(cb);
 
-        card.dataset.id = realIndex;
+        card.dataset.id = entry.id;
         card.addEventListener("click", e => {
             if (e.target.closest(".card-copy-btn")) return;
-            haptic(6); openCard(entry, realIndex);
+            haptic(6); openCard(entry);
         });
         vaultContainer.appendChild(card);
     });
@@ -357,8 +376,8 @@ function renderVault(filter) {
 // ============================================================
 // EXPANDED CARD
 // ============================================================
-function openCard(entry, index) {
-    currentIndex    = index;
+function openCard(entry) {
+    currentEntryId  = entry.id;
     passwordVisible = false;
 
     expandedName.textContent = entry.name || "No title";
@@ -400,15 +419,15 @@ function closeCard() {
     expandedCard.style.display      = "none";
     saveCancelWrapper.style.display = "none";
     editBtn.style.display           = "inline-flex";
-    currentIndex = null;
+    currentEntryId = null;
 }
 
 // ============================================================
 // EDIT MODE
 // ============================================================
 editBtn.addEventListener("click", () => {
-    if (currentIndex === null) return;
-    const e = vault[currentIndex];
+    const e = findEntry(currentEntryId);
+    if (!e) return;
 
     editBtn.style.display           = "none";
     saveCancelWrapper.style.display = "flex";
@@ -432,12 +451,13 @@ editBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
-    if (currentIndex === null) return;
-    vault[currentIndex].url       = (document.getElementById("edit-url")?.value      || "").trim();
-    vault[currentIndex].username  = (document.getElementById("edit-username")?.value  || "").trim();
-    vault[currentIndex].password  = (document.getElementById("edit-password")?.value  || "").trim();
-    vault[currentIndex].notes     = (document.getElementById("edit-notes")?.value     || "").trim();
-    vault[currentIndex].updatedAt = Date.now();
+    const entry = findEntry(currentEntryId);
+    if (!entry) return;
+    entry.url       = (document.getElementById("edit-url")?.value      || "").trim();
+    entry.username  = (document.getElementById("edit-username")?.value  || "").trim();
+    entry.password  =  document.getElementById("edit-password")?.value  || "";
+    entry.notes     = (document.getElementById("edit-notes")?.value     || "").trim();
+    entry.updatedAt = Date.now();
     saveVault();
     renderVault(searchInput.value);
     exitEditMode();
@@ -447,8 +467,8 @@ saveBtn.addEventListener("click", () => {
 cancelBtn.addEventListener("click", () => { haptic(4); exitEditMode(); });
 
 function exitEditMode() {
-    if (currentIndex === null) return;
-    const e = vault[currentIndex];
+    const e = findEntry(currentEntryId);
+    if (!e) return;
     editBtn.style.display           = "inline-flex";
     saveCancelWrapper.style.display = "none";
 
@@ -480,14 +500,14 @@ function exitEditMode() {
 // TOGGLE PASSWORD
 // ============================================================
 togglePasswordBtn.addEventListener("click", () => {
-    if (currentIndex === null) return;
+    const entry = findEntry(currentEntryId);
+    if (!entry) return;
     passwordVisible = !passwordVisible;
     const editInput = document.getElementById("edit-password");
     if (editInput) {
         editInput.type = passwordVisible ? "text" : "password";
     } else {
-        expandedPassword.textContent = passwordVisible
-            ? vault[currentIndex].password : "••••••••";
+        expandedPassword.textContent = passwordVisible ? entry.password : "••••••••";
     }
     togglePasswordBtn.querySelector("i").className = passwordVisible
         ? "fa-solid fa-eye" : "fa-solid fa-eye-slash";
@@ -498,20 +518,22 @@ togglePasswordBtn.addEventListener("click", () => {
 // COPY BUTTONS (expanded card)
 // ============================================================
 copyIconBtn.addEventListener("click", () => {
-    if (currentIndex === null) return;
-    copyToClipboard(vault[currentIndex].password, "Password copied!");
+    const entry = findEntry(currentEntryId);
+    if (!entry) return;
+    copyToClipboard(entry.password, "Password copied!");
 });
 
 copyUsernameBtn.addEventListener("click", () => {
-    if (currentIndex === null) return;
-    copyToClipboard(vault[currentIndex].username, "Username copied!");
+    const entry = findEntry(currentEntryId);
+    if (!entry) return;
+    copyToClipboard(entry.username, "Username copied!");
 });
 
 // ============================================================
 // DELETE
 // ============================================================
 removeBtn.addEventListener("click", () => {
-    if (currentIndex === null) return;
+    if (!currentEntryId) return;
     if (!settings.confirmDelete) { deleteEntry(); return; }
     haptic(10);
     confirmOverlay.style.display = "flex";
@@ -524,8 +546,9 @@ confirmOverlay.addEventListener("click", e => {
 });
 
 function deleteEntry() {
-    if (currentIndex === null) return;
-    vault.splice(currentIndex, 1);
+    const idx = findEntryIndex(currentEntryId);
+    if (idx < 0) return;
+    vault.splice(idx, 1);
     saveVault();
     closeCard();
     confirmOverlay.style.display = "none";
@@ -619,6 +642,44 @@ function exportVault(format) {
     }
 }
 
+// RFC-4180-style CSV parser: handles quoted commas, embedded
+// newlines, and "" as an escaped quote inside a quoted field.
+function parseCSV(text) {
+    const rows = [];
+    let row    = [];
+    let field  = "";
+    let inQuotes = false;
+    let i = 0;
+
+    while (i < text.length) {
+        const c = text[i];
+
+        if (inQuotes) {
+            if (c === '"') {
+                if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+                inQuotes = false; i++; continue;
+            }
+            field += c; i++; continue;
+        }
+
+        if (c === '"')                  { inQuotes = true;        i++; continue; }
+        if (c === ",")                  { row.push(field); field = ""; i++; continue; }
+        if (c === "\r" && text[i+1] === "\n") {
+            row.push(field); rows.push(row); row = []; field = ""; i += 2; continue;
+        }
+        if (c === "\n" || c === "\r")   {
+            row.push(field); rows.push(row); row = []; field = ""; i++; continue;
+        }
+        field += c; i++;
+    }
+
+    // Flush the final field/row if the file didn't end with a newline.
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+
+    // Drop trailing empty row from a final newline.
+    return rows.filter(r => r.length > 1 || (r.length === 1 && r[0] !== ""));
+}
+
 function downloadFile(name, content, type) {
     const blob = new Blob([content], { type });
     const url  = URL.createObjectURL(blob);
@@ -647,20 +708,18 @@ function importFromFile(file) {
                 sessionStorage.clear();
                 window.location.replace("login.html");
             } else if (file.name.endsWith(".csv")) {
-                // Plain CSV import
-                const lines   = text.split("\n").slice(1); // skip header
                 if (!sessionStorage.getItem("vaultKey")) return;
+                const rows = parseCSV(text).slice(1); // skip header
                 const imported = [];
-                lines.forEach(line => {
-                    if (!line.trim()) return;
-                    const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-                    const clean = cols.map(c => c.replace(/^"|"$/g, "").replace(/""/g, '"'));
-                    if (clean[0]) imported.push({
-                        name:      clean[0] || "",
-                        url:       clean[1] || "",
-                        username:  clean[2] || "",
-                        password:  clean[3] || "",
-                        notes:     clean[4] || "",
+                rows.forEach(cols => {
+                    if (!cols[0]) return;
+                    imported.push({
+                        id:        newEntryId(),
+                        name:      cols[0] || "",
+                        url:       cols[1] || "",
+                        username:  cols[2] || "",
+                        password:  cols[3] || "",
+                        notes:     cols[4] || "",
                         createdAt: Date.now()
                     });
                 });

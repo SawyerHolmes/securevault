@@ -267,7 +267,9 @@ saveBtn.addEventListener("click", async () => {
         catch { vault = []; }
     }
 
-    vault.push({ name, url, username, password, notes, createdAt: Date.now() });
+    const id = (crypto.randomUUID && crypto.randomUUID()) ||
+               ("e_" + Date.now() + "_" + Math.random().toString(36).slice(2));
+    vault.push({ id, name, url, username, password, notes, createdAt: Date.now() });
     localStorage.setItem("vault", await encryptData(vault, key));
     // Auto-push to Gist in background
     if (typeof pushToGist === "function") pushToGist().catch(() => {});
