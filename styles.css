@@ -44,36 +44,46 @@
     --radius-lg:    16px;
     --radius-pill:  999px;
 
-    --bg:           #ffffff;
-    --card:         #ffffff;
-    --text:         #111111;
-    --subtext:      #888888;
-    --input:        #f4f4f4;
-    --input-focus:  #ebebeb;
-    --border:       #e5e5e5;
-    --shadow:        0 1px 4px rgba(0,0,0,0.06);
-    --shadow-hover:  0 4px 16px rgba(0,0,0,0.10);
-    --shadow-thumb:  0 1px 4px rgba(0,0,0,0.18);
-    --transition:    0.15s ease;
+    /* Warm white + beige palette */
+    --bg:           #f5f0e8;  /* soft beige page */
+    --card:         #ffffff;  /* white cards pop against the bg */
+    --text:         #1c1916;  /* warm near-black */
+    --subtext:      #8f857a;  /* warm mid-gray */
+    --input:        #faf6ef;  /* faintly tinted input */
+    --input-focus:  #f1ebe1;
+    --border:       #e8e1d5;  /* warm hairline */
+
+    /* Tinted shadows — neutral grays read cold against beige */
+    --shadow:        0 1px 2px rgba(60, 45, 25, 0.04), 0 1px 3px rgba(60, 45, 25, 0.05);
+    --shadow-hover:  0 1px 2px rgba(60, 45, 25, 0.05), 0 8px 24px rgba(60, 45, 25, 0.08);
+    --shadow-thumb:  0 1px 3px rgba(60, 45, 25, 0.18);
+    --transition:    0.18s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --glass-header:  rgba(245, 240, 232, 0.78);
+
+    --font-sans:     -apple-system, BlinkMacSystemFont, "Segoe UI Variable",
+                     "Segoe UI", system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 html.dark {
-    background: #111111;
+    background: #1a1612;
     color-scheme: dark;
 }
 
 html.dark body,
 body.dark {
-    --bg:           #111111;
-    --card:         #1a1a1a;
-    --text:         #f0f0f0;
-    --subtext:      #777777;
-    --input:        #252525;
-    --input-focus:  #2e2e2e;
-    --border:       #2e2e2e;
-    --shadow:        0 1px 4px rgba(0,0,0,0.30);
-    --shadow-hover:  0 4px 16px rgba(0,0,0,0.40);
+    --bg:           #1a1612;  /* warm dark */
+    --card:         #221e18;
+    --text:         #f5efe5;  /* warm light */
+    --subtext:      #8a8275;
+    --input:        #2a251e;
+    --input-focus:  #332d24;
+    --border:       #332d24;
+    --shadow:        0 1px 3px rgba(0,0,0,0.30);
+    --shadow-hover:  0 8px 24px rgba(0,0,0,0.40);
     --shadow-thumb:  0 1px 6px rgba(0,0,0,0.50);
+
+    --glass-header:  rgba(26, 22, 18, 0.82);
 }
 
 
@@ -88,8 +98,11 @@ html, body {
     min-height: 100%;
     background: var(--bg);
     color: var(--text);
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--font-sans);
+    font-feature-settings: "kern", "liga", "calt";
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 
@@ -118,18 +131,13 @@ header {
     align-items: center;
     padding: 0 var(--page-padding);
     height: 52px;
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: var(--glass-header);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: 100;
-}
-
-html.dark header,
-body.dark header {
-    background: rgba(17,17,17,0.88);
 }
 
 header .logo {
