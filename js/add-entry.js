@@ -13,10 +13,9 @@ window.addEventListener("popstate", () => {
     window.history.pushState(null, null, window.location.href);
 });
 
-// Dark mode already applied to <html> via inline script in <head>
-// Ensure body class is also set for any CSS targeting body.dark
+// Dark is default; only remove .dark if the user opted into light mode
 const _settings = JSON.parse(localStorage.getItem("vaultSettings")) || {};
-if (_settings.darkMode) document.body.classList.add("dark");
+if (_settings.lightMode !== true) document.body.classList.add("dark");
 
 // ============================================================
 // HAPTIC FEEDBACK

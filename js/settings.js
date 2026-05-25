@@ -18,13 +18,10 @@ window.addEventListener("popstate", () => {
 // ============================================================
 const DEFAULT_SETTINGS = {
     autoLock:      false,
-    darkMode:      false,
-    viewMode:      "grid",
+    lightMode:     false,   // dark is default; checking the toggle opts into light
+    viewMode:      "list",
     defaultSort:   "name",
-    confirmDelete: true,
-    lightBg:       THEME_DEFAULTS.lightBg,
-    darkBg:        THEME_DEFAULTS.darkBg,
-    accent:        THEME_DEFAULTS.accent
+    confirmDelete: true
 };
 
 let settings = { ...DEFAULT_SETTINGS };
@@ -70,7 +67,7 @@ function saveSettings() {
 // ============================================================
 async function applySettingsToUI() {
     document.getElementById("auto-lock").checked      = settings.autoLock;
-    document.getElementById("dark-mode").checked      = settings.darkMode;
+    document.getElementById("light-mode").checked     = settings.lightMode;
     document.getElementById("confirm-delete").checked = settings.confirmDelete;
 
     document.querySelectorAll('input[name="default-sort"]').forEach(r => {
@@ -80,60 +77,15 @@ async function applySettingsToUI() {
         r.checked = r.value === settings.viewMode;
     });
 
-    applyDarkMode(settings.darkMode);
+    applyLightMode(settings.lightMode);
     applyViewMode(settings.viewMode);
 
     const cfg = await getSyncConfig();
     document.getElementById("github-token").value = cfg.token;
     document.getElementById("gist-id").value      = cfg.gistId;
 
-    // Sync segmented slider positions after radios are set
     initSegmentedControls2();
     initSegmentedControls3();
-
-    renderSwatches();
-    applyTheme(settings);
-}
-
-// ============================================================
-// APPEARANCE SWATCHES
-// ============================================================
-function buildSwatchGroup(containerId, values, currentValue, kind) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.innerHTML = "";
-
-    values.forEach(v => {
-        const color = typeof v === "string" ? v : v.value;
-        const label = typeof v === "string" ? color : v.label;
-        const btn   = document.createElement("button");
-        btn.type           = "button";
-        btn.className      = "swatch" + (color.toLowerCase() === (currentValue || "").toLowerCase() ? " selected" : "");
-        btn.style.setProperty("--swatch-color", color);
-        btn.dataset.value  = color;
-        btn.dataset.kind   = kind;
-        btn.setAttribute("role", "radio");
-        btn.setAttribute("aria-checked", color === currentValue ? "true" : "false");
-        btn.setAttribute("aria-label", `${label} (${color})`);
-        btn.title          = label;
-        container.appendChild(btn);
-    });
-}
-
-function renderSwatches() {
-    buildSwatchGroup("light-bg-swatches", THEME_LIGHT_BGS, settings.lightBg, "lightBg");
-    buildSwatchGroup("dark-bg-swatches",  THEME_DARK_BGS,  settings.darkBg,  "darkBg");
-    buildSwatchGroup("accent-swatches",   THEME_ACCENTS,   settings.accent,  "accent");
-}
-
-function handleSwatchClick(btn) {
-    const kind  = btn.dataset.kind;
-    const value = btn.dataset.value;
-    if (!kind || !value) return;
-    settings[kind] = value;
-    applyTheme(settings);
-    saveSettings();
-    renderSwatches();
 }
 
 // ============================================================
@@ -154,9 +106,10 @@ function setSyncStatus(msg, color) {
 // ============================================================
 // LIVE EFFECTS
 // ============================================================
-function applyDarkMode(enabled) {
-    document.documentElement.classList.toggle("dark", enabled);
-    document.body.classList.toggle("dark", enabled);
+function applyLightMode(enabled) {
+    // Dark is default; .dark class removed when in light mode
+    document.documentElement.classList.toggle("dark", !enabled);
+    document.body.classList.toggle("dark", !enabled);
 }
 
 function applyViewMode(mode) {
@@ -169,7 +122,7 @@ function applyViewMode(mode) {
 // ============================================================
 function readSettingsFromUI() {
     settings.autoLock      = document.getElementById("auto-lock").checked;
-    settings.darkMode      = document.getElementById("dark-mode").checked;
+    settings.lightMode     = document.getElementById("light-mode").checked;
     settings.confirmDelete = document.getElementById("confirm-delete").checked;
 
     const sort = document.querySelector('input[name="default-sort"]:checked');
@@ -192,9 +145,9 @@ function attachEventListeners() {
             try {
                 await saveSyncConfig();
             } catch (e) {
-                setSyncStatus("Could not save token: " + e.message, "#e74c3c");
+                setSyncStatus("Could not save token: " + e.message, "var(--danger)");
             }
-            applyDarkMode(settings.darkMode);
+            applyLightMode(settings.lightMode);
             applyViewMode(settings.viewMode);
         });
     });
@@ -208,21 +161,11 @@ function attachEventListeners() {
         });
     });
 
-    // Dark mode live toggle
-    document.getElementById("dark-mode").addEventListener("change", e => {
-        applyDarkMode(e.target.checked);
-        settings.darkMode = e.target.checked;
+    // Light mode live toggle
+    document.getElementById("light-mode").addEventListener("change", e => {
+        applyLightMode(e.target.checked);
+        settings.lightMode = e.target.checked;
         saveSettings();
-    });
-
-    // Appearance swatches (delegated)
-    ["light-bg-swatches", "dark-bg-swatches", "accent-swatches"].forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.addEventListener("click", e => {
-            const btn = e.target.closest(".swatch");
-            if (btn) handleSwatchClick(btn);
-        });
     });
 
     // Change master password

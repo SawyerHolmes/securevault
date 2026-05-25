@@ -10,9 +10,9 @@ const MAX_LOCKOUT_MS   = 60 * 60 * 1000; // cap: 1 hour
 // DARK MODE
 // Applied immediately from saved settings
 // ============================================================
-(function applyDarkMode() {
+(function applyLightMode() {
     const settings = JSON.parse(localStorage.getItem("vaultSettings")) || {};
-    document.body.classList.toggle("dark", !!settings.darkMode);
+    document.body.classList.toggle("dark", settings.lightMode !== true);
 })();
 
 // ============================================================

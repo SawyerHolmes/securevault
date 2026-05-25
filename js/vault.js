@@ -23,8 +23,8 @@ function newEntryId() {
 }
 
 const settings = JSON.parse(localStorage.getItem("vaultSettings")) || {
-    darkMode:      false,
-    viewMode:      "grid",
+    lightMode:     false,
+    viewMode:      "list",
     defaultSort:   "name",
     confirmDelete: true
 };
@@ -110,10 +110,10 @@ async function saveVault() {
 // ============================================================
 // SETTINGS
 // ============================================================
-function applyDarkMode() {
-    const isDark = settings.darkMode;
-    document.body.classList.toggle("dark", isDark);
-    document.documentElement.classList.toggle("dark", isDark);
+function applyLightMode() {
+    const isLight = !!settings.lightMode;
+    document.body.classList.toggle("dark", !isLight);
+    document.documentElement.classList.toggle("dark", !isLight);
 }
 
 function applyViewMode(mode) {
@@ -757,8 +757,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // ============================================================
 (async () => {
     await loadVault();
-    applyDarkMode();
-    applyViewMode(settings.viewMode || "grid");
+    applyLightMode();
+    applyViewMode(settings.viewMode || "list");
     sortField = settings.defaultSort || "name";
     renderVault();
 })();
