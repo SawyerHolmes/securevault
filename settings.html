@@ -6,6 +6,10 @@
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
             if (s.darkMode) document.documentElement.classList.add("dark");
+            const r = document.documentElement;
+            if (s.lightBg) r.style.setProperty("--bg-light", s.lightBg);
+            if (s.darkBg)  r.style.setProperty("--bg-dark",  s.darkBg);
+            if (s.accent)  r.style.setProperty("--accent",   s.accent);
         })();
     </script>
     <meta charset="UTF-8">
@@ -16,6 +20,7 @@
     <script src="js/crypto-utils.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/sync.js"></script>
+    <script src="js/theme.js"></script>
     <script defer src="js/settings.js"></script>
 </head>
 <body>
@@ -80,6 +85,21 @@
                         <label for="view-gallery">Gallery</label>
                         <div class="segmented-slider-3"></div>
                     </div>
+                </div>
+
+                <div class="setting-item">
+                    <label>Light background</label>
+                    <div class="swatch-row" id="light-bg-swatches" role="radiogroup" aria-label="Light background colour"></div>
+                </div>
+
+                <div class="setting-item">
+                    <label>Dark background</label>
+                    <div class="swatch-row" id="dark-bg-swatches" role="radiogroup" aria-label="Dark background colour"></div>
+                </div>
+
+                <div class="setting-item">
+                    <label>Accent (banner)</label>
+                    <div class="swatch-row" id="accent-swatches" role="radiogroup" aria-label="Accent colour"></div>
                 </div>
 
             </div>

@@ -6,6 +6,10 @@
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
             if (s.darkMode) document.documentElement.classList.add("dark");
+            const r = document.documentElement;
+            if (s.lightBg) r.style.setProperty("--bg-light", s.lightBg);
+            if (s.darkBg)  r.style.setProperty("--bg-dark",  s.darkBg);
+            if (s.accent)  r.style.setProperty("--accent",   s.accent);
         })();
     </script>
     <meta charset="UTF-8">

@@ -21,7 +21,10 @@ const DEFAULT_SETTINGS = {
     darkMode:      false,
     viewMode:      "grid",
     defaultSort:   "name",
-    confirmDelete: true
+    confirmDelete: true,
+    lightBg:       THEME_DEFAULTS.lightBg,
+    darkBg:        THEME_DEFAULTS.darkBg,
+    accent:        THEME_DEFAULTS.accent
 };
 
 let settings = { ...DEFAULT_SETTINGS };
@@ -87,6 +90,50 @@ async function applySettingsToUI() {
     // Sync segmented slider positions after radios are set
     initSegmentedControls2();
     initSegmentedControls3();
+
+    renderSwatches();
+    applyTheme(settings);
+}
+
+// ============================================================
+// APPEARANCE SWATCHES
+// ============================================================
+function buildSwatchGroup(containerId, values, currentValue, kind) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = "";
+
+    values.forEach(v => {
+        const color = typeof v === "string" ? v : v.value;
+        const label = typeof v === "string" ? color : v.label;
+        const btn   = document.createElement("button");
+        btn.type           = "button";
+        btn.className      = "swatch" + (color.toLowerCase() === (currentValue || "").toLowerCase() ? " selected" : "");
+        btn.style.setProperty("--swatch-color", color);
+        btn.dataset.value  = color;
+        btn.dataset.kind   = kind;
+        btn.setAttribute("role", "radio");
+        btn.setAttribute("aria-checked", color === currentValue ? "true" : "false");
+        btn.setAttribute("aria-label", `${label} (${color})`);
+        btn.title          = label;
+        container.appendChild(btn);
+    });
+}
+
+function renderSwatches() {
+    buildSwatchGroup("light-bg-swatches", THEME_LIGHT_BGS, settings.lightBg, "lightBg");
+    buildSwatchGroup("dark-bg-swatches",  THEME_DARK_BGS,  settings.darkBg,  "darkBg");
+    buildSwatchGroup("accent-swatches",   THEME_ACCENTS,   settings.accent,  "accent");
+}
+
+function handleSwatchClick(btn) {
+    const kind  = btn.dataset.kind;
+    const value = btn.dataset.value;
+    if (!kind || !value) return;
+    settings[kind] = value;
+    applyTheme(settings);
+    saveSettings();
+    renderSwatches();
 }
 
 // ============================================================
@@ -108,6 +155,7 @@ function setSyncStatus(msg, color) {
 // LIVE EFFECTS
 // ============================================================
 function applyDarkMode(enabled) {
+    document.documentElement.classList.toggle("dark", enabled);
     document.body.classList.toggle("dark", enabled);
 }
 
@@ -165,6 +213,16 @@ function attachEventListeners() {
         applyDarkMode(e.target.checked);
         settings.darkMode = e.target.checked;
         saveSettings();
+    });
+
+    // Appearance swatches (delegated)
+    ["light-bg-swatches", "dark-bg-swatches", "accent-swatches"].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("click", e => {
+            const btn = e.target.closest(".swatch");
+            if (btn) handleSwatchClick(btn);
+        });
     });
 
     // Change master password
