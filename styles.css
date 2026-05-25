@@ -1500,3 +1500,72 @@ body.dark .slider-tick { background: rgba(255,255,255,0.12); }
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     }
 }
+
+
+/* ============================================================
+   29. GLASSMORPHISM (subtle)
+   Self-contained section — revert this commit alone to remove
+   the glass treatment without losing the warm palette beneath.
+============================================================ */
+:root {
+    --glass-card:        rgba(255, 255, 255, 0.62);
+    --glass-card-border: rgba(255, 255, 255, 0.55);
+    --glass-modal:       rgba(255, 252, 246, 0.78);
+}
+
+html.dark body,
+body.dark {
+    --glass-card:        rgba(40, 34, 26, 0.55);
+    --glass-card-border: rgba(255, 240, 220, 0.06);
+    --glass-modal:       rgba(34, 30, 24, 0.78);
+}
+
+/* Soft beige radial wash on the page background — the blur needs
+   variance under it to do anything visually interesting */
+body {
+    background:
+        radial-gradient(1200px 600px at 12% -10%, #ffeed5 0%, transparent 55%),
+        radial-gradient(900px 600px at 100% 10%, #f3e6cf 0%, transparent 50%),
+        var(--bg);
+    background-attachment: fixed;
+}
+
+html.dark body,
+body.dark {
+    background:
+        radial-gradient(1200px 600px at 12% -10%, #2a2014 0%, transparent 55%),
+        radial-gradient(900px 600px at 100% 10%, #1e1810 0%, transparent 50%),
+        var(--bg);
+    background-attachment: fixed;
+}
+
+/* Frosted cards */
+.vault-card,
+.vault-gallery-card {
+    background: var(--glass-card);
+    backdrop-filter: saturate(160%) blur(14px);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    border: 1px solid var(--glass-card-border);
+}
+
+/* Expanded entry + confirmation modals share the same frosted material */
+.expanded-content,
+.confirmation-modal {
+    background: var(--glass-modal);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border: 1px solid var(--glass-card-border);
+}
+
+/* Login card */
+.login-container {
+    background: var(--glass-card);
+    backdrop-filter: saturate(160%) blur(18px);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+    border: 1px solid var(--glass-card-border);
+    border-radius: var(--radius-lg);
+    padding: 28px 26px;
+    box-shadow: var(--shadow-hover);
+}
+
+
