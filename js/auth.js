@@ -3,9 +3,7 @@
 // Shared across vault.js, settings.js, add-entry.js
 // ============================================================
 
-const SESSION_TIMEOUT    = 5 * 60 * 1000; // 5 minutes
-const MAX_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_DURATION   = 30 * 1000;     // 30 seconds
+const SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 // ============================================================
 // AUTH GUARD
@@ -38,7 +36,7 @@ function updateActivity() {
 }
 
 function startActivityTracking() {
-    ["click", "keydown", "mousemove", "touchstart", "scroll"].forEach(event => {
+    ["click", "keydown", "touchstart", "scroll"].forEach(event => {
         document.addEventListener(event, updateActivity, { passive: true });
     });
 
@@ -48,42 +46,6 @@ function startActivityTracking() {
             logout();
         }
     }, 30000);
-}
-
-// ============================================================
-// BRUTE FORCE PROTECTION
-// ============================================================
-function getLoginAttempts() {
-    return parseInt(localStorage.getItem("loginAttempts") || "0", 10);
-}
-
-function getLockoutTime() {
-    return parseInt(localStorage.getItem("lockoutUntil") || "0", 10);
-}
-
-function isLockedOut() {
-    const lockoutUntil = getLockoutTime();
-    if (!lockoutUntil) return false;
-    if (Date.now() < lockoutUntil) return true;
-    localStorage.removeItem("lockoutUntil");
-    localStorage.removeItem("loginAttempts");
-    return false;
-}
-
-function recordFailedAttempt() {
-    const attempts = getLoginAttempts() + 1;
-    localStorage.setItem("loginAttempts", attempts);
-    if (attempts >= MAX_LOGIN_ATTEMPTS) {
-        localStorage.setItem("lockoutUntil", Date.now() + LOCKOUT_DURATION);
-        localStorage.setItem("loginAttempts", "0");
-        return { locked: true, seconds: LOCKOUT_DURATION / 1000 };
-    }
-    return { locked: false, remaining: MAX_LOGIN_ATTEMPTS - attempts };
-}
-
-function clearLoginAttempts() {
-    localStorage.removeItem("loginAttempts");
-    localStorage.removeItem("lockoutUntil");
 }
 
 // ============================================================
