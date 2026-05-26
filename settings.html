@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Dark mode applied immediately to prevent flash -->
     <script>
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
@@ -56,209 +55,239 @@
 <main>
     <div class="page-content">
         <h1 class="page-title">Settings.</h1>
+
+        <nav class="settings-tabs" role="tablist" aria-label="Settings sections">
+            <button type="button" role="tab" class="settings-tab active" data-tab="account"  aria-selected="true">Account</button>
+            <button type="button" role="tab" class="settings-tab"        data-tab="vault"    aria-selected="false">Vault</button>
+            <button type="button" role="tab" class="settings-tab"        data-tab="health"   aria-selected="false">Health</button>
+            <button type="button" role="tab" class="settings-tab"        data-tab="sync"     aria-selected="false">Sync</button>
+            <button type="button" role="tab" class="settings-tab"        data-tab="storage"  aria-selected="false">Storage</button>
+        </nav>
+
         <div class="settings-container">
 
-        <div class="settings-group">
-            <div class="settings-title">Account & security</div>
-            <div class="settings-section">
-
-                <div class="setting-item">
-                    <label for="change-password">Current password</label>
-                    <input type="password" id="change-password" placeholder="Enter current password" autocomplete="current-password">
+            <!-- ============ ACCOUNT ============ -->
+            <section class="settings-tabpanel" data-tab="account" role="tabpanel">
+                <div class="settings-group">
+                    <div class="settings-title">Master password</div>
+                    <div class="settings-section">
+                        <div class="setting-item">
+                            <label for="change-password">Current password</label>
+                            <input type="password" id="change-password" placeholder="Enter current password" autocomplete="current-password">
+                        </div>
+                        <div class="setting-item">
+                            <label for="confirm-password">New password</label>
+                            <input type="password" id="confirm-password" placeholder="Enter new password" autocomplete="new-password">
+                        </div>
+                        <div class="setting-item no-divider">
+                            <button class="btn-black btn-inline" id="change-password-btn">Change password</button>
+                            <div id="password-change-status" class="setting-item-status" role="status" aria-live="polite"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="setting-item">
-                    <label for="confirm-password">New password</label>
-                    <input type="password" id="confirm-password" placeholder="Enter new password" autocomplete="new-password">
-                </div>
-
-                <div class="setting-item">
-                    <button class="btn-black btn-inline" id="change-password-btn">Change password</button>
-                    <div id="password-change-status" class="setting-item-status" role="status" aria-live="polite"></div>
-                </div>
-
-                <div class="setting-item toggle-field no-divider" id="biometric-row" style="display:none;">
-                    <span>Biometric unlock</span>
-                    <label class="switch">
-                        <input type="checkbox" id="biometric-toggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div id="biometric-status" class="setting-item-status" role="status" aria-live="polite" style="padding: 0 18px 16px;"></div>
-
-            </div>
-        </div>
-
-        <!-- Appearance -->
-        <div class="settings-group">
-            <div class="settings-title">Appearance</div>
-            <div class="settings-section">
-
-                <div class="setting-item toggle-field">
-                    <span>Light mode</span>
-                    <label class="switch">
-                        <input type="checkbox" id="light-mode">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="setting-item">
-                    <label>Vault view</label>
-                    <div class="segmented-control-3">
-                        <input type="radio" name="vault-view" id="view-list" value="list" checked>
-                        <label for="view-list">List</label>
-                        <input type="radio" name="vault-view" id="view-grid" value="grid">
-                        <label for="view-grid">Grid</label>
-                        <input type="radio" name="vault-view" id="view-gallery" value="gallery">
-                        <label for="view-gallery">Gallery</label>
-                        <div class="segmented-slider-3"></div>
+                <div class="settings-group">
+                    <div class="settings-title">Unlock</div>
+                    <div class="settings-section">
+                        <div class="setting-item toggle-field" id="biometric-row" style="display:none;">
+                            <div>
+                                <span>Biometric unlock</span>
+                                <p class="setting-item-hint">Touch ID / Face ID via WebAuthn</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="biometric-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item no-divider" id="biometric-status-row">
+                            <div id="biometric-status" class="setting-item-status" role="status" aria-live="polite"></div>
+                        </div>
                     </div>
                 </div>
 
-            </div>
-        </div>
-
-        <!-- Preferences -->
-        <div class="settings-group">
-            <div class="settings-title">Preferences</div>
-            <div class="settings-section">
-
-                <div class="setting-item">
-                    <label>Default sort</label>
-                    <div class="segmented-control-2">
-                        <input type="radio" name="default-sort" id="sort-name" value="name" checked>
-                        <label for="sort-name">Site name</label>
-                        <input type="radio" name="default-sort" id="sort-username" value="username">
-                        <label for="sort-username">Username</label>
-                        <div class="segmented-slider-2"></div>
-                    </div>
-                </div>
-
-                <div class="setting-item toggle-field">
-                    <span>Confirm before delete</span>
-                    <label class="switch">
-                        <input type="checkbox" id="confirm-delete" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="setting-item toggle-field">
-                    <span>Auto-lock vault</span>
-                    <label class="switch">
-                        <input type="checkbox" id="auto-lock">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Storage -->
-        <div class="settings-group">
-            <div class="settings-title">Storage</div>
-            <div class="settings-section">
-                <a href="trash.html" class="setting-link">
-                    <span class="setting-link-label">Trash</span>
-                    <span class="setting-link-meta">View deleted entries</span>
-                </a>
-                <a href="archive.html" class="setting-link">
-                    <span class="setting-link-label">Archive</span>
-                    <span class="setting-link-meta">View archived entries</span>
-                </a>
-                <a href="history.html" class="setting-link">
-                    <span class="setting-link-label">Password history</span>
-                    <span class="setting-link-meta">Recover previous passwords</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- Password health -->
-        <div class="settings-group">
-            <div class="settings-title">Password health</div>
-            <div class="settings-section">
-                <div class="setting-item no-divider">
-                    <div class="health-summary">
-                        <div class="health-stat">
-                            <span class="health-stat-num" id="health-total">—</span>
-                            <span class="health-stat-label">Entries</span>
-                        </div>
-                        <div class="health-stat">
-                            <span class="health-stat-num" id="health-weak">—</span>
-                            <span class="health-stat-label">Weak</span>
-                        </div>
-                        <div class="health-stat">
-                            <span class="health-stat-num" id="health-reused">—</span>
-                            <span class="health-stat-label">Reused</span>
-                        </div>
-                        <div class="health-stat health-stat-danger">
-                            <span class="health-stat-num" id="health-breached">—</span>
-                            <span class="health-stat-label">Breached</span>
+                <div class="settings-group">
+                    <div class="settings-title">Appearance</div>
+                    <div class="settings-section">
+                        <div class="setting-item toggle-field no-divider">
+                            <span>Light mode</span>
+                            <label class="switch">
+                                <input type="checkbox" id="light-mode">
+                                <span class="slider"></span>
+                            </label>
                         </div>
                     </div>
-                    <p class="health-hint">Breach check uses Have I Been Pwned with SHA-1 k-anonymity. Only the first 5 chars of each hash leave your device.</p>
-                    <button class="btn-black btn-inline" id="health-scan-btn">Scan vault</button>
-                    <div id="health-status" class="setting-item-status" role="status" aria-live="polite"></div>
-                    <ul class="health-problems" id="health-problems"></ul>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <!-- Sync -->
-        <div class="settings-group">
-            <div class="settings-title">Sync</div>
-            <div class="settings-section">
-
-                <div class="setting-item">
-                    <div class="info-wrap">
-                        <label for="github-token">GitHub personal access token</label>
-                        <div style="position:relative;">
-                            <button class="info-btn" id="pat-info-btn" aria-label="About personal access tokens"><i data-lucide="info"></i></button>
-                            <div class="tooltip" id="pat-tooltip">
-                                Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a>
-                                → Generate new token (classic) → tick the gist scope only.
+            <!-- ============ VAULT ============ -->
+            <section class="settings-tabpanel" data-tab="vault" role="tabpanel" hidden>
+                <div class="settings-group">
+                    <div class="settings-title">Vault view</div>
+                    <div class="settings-section">
+                        <div class="setting-item no-divider">
+                            <label>Default view</label>
+                            <div class="segmented-control-3">
+                                <input type="radio" name="vault-view" id="view-list" value="list" checked>
+                                <label for="view-list">List</label>
+                                <input type="radio" name="vault-view" id="view-grid" value="grid">
+                                <label for="view-grid">Grid</label>
+                                <input type="radio" name="vault-view" id="view-gallery" value="gallery">
+                                <label for="view-gallery">Gallery</label>
+                                <div class="segmented-slider-3"></div>
                             </div>
                         </div>
                     </div>
-                    <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
                 </div>
 
-                <div class="setting-item">
-                    <div class="info-wrap">
-                        <label for="gist-id">Gist ID</label>
-                        <div style="position:relative;">
-                            <button class="info-btn" id="gist-info-btn" aria-label="About Gist IDs"><i data-lucide="info"></i></button>
-                            <div class="tooltip" id="gist-tooltip">
-                                Create a secret Gist at <a href="https://gist.github.com" target="_blank">gist.github.com</a>
-                                with a file called vault.json, then copy the ID from the URL.
+                <div class="settings-group">
+                    <div class="settings-title">Sorting</div>
+                    <div class="settings-section">
+                        <div class="setting-item no-divider">
+                            <label>Default sort</label>
+                            <div class="segmented-control-2">
+                                <input type="radio" name="default-sort" id="sort-name" value="name" checked>
+                                <label for="sort-name">Site name</label>
+                                <input type="radio" name="default-sort" id="sort-username" value="username">
+                                <label for="sort-username">Username</label>
+                                <div class="segmented-slider-2"></div>
                             </div>
                         </div>
                     </div>
-                    <input type="text" id="gist-id" placeholder="e.g. 4b2c8f1a9d3e7f0c2a1b">
                 </div>
 
-                <div class="sync-buttons">
-                    <button class="btn-black" id="push-btn">Push to Gist</button>
-                    <button class="btn-white" id="pull-btn">Pull from Gist</button>
+                <div class="settings-group">
+                    <div class="settings-title">Behaviour</div>
+                    <div class="settings-section">
+                        <div class="setting-item toggle-field">
+                            <span>Confirm before delete</span>
+                            <label class="switch">
+                                <input type="checkbox" id="confirm-delete" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item toggle-field no-divider">
+                            <div>
+                                <span>Auto-lock vault</span>
+                                <p class="setting-item-hint">Lock after 5 minutes of inactivity</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="auto-lock">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
+            </section>
 
-                <div class="setting-item no-divider">
-                    <div id="sync-status" class="setting-item-status" role="status" aria-live="polite"></div>
+            <!-- ============ HEALTH ============ -->
+            <section class="settings-tabpanel" data-tab="health" role="tabpanel" hidden>
+                <div class="settings-group">
+                    <div class="settings-title">Password health</div>
+                    <div class="settings-section">
+                        <div class="setting-item no-divider">
+                            <div class="health-summary">
+                                <div class="health-stat">
+                                    <span class="health-stat-num" id="health-total">—</span>
+                                    <span class="health-stat-label">Entries</span>
+                                </div>
+                                <div class="health-stat">
+                                    <span class="health-stat-num" id="health-weak">—</span>
+                                    <span class="health-stat-label">Weak</span>
+                                </div>
+                                <div class="health-stat">
+                                    <span class="health-stat-num" id="health-reused">—</span>
+                                    <span class="health-stat-label">Reused</span>
+                                </div>
+                                <div class="health-stat health-stat-danger">
+                                    <span class="health-stat-num" id="health-breached">—</span>
+                                    <span class="health-stat-label">Breached</span>
+                                </div>
+                            </div>
+                            <p class="health-hint">Breach check uses Have I Been Pwned with SHA-1 k-anonymity. Only the first 5 chars of each hash leave your device.</p>
+                            <button class="btn-black btn-inline" id="health-scan-btn">Scan vault</button>
+                            <div id="health-status" class="setting-item-status" role="status" aria-live="polite"></div>
+                            <ul class="health-problems" id="health-problems"></ul>
+                        </div>
+                    </div>
                 </div>
+            </section>
 
+            <!-- ============ SYNC ============ -->
+            <section class="settings-tabpanel" data-tab="sync" role="tabpanel" hidden>
+                <div class="settings-group">
+                    <div class="settings-title">GitHub Gist</div>
+                    <div class="settings-section">
+                        <div class="setting-item">
+                            <div class="info-wrap">
+                                <label for="github-token">Personal access token</label>
+                                <div style="position:relative;">
+                                    <button class="info-btn" id="pat-info-btn" aria-label="About personal access tokens"><i data-lucide="info"></i></button>
+                                    <div class="tooltip" id="pat-tooltip">
+                                        Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a>
+                                        → Generate new token (classic) → tick the gist scope only.
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="info-wrap">
+                                <label for="gist-id">Gist ID</label>
+                                <div style="position:relative;">
+                                    <button class="info-btn" id="gist-info-btn" aria-label="About Gist IDs"><i data-lucide="info"></i></button>
+                                    <div class="tooltip" id="gist-tooltip">
+                                        Create a secret Gist at <a href="https://gist.github.com" target="_blank">gist.github.com</a>
+                                        with a file called vault.json, then copy the ID from the URL.
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="text" id="gist-id" placeholder="e.g. 4b2c8f1a9d3e7f0c2a1b">
+                        </div>
+
+                        <div class="sync-buttons">
+                            <button class="btn-black" id="push-btn">Push to Gist</button>
+                            <button class="btn-white" id="pull-btn">Pull from Gist</button>
+                        </div>
+
+                        <div class="setting-item no-divider">
+                            <div id="sync-status" class="setting-item-status" role="status" aria-live="polite"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ STORAGE ============ -->
+            <section class="settings-tabpanel" data-tab="storage" role="tabpanel" hidden>
+                <div class="settings-group">
+                    <div class="settings-title">Browse</div>
+                    <div class="settings-section">
+                        <a href="trash.html" class="setting-link">
+                            <span class="setting-link-label">Trash</span>
+                            <span class="setting-link-meta">View deleted entries</span>
+                        </a>
+                        <a href="archive.html" class="setting-link">
+                            <span class="setting-link-label">Archive</span>
+                            <span class="setting-link-meta">View archived entries</span>
+                        </a>
+                        <a href="history.html" class="setting-link">
+                            <span class="setting-link-label">Password history</span>
+                            <span class="setting-link-meta">Recover previous passwords</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Save / Reset row stays at the bottom across all tabs -->
+            <div class="settings-actions">
+                <button id="save-settings" class="btn-black">Save settings</button>
+                <button id="reset-settings" class="btn-white">Reset defaults</button>
             </div>
-        </div>
 
-        <div class="settings-actions">
-            <button id="save-settings" class="btn-black">Save settings</button>
-            <button id="reset-settings" class="btn-white">Reset defaults</button>
-        </div>
-
-        <div class="settings-group" style="margin-top:48px;">
-            <a href="about.html" class="setting-link" style="border:1px solid var(--border);">
+            <a href="about.html" class="setting-link setting-link-featured">
                 <span class="setting-link-label">About Securevault</span>
                 <span class="setting-link-meta">Version, security model, changelog</span>
             </a>
-        </div>
 
         </div>
     </div>

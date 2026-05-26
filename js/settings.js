@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     attachEventListeners();
     initSegmentedControls2();
     initSegmentedControls3();
+    initSettingsTabs();
 
     // Info tooltips
     ["pat", "gist"].forEach(key => {
@@ -48,6 +49,36 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.addEventListener("click", () => tooltip.classList.remove("show"));
     });
 });
+
+// ============================================================
+// TABS
+// ============================================================
+function initSettingsTabs() {
+    const tabs    = Array.from(document.querySelectorAll(".settings-tab"));
+    const panels  = Array.from(document.querySelectorAll(".settings-tabpanel"));
+    if (!tabs.length) return;
+
+    function showTab(name) {
+        tabs.forEach(t => {
+            const on = t.dataset.tab === name;
+            t.classList.toggle("active", on);
+            t.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        panels.forEach(p => {
+            if (p.dataset.tab === name) p.removeAttribute("hidden");
+            else                        p.setAttribute("hidden", "");
+        });
+        const next = new URL(window.location.href);
+        next.hash = "#" + name;
+        history.replaceState(null, "", next.toString());
+    }
+
+    tabs.forEach(t => t.addEventListener("click", () => showTab(t.dataset.tab)));
+
+    // Deep-link via #hash on load
+    const initial = (window.location.hash || "").replace(/^#/, "");
+    if (initial && tabs.some(t => t.dataset.tab === initial)) showTab(initial);
+}
 
 // ============================================================
 // LOAD / SAVE

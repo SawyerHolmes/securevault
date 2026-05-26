@@ -121,17 +121,17 @@
             <!-- Generator card -->
             <div class="generator-card">
 
-                <div class="generator-top">
-                    <button id="generate-btn" class="btn-white generator-btn">
-                        <i data-lucide="sparkles"></i> Generate
-                    </button>
+                <header class="generator-header">
+                    <div class="generator-title">
+                        <i data-lucide="sparkles"></i>
+                        <span>Generator</span>
+                    </div>
                     <div class="gen-length-display">
                         <span class="gen-length-value" id="gen-length-label">20</span>
                         <span class="gen-length-unit">chars</span>
                     </div>
-                </div>
+                </header>
 
-                <!-- Slider — full width row -->
                 <div class="generator-slider-row">
                     <div class="slider-track" id="gen-slider">
                         <div class="slider-fill"     id="slider-fill"></div>
@@ -141,10 +141,9 @@
                     </div>
                 </div>
 
-                <!-- Character type pill toggles -->
-                <div class="generator-options">
+                <div class="generator-options" role="group" aria-label="Character types">
                     <label class="gen-option">
-                        <input type="checkbox" id="gen-upper" checked> A–Z
+                        <input type="checkbox" id="gen-upper"   checked> A–Z
                     </label>
                     <label class="gen-option">
                         <input type="checkbox" id="gen-numbers" checked> 0–9
@@ -153,6 +152,10 @@
                         <input type="checkbox" id="gen-symbols" checked> !@#
                     </label>
                 </div>
+
+                <button type="button" id="generate-btn" class="btn-black generator-btn-primary">
+                    Generate password
+                </button>
 
             </div>
         </div>
