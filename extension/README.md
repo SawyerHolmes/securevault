@@ -2,15 +2,20 @@
 
 A Manifest V3 extension that scans pages for `<input type="password">` and drops a small lime "SV" pin near each one. Click the pin and the extension opens your hosted Securevault instance in a new tab.
 
-## What this extension currently does
+## What this extension does
 
 - **Popup** with a single field — paste the URL of your hosted Securevault (e.g. `https://sawyerholmes.github.io/securevault/`). The popup persists the URL via `chrome.storage.local` and opens it in a new tab on demand.
-- **Content script** runs on every page (`<all_urls>`). It finds password inputs and pins a small lime button next to them. Clicking the pin posts an `open-vault` message to the background worker, which opens the saved vault URL.
-- **Options page** lets you change the saved URL later.
-
-## What it intentionally does *not* do yet
-
-Cross-origin autofill — sending an entry's password from the vault tab back into the page that triggered the request — needs a `window.postMessage` handshake on a trusted origin, plus a UI in the vault for picking which entry to send. That bridge is **not** implemented here. Today the pin is a fancy bookmark to your vault.
+- **Content script** runs on every page (`<all_urls>`) and pins a small lime "SV" button next to each visible `<input type="password">`.
+- **Autofill bridge** — clicking the pin:
+    1. Sends `{ type: "request-fill", origin }` to the background worker.
+    2. Background generates a one-shot `requestId`, remembers the originating tab, and opens the vault with `#sv-fill=<requestId>&origin=<origin>` in the hash.
+    3. The vault page sees the hash, renders a lime "Fill credentials for …" banner, and filters its list to logins whose URL matches the origin.
+    4. The user picks an entry. The vault page calls `window.postMessage({ __securevault: true, type: "vault-pick", requestId, username, password })`.
+    5. The content script on the vault tab forwards that postMessage to the background.
+    6. Background looks up the request, calls `chrome.tabs.sendMessage(sourceTabId, { type: "fill", username, password })`, and closes the vault tab.
+    7. The content script on the original page sets the username + password using the native setter (so React / Vue notice), dispatches `input` + `change` events, and briefly flashes a lime outline on each filled field.
+- **Options page** lets you change the saved vault URL later.
+- **Request lifecycle**: requests time out after 5 minutes, get dropped if the vault tab is closed without a pick, and are one-shot (no `requestId` is honoured twice).
 
 ## Load locally
 

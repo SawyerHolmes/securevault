@@ -379,7 +379,7 @@ Mobile gets light haptic feedback on these interactions (via `navigator.vibrate`
 3. **No rounded corners** on cards, inputs, modals, toggles, sliders, the bulk-action bar. Only on the pill nav, pill buttons, tag chips, and the mobile bottom CTA.
 4. **No italics in UI copy.** User-typed markdown in notes is allowed.
 5. **No more than three colours on screen at once**: black/white/lime in dark mode, white/black/lime in light mode. Grey is allowed as text/border tone but doesn't count.
-6. **Lime is never a large surface**. It appears as: the nav bar, button fills, selected tag chips, active segmented control segment, focus accents, the 6% hover tint, the strong-strength bar, the featured numeral, the breach indicator, the TOTP countdown bar, the pull-to-refresh bar, the welcome modal call-to-action. Nothing larger.
+6. **Lime is never a large surface**. It appears as: the nav bar, button fills, selected tag chips, active segmented control segment, focus accents, the 6% hover tint, the strong-strength bar, the featured numeral, the breach indicator, the TOTP countdown bar, the pull-to-refresh bar, the welcome modal CTA. Nothing larger.
 7. **No emoji** in UI text.
 8. **No mid-sentence bold** in UI prose (settings descriptions, modal copy, etc.). Bold is for labels and section headers only. User markdown is exempt.
 9. **Two weights only**: 400 and 500. Never use `font-weight: 700` or `bold`.

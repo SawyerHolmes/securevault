@@ -13,6 +13,9 @@ let sortOrder        = "asc";
 let activeTagFilter  = null;
 let selectMode       = false;
 let selectedIds      = new Set();
+let fillRequestId    = null;
+let fillOrigin       = null;
+let fillHost         = null;
 
 function findEntry(id) {
     return vault.find(e => e.id === id);
@@ -275,6 +278,10 @@ function renderVault(filter) {
 
     // Active vault excludes soft-deleted + archived entries
     let items = vault.filter(e => !e.deleted && !e.archived);
+    if (fillRequestId) {
+        // In fill mode show only login entries whose URL matches the origin
+        items = items.filter(e => (e.type || "login") === "login" && entryMatchesFill(e));
+    }
     if (activeTagFilter) {
         items = items.filter(e => (e.tags || []).includes(activeTagFilter));
     }
@@ -483,6 +490,11 @@ function renderVault(filter) {
 
         card.dataset.id = entry.id;
         card.addEventListener("click", e => {
+            if (fillRequestId) {
+                if (e.target.closest(".card-copy-btn")) return;
+                sendFillPick(entry);
+                return;
+            }
             if (selectMode) {
                 if (selectedIds.has(entry.id)) selectedIds.delete(entry.id);
                 else                            selectedIds.add(entry.id);
@@ -494,7 +506,7 @@ function renderVault(filter) {
             if (e.target.closest(".card-copy-btn")) return;
             haptic(6); openCard(entry);
         });
-        if (sortField === "manual" && !selectMode) attachDragReorder(card, entry);
+        if (sortField === "manual" && !selectMode && !fillRequestId) attachDragReorder(card, entry);
         vaultContainer.appendChild(card);
     });
     renderIcons();
@@ -1371,6 +1383,61 @@ setInterval(() => {
 })();
 
 // ============================================================
+// EXTENSION FILL MODE
+// When the page is opened with #sv-fill=<requestId>&origin=<origin>
+// (only ever set by the companion extension), we render a banner at
+// the top, filter the list to entries whose URL matches the origin,
+// and route clicks into a postMessage handshake instead of the
+// regular modal.
+// ============================================================
+function setupFillMode() {
+    const hash = window.location.hash || "";
+    const id   = /[#&]sv-fill=([\w-]+)/.exec(hash);
+    const og   = /[#&]origin=([^&]+)/.exec(hash);
+    if (!id || !og) return;
+
+    fillRequestId = id[1];
+    fillOrigin    = decodeURIComponent(og[1]);
+    try { fillHost = new URL(fillOrigin).hostname; } catch { fillHost = fillOrigin; }
+    document.body.classList.add("fill-mode");
+
+    const pageContent = document.querySelector(".page-content");
+    if (!pageContent) return;
+    const banner = document.createElement("div");
+    banner.className = "fill-banner";
+    banner.innerHTML =
+        '<div class="fill-banner-text">' +
+            '<span class="fill-banner-label">Fill credentials</span>' +
+            '<span class="fill-banner-origin"></span>' +
+        '</div>' +
+        '<button type="button" class="btn-white btn-row" id="fill-cancel">Cancel</button>';
+    banner.querySelector(".fill-banner-origin").textContent = fillHost || fillOrigin;
+    pageContent.insertBefore(banner, pageContent.firstChild);
+    document.getElementById("fill-cancel").addEventListener("click", () => window.close());
+}
+
+function entryMatchesFill(entry) {
+    if (!entry.url || !fillHost) return false;
+    try {
+        const u = new URL(entry.url).hostname.toLowerCase();
+        const h = fillHost.toLowerCase();
+        return u === h || u.endsWith("." + h) || h.endsWith("." + u);
+    } catch { return false; }
+}
+
+function sendFillPick(entry) {
+    if (!fillRequestId) return;
+    window.postMessage({
+        __securevault: true,
+        type:      "vault-pick",
+        requestId: fillRequestId,
+        username:  entry.username || "",
+        password:  entry.password || ""
+    }, "*");
+    // The background closes this tab once the message is relayed.
+}
+
+// ============================================================
 // FIRST-RUN WELCOME
 // ============================================================
 function maybeShowWelcome() {
@@ -1395,6 +1462,7 @@ function maybeShowWelcome() {
     applyLightMode();
     applyViewMode(settings.viewMode || "list");
     sortField = settings.defaultSort || "name";
+    setupFillMode();
     renderVault();
-    maybeShowWelcome();
+    if (!fillRequestId) maybeShowWelcome();
 })();

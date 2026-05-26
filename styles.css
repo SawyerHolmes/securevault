@@ -356,6 +356,7 @@ body.drawer-open { overflow: hidden; }
 .mobile-cta:hover { opacity: 0.85; }
 
 
+
 /* ============================================================
    4. BUTTONS
 ============================================================ */
@@ -735,7 +736,10 @@ body.select-mode .vault-card           { grid-template-columns: 24px 56px 1fr au
 body.select-mode .vault-card .card-copy-btn { display: none; }
 body.select-mode .vault-card.selected  { background: linear-gradient(90deg, rgba(199, 241, 0, 0.10), transparent); }
 
-/* Bottom bulk-action bar */
+/* Bottom bulk-action bar — only visible in select mode. The
+   [hidden] attribute is the source of truth; the rule below makes
+   sure the display: flex doesn't override it. */
+.bulk-actions[hidden] { display: none; }
 .bulk-actions {
     position: fixed;
     left: 0; right: 0; bottom: 0;
@@ -778,6 +782,47 @@ body.select-mode main { padding-bottom: 120px; }
 .vault-card.draggable:active { cursor: grabbing; }
 .vault-card.dragging     { opacity: 0.4; }
 .vault-card.drag-over    { box-shadow: inset 0 2px 0 0 var(--accent); }
+
+/* Extension fill mode — vault opened with #sv-fill=… in the URL.
+   The lime banner explains who's asking, the meta + filter chrome
+   step out of the way so the picker is the only thing to do. */
+.fill-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 12px 16px;
+    margin: 0 0 24px;
+}
+.fill-banner-text {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+}
+.fill-banner-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.fill-banner-origin {
+    font-size: 13px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.fill-banner .btn-row { border-color: var(--accent-ink); color: var(--accent-ink); }
+.fill-banner .btn-row:hover { background: var(--accent-ink); color: var(--accent); }
+
+body.fill-mode header,
+body.fill-mode .vault-meta-row,
+body.fill-mode .tag-filter-bar,
+body.fill-mode .vault-controls { display: none; }
+body.fill-mode .page-title { margin-top: 0; }
 
 /* Pull-to-refresh — only renders on mobile. The bar visually
    extends as the user drags down past the top of the page. */
@@ -2261,9 +2306,8 @@ body[data-view-type="card"]  .type-only-note {
     .nav-burger { display: inline-flex; }
 
     /* Reveal fixed bottom CTA on pages that include the markup */
-    .mobile-cta { display: inline-flex; }
-    /* Add extra bottom padding so the CTA doesn't overlap content */
-    main { padding-bottom: 96px; }
+    .mobile-cta     { display: inline-flex; }
+    main            { padding-bottom: 96px; }
 
     .login-container { margin: 48px auto; }
     .login-title { font-size: 36px; }
