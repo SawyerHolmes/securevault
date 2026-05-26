@@ -36,7 +36,6 @@ const usernameInput  = document.getElementById("entry-username");
 const passwordInput  = document.getElementById("entry-password");
 const notesInput     = document.getElementById("entry-notes");
 const toggleBtn      = document.getElementById("toggle-password");
-const toggleIcon     = toggleBtn.querySelector("i");
 const generateBtn    = document.getElementById("generate-btn");
 const genLengthLabel = document.getElementById("gen-length-label");
 const strengthBar    = document.getElementById("strength-bar");
@@ -175,9 +174,9 @@ window.addEventListener("resize", () => { buildTicks(); renderSlider(); });
 // TOGGLE PASSWORD VISIBILITY
 // ============================================================
 toggleBtn.addEventListener("click", () => {
-    const isVisible      = passwordInput.type === "text";
-    passwordInput.type   = isVisible ? "password" : "text";
-    toggleIcon.className = isVisible ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+    const isVisible    = passwordInput.type === "text";
+    passwordInput.type = isVisible ? "password" : "text";
+    setIcon(toggleBtn, isVisible ? "eye-off" : "eye");
     haptic(6);
 });
 
@@ -197,9 +196,9 @@ generateBtn.addEventListener("click", () => {
 
     const password = generatePassword(length, chars);
 
-    passwordInput.value  = password;
-    passwordInput.type   = "text";
-    toggleIcon.className = "fa-solid fa-eye";
+    passwordInput.value = password;
+    passwordInput.type  = "text";
+    setIcon(toggleBtn, "eye");
     checkStrength(password);
 
     haptic([10, 30, 10]); // generate feedback
@@ -224,10 +223,10 @@ function checkStrength(password) {
 
     const levels = [
         { label: "",        color: "transparent", width: "0%"   },
-        { label: "Weak",    color: "#e74c3c",     width: "25%"  },
-        { label: "Fair",    color: "#e67e22",     width: "50%"  },
-        { label: "Good",    color: "#f1c40f",     width: "75%"  },
-        { label: "Strong",  color: "#2ecc71",     width: "100%" },
+        { label: "Weak",    color: "#FF3838",     width: "25%"  },
+        { label: "Fair",    color: "#E67E22",     width: "50%"  },
+        { label: "Good",    color: "#F1C40F",     width: "75%"  },
+        { label: "Strong",  color: "#C7F100",     width: "100%" },
     ];
 
     const level = score <= 1 ? 1 : score <= 3 ? 2 : score <= 4 ? 3 : 4;

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Dark mode applied immediately to prevent flash -->
     <script>
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
@@ -15,123 +14,124 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
 <header>
-    <div class="logo">SecureVault</div>
+    <div class="logo">■ Securevault</div>
     <nav class="menu">
         <a href="vault.html" class="active">Vault</a>
-        <a href="add-entry.html">Add Entry</a>
+        <a href="add-entry.html">Add</a>
         <a href="settings.html">Settings</a>
         <a href="login.html" id="logout-btn">Logout</a>
     </nav>
 </header>
 
-<!-- Search + Sort -->
-<div class="vault-controls">
-    <div class="search-wrapper">
-        <svg class="search-icon" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
-            <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2"/>
-        </svg>
-        <input type="text" id="search-input" placeholder="Search entries…" autocomplete="off">
-        <svg class="sort-icon" id="sort-toggle" viewBox="0 0 24 24">
-            <line x1="4" y1="6"  x2="20" y2="6"  stroke="currentColor" stroke-width="2"/>
-            <circle cx="10" cy="6"  r="2" fill="currentColor"/>
-            <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="2"/>
-            <circle cx="14" cy="12" r="2" fill="currentColor"/>
-            <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="2"/>
-            <circle cx="8"  cy="18" r="2" fill="currentColor"/>
-        </svg>
-        <div class="sort-menu" id="sort-menu">
-            <div class="sort-field" data-field="name">Site Name <span class="indicator"></span></div>
-            <div class="sort-field" data-field="username">Username <span class="indicator"></span></div>
-            <div class="divider"></div>
-            <div class="sort-order" data-order="asc">Ascending <span class="indicator"></span></div>
-            <div class="sort-order" data-order="desc">Descending <span class="indicator"></span></div>
+<main>
+
+    <h1 class="page-title">Vault.</h1>
+
+    <div class="vault-controls">
+        <div class="search-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <input type="text" id="search-input" placeholder="Search entries…" autocomplete="off">
+            <svg class="sort-icon" id="sort-toggle" viewBox="0 0 24 24">
+                <line x1="4" y1="6"  x2="20" y2="6"  stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="10" cy="6"  r="2" fill="currentColor"/>
+                <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="14" cy="12" r="2" fill="currentColor"/>
+                <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="8"  cy="18" r="2" fill="currentColor"/>
+            </svg>
+            <div class="sort-menu" id="sort-menu">
+                <div class="sort-field" data-field="name">Site name <span class="indicator"></span></div>
+                <div class="sort-field" data-field="username">Username <span class="indicator"></span></div>
+                <div class="divider"></div>
+                <div class="sort-order" data-order="asc">Ascending <span class="indicator"></span></div>
+                <div class="sort-order" data-order="desc">Descending <span class="indicator"></span></div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Vault Grid -->
-<div class="vault-container" id="vault-container"></div>
+    <div id="vault-container"></div>
+
+</main>
 
 <!-- Expanded Card Modal -->
 <div class="expanded-card" id="expanded-card">
     <div class="expanded-content">
 
         <div class="expanded-header">
-            <h2 id="expanded-name">Entry Name</h2>
+            <h2 id="expanded-name">Entry name</h2>
             <div class="top-right-buttons">
                 <button class="btn-white edit-top" id="edit-btn">
-                    <i class="fa-solid fa-pen"></i> Edit
+                    <i data-lucide="pencil"></i> Edit
                 </button>
-                <div id="save-cancel-wrapper" style="display:none; gap:6px;">
+                <div id="save-cancel-wrapper" style="display:none;">
                     <button class="btn-black" id="save-btn">Save</button>
                     <button class="btn-white" id="cancel-btn">Cancel</button>
                 </div>
             </div>
         </div>
 
-        <!-- URL -->
         <div class="field" id="url-field">
             <label>URL</label>
             <div class="value url-value" id="expanded-url">—</div>
         </div>
 
-        <!-- Username -->
         <div class="field">
             <label>Username</label>
             <div class="value-row">
                 <div class="value" id="expanded-username">—</div>
                 <button class="icon-btn copy-icon-btn" id="copy-username-btn" title="Copy username" aria-label="Copy username">
-                    <i class="fa-regular fa-copy"></i>
+                    <i data-lucide="copy"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Password -->
         <div class="field">
             <label>Password</label>
             <div class="value-row">
-                <div class="password-wrapper" style="flex:1;">
-                    <div class="value" id="expanded-password">••••••••</div>
-                    <button id="toggle-password" class="icon-btn" title="Show/hide password" aria-label="Show or hide password">
-                        <i class="fa-solid fa-eye-slash"></i>
-                    </button>
-                </div>
+                <div class="value" id="expanded-password">••••••••</div>
+                <button id="toggle-password" class="icon-btn" title="Show/hide password" aria-label="Show or hide password">
+                    <i data-lucide="eye-off"></i>
+                </button>
                 <button class="icon-btn copy-icon-btn" id="copy-btn" title="Copy password" aria-label="Copy password">
-                    <i class="fa-regular fa-copy"></i>
+                    <i data-lucide="copy"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Notes -->
         <div class="field">
             <label>Notes</label>
             <div class="value notes" id="expanded-notes">No notes</div>
         </div>
 
-        <button class="btn-black" id="remove-btn" style="background:#e74c3c; margin-top:4px;">Remove entry</button>
+        <div id="expanded-modified"></div>
 
-        <div class="copy-toast" id="copy-toast">Copied!</div>
+        <button class="btn-danger" id="remove-btn">Remove entry</button>
 
     </div>
 </div>
+
+<div class="copy-toast" id="copy-toast">Copied!</div>
 
 <!-- Confirmation Modal -->
 <div class="confirmation-overlay" id="confirmation-overlay">
     <div class="confirmation-modal">
         <p id="confirmation-message">Are you sure you want to remove this entry?</p>
         <div class="confirmation-buttons">
-            <button class="btn-white" id="confirm-yes">Yes, remove</button>
-            <button class="btn-black" id="confirm-no">Cancel</button>
+            <button class="btn-danger" id="confirm-yes">Yes, remove</button>
+            <button class="btn-white" id="confirm-no">Cancel</button>
         </div>
     </div>
 </div>
 
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/crypto-utils.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/auth.js"></script>

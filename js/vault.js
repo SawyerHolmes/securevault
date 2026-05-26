@@ -233,13 +233,14 @@ function renderVault(filter) {
         const div = document.createElement("div");
         div.className = "empty-state";
         div.innerHTML = q
-            ? `<div class="empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+            ? `<div class="empty-icon"><i data-lucide="search"></i></div>
                <h2>No results</h2><p>Try a different search term</p>`
-            : `<div class="empty-icon"><i class="fa-solid fa-vault"></i></div>
+            : `<div class="empty-icon"><i data-lucide="lock"></i></div>
                <h2>Your vault is empty</h2>
                <p>Add your first password to get started</p>
                <a href="add-entry.html" class="empty-add-btn">Add entry</a>`;
         vaultContainer.appendChild(div);
+        renderIcons();
         return;
     }
 
@@ -271,7 +272,7 @@ function renderVault(filter) {
             const cb = document.createElement("button");
             cb.className = "card-copy-btn";
             cb.setAttribute("aria-label", "Copy credentials");
-            cb.innerHTML = `<i class="fa-regular fa-copy"></i>`;
+            cb.innerHTML = `<i data-lucide="copy"></i>`;
             cb.addEventListener("click", e => showCopyMenu(e, entry));
             tdCopy.appendChild(cb);
             tr.appendChild(tdCopy);
@@ -284,6 +285,7 @@ function renderVault(filter) {
         });
         table.appendChild(tbody);
         vaultContainer.appendChild(table);
+        renderIcons();
         return;
     }
 
@@ -319,7 +321,7 @@ function renderVault(filter) {
             const cb = document.createElement("button");
             cb.className = "gallery-copy-btn";
             cb.setAttribute("aria-label", "Copy credentials");
-            cb.innerHTML = `<i class="fa-regular fa-copy"></i>`;
+            cb.innerHTML = `<i data-lucide="copy"></i>`;
             cb.addEventListener("click", e => showCopyMenu(e, entry));
 
             card.appendChild(icon);
@@ -333,34 +335,40 @@ function renderVault(filter) {
             });
             vaultContainer.appendChild(card);
         });
+        renderIcons();
         return;
     }
 
-    // ---- GRID VIEW ----
+    // ---- DEFAULT STRIPE VIEW ----
     vaultContainer.style.display = "";
-    items.forEach(entry => {
+    items.forEach((entry, i) => {
         const card     = document.createElement("div");
         card.className = "vault-card";
 
-        const h2 = document.createElement("h2");
-        h2.textContent = entry.name || "No title";
-        card.appendChild(h2);
+        const num = document.createElement("div");
+        num.className   = "row-num";
+        num.textContent = String(i + 1).padStart(2, "0");
+        card.appendChild(num);
 
-        if (entry.url) {
-            const p = document.createElement("p");
-            p.textContent = entry.url;
-            card.appendChild(p);
-        }
-        if (entry.username) {
-            const p = document.createElement("p");
-            p.textContent = entry.username;
-            card.appendChild(p);
-        }
+        const text = document.createElement("div");
+        text.className = "row-text";
+
+        const h2 = document.createElement("h2");
+        h2.className   = "row-name";
+        h2.textContent = entry.name || "No title";
+        text.appendChild(h2);
+
+        const sub = document.createElement("p");
+        sub.className   = "row-username";
+        sub.textContent = entry.username || entry.url || "";
+        text.appendChild(sub);
+
+        card.appendChild(text);
 
         const cb = document.createElement("button");
         cb.className = "card-copy-btn";
         cb.setAttribute("aria-label", "Copy credentials");
-        cb.innerHTML = `<i class="fa-regular fa-copy"></i>`;
+        cb.innerHTML = `<i data-lucide="copy"></i>`;
         cb.addEventListener("click", e => showCopyMenu(e, entry));
         card.appendChild(cb);
 
@@ -371,6 +379,7 @@ function renderVault(filter) {
         });
         vaultContainer.appendChild(card);
     });
+    renderIcons();
 }
 
 // ============================================================
@@ -405,7 +414,7 @@ function openCard(entry) {
         expandedModified.style.display = date ? "" : "none";
     }
 
-    togglePasswordBtn.querySelector("i").className = "fa-solid fa-eye-slash";
+    setIcon(togglePasswordBtn, "eye-off");
     editBtn.style.display           = "inline-flex";
     saveCancelWrapper.style.display = "none";
     expandedCard.style.display      = "flex";
@@ -509,8 +518,7 @@ togglePasswordBtn.addEventListener("click", () => {
     } else {
         expandedPassword.textContent = passwordVisible ? entry.password : "••••••••";
     }
-    togglePasswordBtn.querySelector("i").className = passwordVisible
-        ? "fa-solid fa-eye" : "fa-solid fa-eye-slash";
+    setIcon(togglePasswordBtn, passwordVisible ? "eye" : "eye-off");
     haptic(4);
 });
 

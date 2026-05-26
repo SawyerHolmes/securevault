@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Dark mode applied immediately to prevent flash -->
     <script>
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
-            // Default to dark mode unless the user has opted into light
             if (s.lightMode !== true) document.documentElement.classList.add("dark");
         })();
     </script>
@@ -16,25 +14,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
-<header>
-    <div class="logo">SecureVault</div>
-</header>
 
 <main>
     <div class="login-container">
 
         <div>
-            <h1 class="login-title">Welcome back</h1>
-            <p class="login-subtitle">Enter your master password to unlock your vault.</p>
+            <h1 class="login-title">Enter vault.</h1>
+            <p class="login-subtitle">Encrypted local · AES-256</p>
         </div>
 
         <div>
-            <label for="master-password" style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--subtext);">Master Password</label>
-            <div class="password-wrapper" style="margin-top:6px;">
+            <label for="master-password">Master password</label>
+            <div class="password-wrapper">
                 <input
                     type="password"
                     id="master-password"
@@ -44,14 +37,14 @@
                     autocapitalize="off"
                     spellcheck="false">
                 <button type="button" id="toggle-password" class="toggle-password" title="Show/hide password" aria-label="Show or hide password">
-                    <i class="fa-solid fa-eye-slash"></i>
+                    <i data-lucide="eye-off"></i>
                 </button>
             </div>
         </div>
 
         <div id="confirm-password-field" style="display:none;">
-            <label for="confirm-master-password" style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--subtext);">Confirm Password</label>
-            <div class="password-wrapper" style="margin-top:6px;">
+            <label for="confirm-master-password">Confirm password</label>
+            <div class="password-wrapper">
                 <input
                     type="password"
                     id="confirm-master-password"
@@ -61,35 +54,31 @@
                     autocapitalize="off"
                     spellcheck="false">
             </div>
-            <p style="font-size:0.78rem;color:var(--subtext);margin:8px 0 0;line-height:1.5;">
-                First-time setup: this password protects your vault. There is no way to recover it.
-            </p>
+            <p>First-time setup. This password protects your vault. There is no way to recover it.</p>
         </div>
 
-        <button class="btn-black" id="login-btn">Unlock vault</button>
-
         <div id="login-error" class="login-error"></div>
+
+        <button class="btn-black" id="login-btn">Unlock</button>
 
         <button class="link-btn" id="reset-btn">Forgot password? Reset vault</button>
 
     </div>
 </main>
 
-<!-- Reset vault confirmation modal -->
 <div class="confirmation-overlay" id="reset-overlay">
     <div class="confirmation-modal">
-        <p style="font-weight:600; margin:0 0 6px;">Reset vault?</p>
-        <p style="font-size:0.82rem; color:var(--subtext); margin:0; line-height:1.5;">
-            This permanently deletes all passwords and settings on this device.
-            If you have a Gist backup you can restore it after setting a new password.
-        </p>
-        <div class="confirmation-buttons" style="margin-top:12px;">
-            <button id="reset-confirm-yes" class="btn-white" style="color:#e74c3c; border-color:#e74c3c;">Yes, wipe everything</button>
-            <button id="reset-confirm-no"  class="btn-black">Cancel</button>
+        <p class="confirm-title">Reset vault?</p>
+        <p>This permanently deletes all passwords and settings on this device. If you have a Gist backup you can restore it after setting a new password.</p>
+        <div class="confirmation-buttons">
+            <button id="reset-confirm-yes" class="btn-danger">Yes, wipe everything</button>
+            <button id="reset-confirm-no"  class="btn-white">Cancel</button>
         </div>
     </div>
 </div>
 
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/crypto-utils.js"></script>
 <script src="js/login.js"></script>
 

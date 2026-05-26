@@ -31,7 +31,6 @@ const confirmInput      = document.getElementById("confirm-master-password");
 const confirmField      = document.getElementById("confirm-password-field");
 const loginError        = document.getElementById("login-error");
 const toggleBtn         = document.getElementById("toggle-password");
-const toggleIcon        = toggleBtn.querySelector("i");
 
 // ============================================================
 // FIRST-TIME SETUP DETECTION
@@ -260,9 +259,9 @@ loginBtn.addEventListener("click", async () => {
 // TOGGLE PASSWORD VISIBILITY
 // ============================================================
 toggleBtn.addEventListener("click", () => {
-    const isPassword     = passwordInput.type === "password";
-    passwordInput.type   = isPassword ? "text" : "password";
-    toggleIcon.className = isPassword ? "fa-solid fa-eye" : "fa-solid fa-eye-slash";
+    const isPassword   = passwordInput.type === "password";
+    passwordInput.type = isPassword ? "text" : "password";
+    setIcon(toggleBtn, isPassword ? "eye" : "eye-off");
 });
 
 passwordInput.addEventListener("keyup", e => {

@@ -15,7 +15,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="js/icons.js"></script>
     <script src="js/crypto-utils.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/sync.js"></script>
@@ -24,10 +25,10 @@
 <body>
 
 <header>
-    <div class="logo">SecureVault</div>
+    <div class="logo">■ Securevault</div>
     <nav class="menu">
         <a href="vault.html">Vault</a>
-        <a href="add-entry.html">Add Entry</a>
+        <a href="add-entry.html">Add</a>
         <a href="settings.html" class="active">Settings</a>
         <a href="login.html" id="logout-btn">Logout</a>
     </nav>
@@ -36,9 +37,10 @@
 <main>
     <div class="settings-container">
 
-        <!-- Account & Security -->
+        <h1 class="page-title">Settings.</h1>
+
         <div class="settings-group">
-            <div class="settings-title">Account & Security</div>
+            <div class="settings-title">Account & security</div>
             <div class="settings-section">
 
                 <div class="setting-item">
@@ -52,7 +54,7 @@
                 </div>
 
                 <div class="setting-item no-divider">
-                    <button class="btn-black" id="change-password-btn" style="width:auto; align-self:flex-start; padding: 8px 18px;">Change password</button>
+                    <button class="btn-black btn-inline" id="change-password-btn">Change password</button>
                     <div id="password-change-status" class="setting-item-status"></div>
                 </div>
 
@@ -132,10 +134,10 @@
                     <div class="info-wrap">
                         <label for="github-token">GitHub personal access token</label>
                         <div style="position:relative;">
-                            <button class="info-btn" id="pat-info-btn" aria-label="About personal access tokens"><i class="fa-solid fa-circle-info"></i></button>
+                            <button class="info-btn" id="pat-info-btn" aria-label="About personal access tokens"><i data-lucide="info"></i></button>
                             <div class="tooltip" id="pat-tooltip">
                                 Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a>
-                                → Generate new token (classic) → tick <strong>gist</strong> scope only.
+                                → Generate new token (classic) → tick the gist scope only.
                             </div>
                         </div>
                     </div>
@@ -146,10 +148,10 @@
                     <div class="info-wrap">
                         <label for="gist-id">Gist ID</label>
                         <div style="position:relative;">
-                            <button class="info-btn" id="gist-info-btn" aria-label="About Gist IDs"><i class="fa-solid fa-circle-info"></i></button>
+                            <button class="info-btn" id="gist-info-btn" aria-label="About Gist IDs"><i data-lucide="info"></i></button>
                             <div class="tooltip" id="gist-tooltip">
                                 Create a secret Gist at <a href="https://gist.github.com" target="_blank">gist.github.com</a>
-                                with a file called <strong>vault.json</strong>, then copy the ID from the URL.
+                                with a file called vault.json, then copy the ID from the URL.
                             </div>
                         </div>
                     </div>
@@ -161,7 +163,7 @@
                     <button class="btn-white" id="pull-btn">Pull from Gist</button>
                 </div>
 
-                <div class="setting-item no-divider" style="padding-top:0;">
+                <div class="setting-item no-divider">
                     <div id="sync-status" class="setting-item-status"></div>
                 </div>
 

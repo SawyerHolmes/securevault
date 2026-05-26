@@ -15,15 +15,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
 <header>
-    <div class="logo">SecureVault</div>
+    <div class="logo">■ Securevault</div>
     <nav class="menu">
         <a href="vault.html">Vault</a>
-        <a href="add-entry.html" class="active">Add Entry</a>
+        <a href="add-entry.html" class="active">Add</a>
         <a href="settings.html">Settings</a>
         <a href="login.html" id="logout-btn">Logout</a>
     </nav>
@@ -32,7 +31,7 @@
 <main>
     <div class="add-entry-container">
 
-        <h1 class="add-entry-title">Add entry</h1>
+        <h1 class="page-title">Add entry.</h1>
 
         <div class="field">
             <label for="entry-name">Name</label>
@@ -54,7 +53,7 @@
             <div class="password-wrapper">
                 <input type="password" id="entry-password" placeholder="••••••••" autocomplete="new-password">
                 <button id="toggle-password" class="icon-btn" title="Show/hide" aria-label="Show or hide password">
-                    <i class="fa-solid fa-eye-slash"></i>
+                    <i data-lucide="eye-off"></i>
                 </button>
             </div>
 
@@ -71,7 +70,7 @@
 
                 <div class="generator-top">
                     <button id="generate-btn" class="btn-white generator-btn">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
+                        <i data-lucide="sparkles"></i> Generate
                     </button>
                     <div class="gen-length-display">
                         <span class="gen-length-value" id="gen-length-label">20</span>
@@ -118,6 +117,8 @@
     </div>
 </main>
 
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/crypto-utils.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/auth.js"></script>
