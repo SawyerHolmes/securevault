@@ -104,6 +104,47 @@ function setSyncStatus(msg, color) {
 }
 
 // ============================================================
+// BIOMETRIC UNLOCK
+// ============================================================
+async function setupBiometricToggle() {
+    const row    = document.getElementById("biometric-row");
+    const toggle = document.getElementById("biometric-toggle");
+    const status = document.getElementById("biometric-status");
+    if (!row || !toggle) return;
+
+    const available = await isBiometricAvailable();
+    if (!available) {
+        row.style.display = "";
+        toggle.disabled   = true;
+        if (status) status.textContent = "This device doesn't expose a platform authenticator.";
+        return;
+    }
+
+    row.style.display  = "";
+    toggle.checked     = biometricConfigured();
+
+    toggle.addEventListener("change", async () => {
+        if (toggle.checked) {
+            try {
+                await enableBiometric();
+                status.textContent = "Biometric unlock enabled.";
+                status.style.color = "var(--accent)";
+                window.showToast("Biometric unlock enabled", { tone: "success" });
+            } catch (e) {
+                toggle.checked = false;
+                status.textContent = e.message || "Couldn't enable biometric unlock.";
+                status.style.color = "var(--danger)";
+            }
+        } else {
+            disableBiometric();
+            status.textContent = "Biometric unlock disabled.";
+            status.style.color = "var(--text-secondary)";
+            window.showToast("Biometric unlock disabled");
+        }
+    });
+}
+
+// ============================================================
 // PASSWORD HEALTH
 // ============================================================
 async function runHealthScan(btn) {
@@ -266,6 +307,9 @@ function attachEventListeners() {
     // Password health scan
     const scanBtn = document.getElementById("health-scan-btn");
     if (scanBtn) scanBtn.addEventListener("click", () => runHealthScan(scanBtn));
+
+    // Biometric unlock
+    setupBiometricToggle();
 
     // Push to Gist
     const pushBtn = document.getElementById("push-btn");

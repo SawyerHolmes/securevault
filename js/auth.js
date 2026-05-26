@@ -115,6 +115,9 @@ async function changeMasterPassword(currentPassword, newPassword) {
     sessionStorage.setItem("vaultKey",      bytesToBase64(new Uint8Array(newKeyRaw)));
     sessionStorage.setItem("authenticated", "true");
 
+    // Biometric unlock wraps the old vault key — invalidate; user can re-enroll
+    localStorage.removeItem("biometric");
+
     // 5) Best-effort sync push
     if (typeof syncConfigured === "function" && await syncConfigured()) {
         const result = await pushToGist();

@@ -44,6 +44,31 @@ if (isFirstTime) {
 }
 
 // ============================================================
+// BIOMETRIC UNLOCK
+// Shown only when a credential has been registered on this device
+// ============================================================
+const bioBtn = document.getElementById("biometric-btn");
+if (bioBtn && typeof biometricConfigured === "function" && biometricConfigured()) {
+    bioBtn.style.display = "inline-flex";
+    bioBtn.addEventListener("click", async () => {
+        const remaining = isLockedOut();
+        if (remaining) return;
+        bioBtn.disabled = true;
+        bioBtn.textContent = "Authenticating…";
+        try {
+            await unlockBiometric();
+            resetAttempts();
+            window.location.replace("vault.html");
+        } catch (e) {
+            bioBtn.disabled = false;
+            bioBtn.innerHTML = '<i data-lucide="lock"></i> Use biometric';
+            if (window.renderIcons) window.renderIcons();
+            showError(e.message || "Biometric unlock failed.");
+        }
+    });
+}
+
+// ============================================================
 // LOCKOUT HELPERS
 // During a brute-force run, each 5-attempt cycle escalates the
 // lockout window: 30s, 1m, 2m, 4m, 8m, 16m, 32m, then capped at 1h.
@@ -307,7 +332,7 @@ resetConfirmYes.addEventListener("click", () => {
     const keysToRemove = [
         "vault", "vaultSalt", "authenticated", "lastActive",
         "loginAttempts", "lockedAt", "lockoutLevel",
-        "vaultSettings", "syncConfig"
+        "vaultSettings", "syncConfig", "biometric"
     ];
     keysToRemove.forEach(k => localStorage.removeItem(k));
     sessionStorage.clear();
