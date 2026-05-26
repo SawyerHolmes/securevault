@@ -623,7 +623,14 @@ saveBtn.addEventListener("click", () => {
     if (type === "login") {
         entry.url       = (document.getElementById("edit-url")?.value      || "").trim();
         entry.username  = (document.getElementById("edit-username")?.value  || "").trim();
-        entry.password  =  document.getElementById("edit-password")?.value  || "";
+        const newPassword = document.getElementById("edit-password")?.value || "";
+        // Track password history when it actually changes (last 10 versions)
+        if (entry.password && newPassword && newPassword !== entry.password) {
+            entry.passwordHistory = entry.passwordHistory || [];
+            entry.passwordHistory.unshift({ value: entry.password, changedAt: Date.now() });
+            if (entry.passwordHistory.length > 10) entry.passwordHistory.length = 10;
+        }
+        entry.password = newPassword;
         const totpVal   = (document.getElementById("edit-totp")?.value || "")
                               .replace(/\s+/g, "").toUpperCase();
         if (totpVal) entry.totp = totpVal;
@@ -761,6 +768,28 @@ removeBtn.addEventListener("click", () => {
     if (!settings.confirmDelete) { deleteEntry(); return; }
     haptic(10);
     confirmOverlay.style.display = "flex";
+});
+
+document.getElementById("archive-btn")?.addEventListener("click", () => {
+    const entry = findEntry(currentEntryId);
+    if (!entry) return;
+    entry.archived = Date.now();
+    saveVault();
+    closeCard();
+    renderVault(searchInput.value);
+    haptic([8, 20, 8]);
+    window.showToast("Entry archived", {
+        duration: 5000,
+        action: {
+            label: "Undo",
+            onClick: () => {
+                delete entry.archived;
+                saveVault();
+                renderVault(searchInput.value);
+                window.showToast("Restored", { tone: "success", duration: 1500 });
+            }
+        }
+    });
 });
 
 confirmYes.addEventListener("click", deleteEntry);

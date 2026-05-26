@@ -1056,12 +1056,18 @@ body.gallery-view #vault-container {
 #save-cancel-wrapper .btn-black,
 #save-cancel-wrapper .btn-white { flex: 1; }
 
-#remove-btn {
-    width: 100%;
+.entry-footer-actions {
+    display: flex;
+    gap: 8px;
     margin-top: 12px;
-    background: var(--danger) !important;
-    color: var(--danger-ink) !important;
-    border: none !important;
+}
+.entry-footer-actions .btn-white,
+.entry-footer-actions .btn-danger { flex: 1; }
+
+#remove-btn {
+    background: var(--danger);
+    color: var(--danger-ink);
+    border: none;
 }
 #remove-btn:hover { opacity: 0.85; }
 
@@ -1272,6 +1278,15 @@ body.gallery-view #vault-container {
     display: flex;
     justify-content: flex-end;
 }
+
+.history-reveal {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    word-break: break-all;
+}
+.history-row .row-text { min-width: 0; }
 
 .add-entry-container {
     width: 100%;

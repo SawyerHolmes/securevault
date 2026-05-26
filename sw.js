@@ -5,7 +5,7 @@
 // localStorage and never touches this cache.
 // ============================================================
 
-const CACHE = "securevault-v2";
+const CACHE = "securevault-v4";
 
 const ASSETS = [
     "./",
@@ -14,6 +14,8 @@ const ASSETS = [
     "./add-entry.html",
     "./settings.html",
     "./trash.html",
+    "./archive.html",
+    "./history.html",
     "./styles.css",
     "./manifest.webmanifest",
     "./icons/icon.svg",
@@ -32,7 +34,9 @@ const ASSETS = [
     "./js/settings.js",
     "./js/totp.js",
     "./js/health.js",
-    "./js/trash.js"
+    "./js/trash.js",
+    "./js/archive.js",
+    "./js/history.js"
 ];
 
 self.addEventListener("install", event => {
