@@ -104,6 +104,64 @@ function setSyncStatus(msg, color) {
 }
 
 // ============================================================
+// PASSWORD HEALTH
+// ============================================================
+async function runHealthScan(btn) {
+    const status = document.getElementById("health-status");
+    const list   = document.getElementById("health-problems");
+    const key    = await getStoredKey();
+    if (!key) { status.textContent = "Locked. Log in first."; return; }
+
+    const encrypted = localStorage.getItem("vault");
+    let entries = [];
+    if (encrypted) {
+        try { entries = await decryptData(encrypted, key); }
+        catch { status.textContent = "Could not decrypt vault."; return; }
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Scanning…";
+    status.textContent = "Checking 0 / " + entries.length;
+    status.style.color = "var(--text-secondary)";
+
+    const report = await scanVault(entries, (done, total) => {
+        status.textContent = `Checking ${done} / ${total}`;
+    });
+
+    document.getElementById("health-total").textContent    = report.total;
+    document.getElementById("health-weak").textContent     = report.weak;
+    document.getElementById("health-reused").textContent   = report.reused;
+    document.getElementById("health-breached").textContent = report.breached;
+
+    list.innerHTML = "";
+    if (report.problems.length === 0) {
+        status.textContent = "All good — no problems found.";
+        status.style.color = "var(--accent)";
+    } else {
+        status.textContent = `${report.problems.length} problem${report.problems.length === 1 ? "" : "s"} found.`;
+        status.style.color = "var(--danger)";
+        report.problems
+            .sort((a, b) => b.issues.length - a.issues.length)
+            .forEach(p => {
+                const li = document.createElement("li");
+                li.className = "health-problem";
+                const name = document.createElement("span");
+                name.className   = "health-problem-name";
+                name.textContent = p.entry.name || "Untitled";
+                const tags = document.createElement("span");
+                tags.className = "health-problem-tags";
+                tags.textContent = p.issues.join(" · ");
+                li.appendChild(name);
+                li.appendChild(tags);
+                list.appendChild(li);
+            });
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Re-scan vault";
+}
+
+// ============================================================
 // LIVE EFFECTS
 // ============================================================
 function applyLightMode(enabled) {
@@ -204,6 +262,10 @@ function attachEventListeners() {
 
     // Logout
     document.getElementById("logout-btn").addEventListener("click", logout);
+
+    // Password health scan
+    const scanBtn = document.getElementById("health-scan-btn");
+    if (scanBtn) scanBtn.addEventListener("click", () => runHealthScan(scanBtn));
 
     // Push to Gist
     const pushBtn = document.getElementById("push-btn");

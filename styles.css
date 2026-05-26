@@ -981,6 +981,25 @@ body.gallery-view #vault-container {
     font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
+.password-warning {
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.password-warning::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--danger);
+}
+
 .totp-row {
     display: flex;
     align-items: center;
@@ -1474,6 +1493,72 @@ body.gallery-view #vault-container {
     min-height: 14px;
 }
 
+.health-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.health-stat {
+    border: 1px solid var(--border);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.health-stat-num {
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    line-height: 1;
+}
+.health-stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+.health-stat-danger .health-stat-num { color: var(--danger); }
+.health-hint {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 12px;
+    line-height: 1.5;
+}
+.health-problems {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+}
+.health-problem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+}
+.health-problem:last-child { border-bottom: 1px solid var(--border); }
+.health-problem-name {
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text);
+}
+.health-problem-tags {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--danger);
+}
+
 .sync-buttons {
     display: flex;
     gap: 8px;
@@ -1762,6 +1847,8 @@ body.gallery-view #vault-container {
     .confirmation-overlay.show .confirmation-modal { animation: sheet-up 0.18s linear; }
 
     .sort-menu { width: 100%; }
+
+    .health-summary { grid-template-columns: repeat(2, 1fr); }
 }
 
 @keyframes sheet-up {

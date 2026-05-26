@@ -438,6 +438,20 @@ function openCard(entry) {
     expandedPassword.textContent = "••••••••";
     expandedNotes.textContent    = entry.notes || "No notes";
 
+    // Surface a "found in N breaches" warning if the user has run a
+    // health scan and this password came back compromised.
+    const warning = document.getElementById("password-warning");
+    if (warning) {
+        const breachCount = typeof breachCache !== "undefined" && entry.password
+            ? breachCache.get(entry.password) : undefined;
+        if (typeof breachCount === "number" && breachCount > 0) {
+            warning.textContent  = `Found in ${breachCount.toLocaleString()} breach${breachCount === 1 ? "" : "es"} — change it`;
+            warning.style.display = "flex";
+        } else {
+            warning.style.display = "none";
+        }
+    }
+
     if (expandedModified) {
         const date = formatDate(entry.updatedAt || entry.createdAt);
         expandedModified.textContent   = date ? `Modified ${date}` : "";

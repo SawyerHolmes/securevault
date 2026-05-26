@@ -28,7 +28,9 @@ const ASSETS = [
     "./js/login.js",
     "./js/vault.js",
     "./js/add-entry.js",
-    "./js/settings.js"
+    "./js/settings.js",
+    "./js/totp.js",
+    "./js/health.js"
 ];
 
 self.addEventListener("install", event => {
