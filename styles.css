@@ -685,6 +685,94 @@ body.list-view #vault-container {
 }
 .card-copy-btn:hover { border-color: var(--text); color: var(--text); }
 
+/* Vault meta row — count on the left, Select toggle on the right */
+.vault-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 16px 0 8px;
+}
+.vault-count {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+.vault-meta-action {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+}
+.vault-meta-action:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+/* Per-card checkbox — hidden by default, revealed in select mode */
+.vault-card-checkbox {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border-strong);
+    position: relative;
+    flex-shrink: 0;
+}
+.vault-card-checkbox.checked::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    background: var(--accent);
+}
+body.select-mode .vault-card-checkbox { display: block; }
+body.select-mode .vault-card           { grid-template-columns: 24px 56px 1fr auto; cursor: pointer; }
+body.select-mode .vault-card .card-copy-btn { display: none; }
+body.select-mode .vault-card.selected  { background: linear-gradient(90deg, rgba(199, 241, 0, 0.10), transparent); }
+
+/* Bottom bulk-action bar */
+.bulk-actions {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 1400;
+    background: var(--surface);
+    border-top: 1px solid var(--border-strong);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+.bulk-count {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+.bulk-actions-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+body.select-mode main { padding-bottom: 120px; }
+
+@media (max-width: 600px) {
+    .bulk-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .bulk-actions-buttons { justify-content: space-between; }
+    .bulk-actions-buttons .btn-row { flex: 1; }
+}
+
 /* Manual-sort drag-and-drop visual states */
 .vault-card.draggable    { cursor: grab; }
 .vault-card.draggable:active { cursor: grabbing; }

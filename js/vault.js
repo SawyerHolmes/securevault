@@ -11,6 +11,8 @@ let passwordVisible  = false;
 let sortField        = "name";
 let sortOrder        = "asc";
 let activeTagFilter  = null;
+let selectMode       = false;
+let selectedIds      = new Set();
 
 function findEntry(id) {
     return vault.find(e => e.id === id);
@@ -433,6 +435,12 @@ function renderVault(filter) {
     items.forEach((entry, i) => {
         const card     = document.createElement("div");
         card.className = "vault-card";
+        if (selectedIds.has(entry.id)) card.classList.add("selected");
+
+        const checkbox = document.createElement("div");
+        checkbox.className = "vault-card-checkbox";
+        if (selectedIds.has(entry.id)) checkbox.classList.add("checked");
+        card.appendChild(checkbox);
 
         const num = document.createElement("div");
         num.className   = "row-num";
@@ -475,13 +483,22 @@ function renderVault(filter) {
 
         card.dataset.id = entry.id;
         card.addEventListener("click", e => {
+            if (selectMode) {
+                if (selectedIds.has(entry.id)) selectedIds.delete(entry.id);
+                else                            selectedIds.add(entry.id);
+                updateBulkCount();
+                renderVault(searchInput.value);
+                haptic(4);
+                return;
+            }
             if (e.target.closest(".card-copy-btn")) return;
             haptic(6); openCard(entry);
         });
-        if (sortField === "manual") attachDragReorder(card, entry);
+        if (sortField === "manual" && !selectMode) attachDragReorder(card, entry);
         vaultContainer.appendChild(card);
     });
     renderIcons();
+    updateVaultMeta();
 }
 
 // HTML5 drag-and-drop: only enabled in manual sort mode.
@@ -1163,6 +1180,100 @@ document.addEventListener("DOMContentLoaded", () => {
         if (file) importFromFile(file);
         e.target.value = "";
     });
+});
+
+// ============================================================
+// BULK SELECT
+// ============================================================
+const selectToggleBtn = document.getElementById("select-toggle");
+const bulkActions     = document.getElementById("bulk-actions");
+const bulkCountEl     = document.getElementById("bulk-count");
+const vaultCountEl    = document.getElementById("vault-count");
+const vaultMetaRow    = document.getElementById("vault-meta-row");
+
+function updateBulkCount() {
+    bulkCountEl.textContent = `${selectedIds.size} selected`;
+}
+
+function enterSelectMode() {
+    selectMode = true;
+    selectedIds.clear();
+    document.body.classList.add("select-mode");
+    selectToggleBtn.textContent = "Done";
+    bulkActions.hidden = false;
+    updateBulkCount();
+    renderVault(searchInput.value);
+}
+
+function exitSelectMode() {
+    selectMode = false;
+    selectedIds.clear();
+    document.body.classList.remove("select-mode");
+    selectToggleBtn.textContent = "Select";
+    bulkActions.hidden = true;
+    renderVault(searchInput.value);
+}
+
+function toggleSelectMode() {
+    if (selectMode) exitSelectMode();
+    else            enterSelectMode();
+}
+
+function updateVaultMeta() {
+    const count = vault.filter(e => !e.deleted && !e.archived).length;
+    if (count === 0) {
+        vaultMetaRow.hidden = true;
+        return;
+    }
+    vaultMetaRow.hidden = false;
+    vaultCountEl.textContent = `${count} entr${count === 1 ? "y" : "ies"}`;
+}
+
+selectToggleBtn.addEventListener("click", toggleSelectMode);
+document.getElementById("bulk-cancel").addEventListener("click", exitSelectMode);
+
+document.getElementById("bulk-archive").addEventListener("click", () => {
+    if (!selectedIds.size) return;
+    const now = Date.now();
+    for (const id of selectedIds) {
+        const e = findEntry(id);
+        if (e) e.archived = now;
+    }
+    const n = selectedIds.size;
+    saveVault();
+    window.showToast(`${n} archived`, { tone: "success", duration: 1500 });
+    exitSelectMode();
+});
+
+document.getElementById("bulk-delete").addEventListener("click", () => {
+    if (!selectedIds.size) return;
+    const now = Date.now();
+    for (const id of selectedIds) {
+        const e = findEntry(id);
+        if (e) e.deleted = now;
+    }
+    const n = selectedIds.size;
+    saveVault();
+    window.showToast(`${n} moved to trash`, { tone: "error", duration: 1500 });
+    exitSelectMode();
+});
+
+document.getElementById("bulk-tag").addEventListener("click", () => {
+    if (!selectedIds.size) return;
+    const raw = prompt("Add a tag to the selected entries:");
+    if (!raw) return;
+    const tag = raw.trim().toLowerCase();
+    if (!tag) return;
+    for (const id of selectedIds) {
+        const e = findEntry(id);
+        if (!e) continue;
+        e.tags = e.tags || [];
+        if (!e.tags.includes(tag)) e.tags.push(tag);
+    }
+    const n = selectedIds.size;
+    saveVault();
+    window.showToast(`Tagged ${n} entr${n === 1 ? "y" : "ies"}`, { tone: "success", duration: 1500 });
+    exitSelectMode();
 });
 
 // ============================================================

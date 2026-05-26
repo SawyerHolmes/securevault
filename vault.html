@@ -79,10 +79,25 @@
             </div>
         </div>
 
+        <div class="vault-meta-row" id="vault-meta-row" hidden>
+            <span class="vault-count" id="vault-count">0 entries</span>
+            <button type="button" class="vault-meta-action" id="select-toggle">Select</button>
+        </div>
+
         <div id="vault-container"></div>
 
     </div>
 </main>
+
+<div class="bulk-actions" id="bulk-actions" hidden>
+    <span class="bulk-count" id="bulk-count">0 selected</span>
+    <div class="bulk-actions-buttons">
+        <button type="button" class="btn-white btn-row" id="bulk-tag">Add tag</button>
+        <button type="button" class="btn-white btn-row" id="bulk-archive">Archive</button>
+        <button type="button" class="btn-danger btn-row" id="bulk-delete">Delete</button>
+        <button type="button" class="btn-white btn-row" id="bulk-cancel">Cancel</button>
+    </div>
+</div>
 
 <!-- Expanded Card Modal -->
 <div class="expanded-card" id="expanded-card">

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        (function() {
+            const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
+            if (s.lightMode !== true) document.documentElement.classList.add("dark");
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVault — Tags</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Crect x='10' y='10' width='12' height='12' fill='%23C7F100'/%3E%3C/svg%3E">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#000000">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">■ Securevault</div>
+    <nav class="menu">
+        <a href="vault.html">Vault</a>
+        <a href="add-entry.html">Add</a>
+        <a href="settings.html">Settings</a>
+        <a href="login.html" id="logout-btn">Logout</a>
+    </nav>
+    <button type="button" class="nav-burger" id="nav-burger" aria-label="Open menu">
+        <i data-lucide="menu"></i>
+    </button>
+</header>
+
+<div class="nav-drawer" id="nav-drawer">
+    <div class="nav-drawer-content">
+        <button type="button" class="nav-drawer-close" id="nav-drawer-close" aria-label="Close menu">
+            <i data-lucide="x"></i>
+        </button>
+        <a href="vault.html">Vault</a>
+        <a href="add-entry.html">Add</a>
+        <a href="settings.html">Settings</a>
+        <a href="login.html" class="nav-drawer-logout">Logout</a>
+    </div>
+</div>
+
+<main>
+    <div class="page-content">
+        <h1 class="page-title">Tags.</h1>
+        <p class="page-sub">Rename, merge, or delete tags across every entry that uses them.</p>
+        <div id="tag-list"></div>
+    </div>
+</main>
+
+<!-- Reusable prompt modal -->
+<div class="confirmation-overlay" id="prompt-overlay">
+    <div class="confirmation-modal">
+        <p class="confirm-title" id="prompt-title">Rename tag</p>
+        <p id="prompt-message">—</p>
+        <input type="text" id="prompt-input" class="value" style="margin: 8px 0 16px; padding: 8px 10px; border: 1px solid var(--border); width: 100%; background: transparent; color: var(--text);">
+        <div class="confirmation-buttons">
+            <button class="btn-white"  id="prompt-cancel">Cancel</button>
+            <button class="btn-black"  id="prompt-confirm">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation modal (for delete) -->
+<div class="confirmation-overlay" id="confirmation-overlay">
+    <div class="confirmation-modal">
+        <p class="confirm-title">Delete tag?</p>
+        <p id="confirm-message">—</p>
+        <div class="confirmation-buttons">
+            <button class="btn-white"  id="confirm-no">Cancel</button>
+            <button class="btn-danger" id="confirm-yes">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/icons.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/sw-register.js"></script>
+<script src="js/crypto-utils.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/tags.js"></script>
+
+</body>
+</html>
