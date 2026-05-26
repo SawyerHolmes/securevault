@@ -1,0 +1,27 @@
+{
+    "manifest_version": 3,
+    "name": "Securevault",
+    "short_name": "Securevault",
+    "version": "0.1.0",
+    "description": "Companion extension for Securevault. Detects login forms and opens the vault when you need a credential.",
+    "action": {
+        "default_title": "Securevault",
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "permissions": [
+        "storage",
+        "activeTab"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js":      ["content.js"],
+            "css":     ["content.css"],
+            "run_at":  "document_idle"
+        }
+    ],
+    "options_page": "options.html"
+}
