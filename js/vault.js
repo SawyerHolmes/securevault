@@ -69,7 +69,6 @@ const togglePasswordBtn = document.getElementById("toggle-password");
 const copyIconBtn       = document.getElementById("copy-btn");
 const copyUsernameBtn   = document.getElementById("copy-username-btn");
 const removeBtn         = document.getElementById("remove-btn");
-const copyToast         = document.getElementById("copy-toast");
 const confirmOverlay    = document.getElementById("confirmation-overlay");
 const confirmYes        = document.getElementById("confirm-yes");
 const confirmNo         = document.getElementById("confirm-no");
@@ -126,15 +125,9 @@ function applyViewMode(mode) {
 // ============================================================
 // CLIPBOARD + TOAST
 // ============================================================
-function showToast(msg) {
-    copyToast.textContent = msg || "Copied!";
-    copyToast.classList.add("show");
-    setTimeout(() => copyToast.classList.remove("show"), 1800);
-}
-
 function copyToClipboard(text, msg) {
     navigator.clipboard.writeText(text).then(() => {
-        showToast(msg);
+        window.showToast(msg || "Copied", { duration: 1800 });
         haptic([8, 20, 8]);
     });
 }
@@ -396,6 +389,8 @@ function renderVault(filter) {
 // ============================================================
 // EXPANDED CARD
 // ============================================================
+let expandedCardRelease = null;
+
 function openCard(entry) {
     currentEntryId  = entry.id;
     passwordVisible = false;
@@ -429,6 +424,8 @@ function openCard(entry) {
     editBtn.style.display           = "inline-flex";
     saveCancelWrapper.style.display = "none";
     expandedCard.style.display      = "flex";
+
+    if (window.trapFocus) expandedCardRelease = window.trapFocus(expandedCard);
 }
 
 expandedCard.addEventListener("click", e => {
@@ -440,7 +437,20 @@ function closeCard() {
     saveCancelWrapper.style.display = "none";
     editBtn.style.display           = "inline-flex";
     currentEntryId = null;
+    if (expandedCardRelease) { expandedCardRelease(); expandedCardRelease = null; }
 }
+
+// Esc closes the expanded entry modal
+document.addEventListener("keydown", e => {
+    if (e.key !== "Escape") return;
+    if (expandedCard.style.display === "flex") {
+        if (confirmOverlay.style.display === "flex") {
+            confirmOverlay.style.display = "none";
+        } else {
+            closeCard();
+        }
+    }
+});
 
 // ============================================================
 // EDIT MODE
@@ -567,12 +577,27 @@ confirmOverlay.addEventListener("click", e => {
 function deleteEntry() {
     const idx = findEntryIndex(currentEntryId);
     if (idx < 0) return;
+    const removed = vault[idx];
     vault.splice(idx, 1);
     saveVault();
     closeCard();
     confirmOverlay.style.display = "none";
     renderVault(searchInput.value);
     haptic([10, 30, 10]);
+
+    window.showToast("Entry removed", {
+        duration: 5000,
+        tone: "error",
+        action: {
+            label: "Undo",
+            onClick: () => {
+                vault.splice(Math.min(idx, vault.length), 0, removed);
+                saveVault();
+                renderVault(searchInput.value);
+                window.showToast("Restored", { tone: "success", duration: 1500 });
+            }
+        }
+    });
 }
 
 // ============================================================
@@ -745,7 +770,7 @@ function importFromFile(file) {
                 vault.push(...imported);
                 saveVault();
                 renderVault();
-                showToast(`Imported ${imported.length} entries`);
+                window.showToast(`Imported ${imported.length} entries`, { tone: "success" });
             }
         } catch (err) {
             alert("Import failed: " + err.message);

@@ -213,8 +213,9 @@ loginBtn.addEventListener("click", async () => {
     }
 
     clearError();
-    loginBtn.disabled      = true;
-    loginBtn.textContent   = isFirstTime ? "Creating…" : "Unlocking…";
+    loginBtn.disabled    = true;
+    loginBtn.classList.add("loading");
+    loginBtn.textContent = isFirstTime ? "Creating" : "Unlocking";
 
     const key = await loginAndStoreKey(password);
 
@@ -231,8 +232,9 @@ loginBtn.addEventListener("click", async () => {
             const left        = MAX_ATTEMPTS - attempts;
             const stillLocked = isLockedOut();
 
-            loginBtn.disabled    = stillLocked ? true : false;
-            loginBtn.textContent = "Unlock vault";
+            loginBtn.classList.remove("loading");
+            loginBtn.disabled    = !!stillLocked;
+            loginBtn.textContent = "Unlock";
 
             if (stillLocked) {
                 showError(`Too many attempts. Try again in ${stillLocked}s`);
