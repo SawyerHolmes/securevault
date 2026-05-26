@@ -89,6 +89,7 @@ main {
     max-width: 800px;
     margin: 0 auto;
 }
+.page-content.narrow { max-width: 480px; }
 
 a { color: inherit; text-decoration: none; }
 
@@ -378,7 +379,7 @@ label {
 
 #search-input {
     width: 100%;
-    padding: 12px 14px 12px 36px;
+    padding: 12px 44px 12px 36px;
     background: transparent;
     border: 1px solid var(--border);
     border-radius: 0;
@@ -398,16 +399,31 @@ label {
     pointer-events: none;
 }
 
-.sort-icon {
+.sort-toggle-btn {
     position: absolute;
-    right: 12px; top: 50%;
+    right: 4px;
+    top: 50%;
     transform: translateY(-50%);
-    width: 16px; height: 16px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     color: var(--text-secondary);
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition);
 }
-.sort-icon:hover,
-.sort-icon.active { color: var(--text); }
+.sort-toggle-btn:hover,
+.sort-toggle-btn.active { color: var(--text); }
+.sort-icon {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+}
 
 .sort-menu {
     position: absolute;
@@ -695,7 +711,7 @@ body.gallery-view #vault-container {
 ============================================================ */
 .copy-menu,
 .card-copy-menu {
-    position: absolute;
+    position: fixed;
     background: var(--surface);
     border: 1px solid var(--border-strong);
     border-radius: 0;
@@ -939,6 +955,12 @@ body.gallery-view #vault-container {
     max-width: 320px;
     margin: 96px auto;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* When the parent is a CSS grid (grid/gallery view), span all
+       columns so the empty state stays centred under the page title. */
+    grid-column: 1 / -1;
 }
 .empty-icon {
     width: 64px; height: 64px;
@@ -992,8 +1014,7 @@ body.gallery-view #vault-container {
 }
 
 .add-entry-container {
-    max-width: 480px;
-    margin: 0;
+    width: 100%;
 }
 .add-entry-container .field { margin-bottom: 16px; }
 .add-entry-container textarea { min-height: 96px; resize: vertical; }
@@ -1482,6 +1503,5 @@ body.gallery-view #vault-container {
     .add-entry-container,
     .settings-container { margin: 16px 0; }
 
-    .vault-list-table th:nth-child(2),
-    .vault-list-table td:nth-child(2) { display: none; } /* hide URL column */
+    .sort-menu { width: 100%; }
 }

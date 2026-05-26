@@ -191,6 +191,9 @@ function showCopyMenu(e, entry) {
 }
 
 document.addEventListener("click", () => closeCopyMenu());
+// Menu is position: fixed, so it would visually detach from its trigger
+// if the page scrolls. Close it instead.
+window.addEventListener("scroll", () => closeCopyMenu(), { passive: true });
 
 // ============================================================
 // FORMAT DATE

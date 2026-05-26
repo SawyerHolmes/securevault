@@ -17,7 +17,7 @@ window.addEventListener("popstate", () => {
 // DEFAULT SETTINGS
 // ============================================================
 const DEFAULT_SETTINGS = {
-    autoLock:      false,
+    autoLock:      true,    // security-first default; toggle off to disable the 5-min lock
     lightMode:     false,   // dark is default; checking the toggle opts into light
     viewMode:      "list",
     defaultSort:   "name",

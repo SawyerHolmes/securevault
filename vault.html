@@ -39,14 +39,16 @@
                     <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="1.5"/>
                 </svg>
                 <input type="text" id="search-input" placeholder="Search entries…" autocomplete="off" aria-label="Search vault">
-                <svg class="sort-icon" id="sort-toggle" viewBox="0 0 24 24" role="button" aria-label="Sort">
-                    <line x1="4" y1="6"  x2="20" y2="6"  stroke="currentColor" stroke-width="1.5"/>
-                    <circle cx="10" cy="6"  r="2" fill="currentColor"/>
-                    <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.5"/>
-                    <circle cx="14" cy="12" r="2" fill="currentColor"/>
-                    <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="1.5"/>
-                    <circle cx="8"  cy="18" r="2" fill="currentColor"/>
-                </svg>
+                <button type="button" class="sort-toggle-btn" id="sort-toggle" aria-label="Sort">
+                    <svg class="sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <line x1="4" y1="6"  x2="20" y2="6"  stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="10" cy="6"  r="2" fill="currentColor"/>
+                        <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="14" cy="12" r="2" fill="currentColor"/>
+                        <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="8"  cy="18" r="2" fill="currentColor"/>
+                    </svg>
+                </button>
                 <div class="sort-menu" id="sort-menu">
                     <div class="sort-field" data-field="name">Site name <span class="indicator"></span></div>
                     <div class="sort-field" data-field="username">Username <span class="indicator"></span></div>

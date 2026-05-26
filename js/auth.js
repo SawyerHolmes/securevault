@@ -5,6 +5,13 @@
 
 const SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
+// Auto-lock is opt-out: default ON for a password vault.
+// Toggling "Auto-lock vault" off in Settings disables the timer.
+function autoLockEnabled() {
+    const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
+    return s.autoLock !== false;
+}
+
 // ============================================================
 // AUTH GUARD
 // Called at the top of every protected page
@@ -18,10 +25,12 @@ function checkAuth() {
         return;
     }
 
-    const last = parseInt(sessionStorage.getItem("lastActive"), 10);
-    if (last && Date.now() - last > SESSION_TIMEOUT) {
-        logout();
-        return;
+    if (autoLockEnabled()) {
+        const last = parseInt(sessionStorage.getItem("lastActive"), 10);
+        if (last && Date.now() - last > SESSION_TIMEOUT) {
+            logout();
+            return;
+        }
     }
 
     updateActivity();
@@ -41,6 +50,7 @@ function startActivityTracking() {
     });
 
     setInterval(() => {
+        if (!autoLockEnabled()) return;
         const last = parseInt(sessionStorage.getItem("lastActive"), 10);
         if (last && Date.now() - last > SESSION_TIMEOUT) {
             logout();
