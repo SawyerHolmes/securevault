@@ -291,13 +291,21 @@ function renderVault(filter) {
         );
     }
 
-    items.sort((a, b) => {
-        const va = (a[sortField] || "").toLowerCase();
-        const vb = (b[sortField] || "").toLowerCase();
-        if (va < vb) return sortOrder === "asc" ? -1 : 1;
-        if (va > vb) return sortOrder === "asc" ?  1 : -1;
-        return 0;
-    });
+    if (sortField === "manual") {
+        items.sort((a, b) => {
+            const va = (typeof a.order === "number") ? a.order : Number.MAX_SAFE_INTEGER;
+            const vb = (typeof b.order === "number") ? b.order : Number.MAX_SAFE_INTEGER;
+            return sortOrder === "asc" ? (va - vb) : (vb - va);
+        });
+    } else {
+        items.sort((a, b) => {
+            const va = (a[sortField] || "").toLowerCase();
+            const vb = (b[sortField] || "").toLowerCase();
+            if (va < vb) return sortOrder === "asc" ? -1 : 1;
+            if (va > vb) return sortOrder === "asc" ?  1 : -1;
+            return 0;
+        });
+    }
 
     if (!items.length) {
         const div = document.createElement("div");
@@ -470,9 +478,55 @@ function renderVault(filter) {
             if (e.target.closest(".card-copy-btn")) return;
             haptic(6); openCard(entry);
         });
+        if (sortField === "manual") attachDragReorder(card, entry);
         vaultContainer.appendChild(card);
     });
     renderIcons();
+}
+
+// HTML5 drag-and-drop: only enabled in manual sort mode.
+function attachDragReorder(card, entry) {
+    card.draggable = true;
+    card.classList.add("draggable");
+    card.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", entry.id);
+        e.dataTransfer.effectAllowed = "move";
+        card.classList.add("dragging");
+    });
+    card.addEventListener("dragend", () => card.classList.remove("dragging"));
+    card.addEventListener("dragover", e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        card.classList.add("drag-over");
+    });
+    card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+    card.addEventListener("drop", e => {
+        e.preventDefault();
+        card.classList.remove("drag-over");
+        const draggedId = e.dataTransfer.getData("text/plain");
+        if (!draggedId || draggedId === entry.id) return;
+        reorderEntries(draggedId, entry.id);
+    });
+}
+
+function reorderEntries(draggedId, targetId) {
+    const displayed = vault
+        .filter(e => !e.deleted && !e.archived)
+        .sort((a, b) => {
+            const va = (typeof a.order === "number") ? a.order : Number.MAX_SAFE_INTEGER;
+            const vb = (typeof b.order === "number") ? b.order : Number.MAX_SAFE_INTEGER;
+            return va - vb;
+        });
+    const fromIdx = displayed.findIndex(e => e.id === draggedId);
+    let   toIdx   = displayed.findIndex(e => e.id === targetId);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const [moved] = displayed.splice(fromIdx, 1);
+    if (toIdx > fromIdx) toIdx -= 1;
+    displayed.splice(toIdx, 0, moved);
+    displayed.forEach((e, i) => { e.order = i; });
+    saveVault();
+    renderVault(searchInput.value);
+    haptic(6);
 }
 
 // ============================================================
@@ -1110,6 +1164,68 @@ document.addEventListener("DOMContentLoaded", () => {
         e.target.value = "";
     });
 });
+
+// ============================================================
+// PULL-TO-REFRESH (mobile only)
+// ============================================================
+(function setupPullToRefresh() {
+    const indicator = document.getElementById("pull-indicator");
+    if (!indicator) return;
+    const PULL_THRESHOLD = 80;
+    let startY = null;
+    let delta  = 0;
+    let pulling = false;
+
+    function modalOpen() {
+        return (expandedCard && expandedCard.style.display === "flex") ||
+               (confirmOverlay && confirmOverlay.style.display === "flex") ||
+               document.body.classList.contains("drawer-open");
+    }
+
+    function setIndicator(progress, loading) {
+        indicator.style.opacity   = progress.toString();
+        indicator.style.transform = `translateX(-50%) translateY(${Math.min(progress * 32, 32)}px)`;
+        indicator.classList.toggle("loading", !!loading);
+    }
+
+    window.addEventListener("touchstart", e => {
+        if (window.scrollY > 0 || e.touches.length !== 1 || modalOpen()) return;
+        startY = e.touches[0].clientY;
+        delta  = 0;
+        pulling = true;
+    }, { passive: true });
+
+    window.addEventListener("touchmove", e => {
+        if (!pulling) return;
+        if (window.scrollY > 0) { pulling = false; setIndicator(0, false); return; }
+        const d = e.touches[0].clientY - startY;
+        if (d <= 0) { setIndicator(0, false); return; }
+        delta = d;
+        setIndicator(Math.min(d / PULL_THRESHOLD, 1), false);
+    }, { passive: true });
+
+    window.addEventListener("touchend", async () => {
+        if (!pulling) return;
+        const triggered = delta >= PULL_THRESHOLD;
+        pulling = false;
+        if (!triggered) { setIndicator(0, false); return; }
+
+        setIndicator(1, true);
+        try {
+            if (typeof syncConfigured === "function" && await syncConfigured()) {
+                await pullFromGist();
+                await loadVault();
+                renderVault(searchInput.value);
+                window.showToast("Pulled from Gist", { tone: "success", duration: 1500 });
+            } else {
+                window.showToast("Sync not configured", { duration: 1500 });
+            }
+        } catch {
+            window.showToast("Pull failed", { tone: "error" });
+        }
+        setIndicator(0, false);
+    }, { passive: true });
+})();
 
 // ============================================================
 // FIRST-RUN WELCOME

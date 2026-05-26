@@ -685,6 +685,39 @@ body.list-view #vault-container {
 }
 .card-copy-btn:hover { border-color: var(--text); color: var(--text); }
 
+/* Manual-sort drag-and-drop visual states */
+.vault-card.draggable    { cursor: grab; }
+.vault-card.draggable:active { cursor: grabbing; }
+.vault-card.dragging     { opacity: 0.4; }
+.vault-card.drag-over    { box-shadow: inset 0 2px 0 0 var(--accent); }
+
+/* Pull-to-refresh — only renders on mobile. The bar visually
+   extends as the user drags down past the top of the page. */
+.pull-indicator {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    width: 64px;
+    height: 3px;
+    background: var(--accent);
+    transform: translateX(-50%) translateY(0);
+    opacity: 0;
+    z-index: 1500;
+    pointer-events: none;
+}
+@media (max-width: 600px) {
+    .pull-indicator { display: block; }
+}
+.pull-indicator.loading {
+    opacity: 1;
+    animation: pull-pulse 0.6s linear infinite alternate;
+}
+@keyframes pull-pulse {
+    from { opacity: 0.35; }
+    to   { opacity: 1; }
+}
+
 
 /* ============================================================
    8. VAULT GRID VIEW (square brutalist tiles)
