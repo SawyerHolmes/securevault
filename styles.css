@@ -226,6 +226,94 @@ header.header-minimal {
     max-width: calc(var(--page-max) - 32px);
 }
 
+/* Hamburger (mobile only) — black pill matching the logo chip */
+.nav-burger {
+    display: none;
+    background: #000;
+    color: var(--accent);
+    border: none;
+    border-radius: 999px;
+    width: 32px; height: 32px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+.nav-burger:hover { opacity: 0.85; }
+
+/* Mobile drawer — full-screen black sheet with big nav items.
+   Hidden on desktop; opens via .open class on tap of .nav-burger. */
+.nav-drawer {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 2000;
+    flex-direction: column;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+            env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.nav-drawer.open { display: flex; }
+.nav-drawer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 96px 32px 32px;
+    width: 100%;
+    flex: 1;
+}
+.nav-drawer a {
+    color: var(--accent);
+    font-size: 18px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+}
+.nav-drawer a.active { box-shadow: inset 0 -2px 0 0 currentColor; align-self: flex-start; }
+.nav-drawer-logout { opacity: 0.55; margin-top: 24px; }
+.nav-drawer-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 999px;
+    width: 44px; height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.nav-drawer-close [data-lucide],
+.nav-drawer-close svg.lucide { width: 20px; height: 20px; }
+body.drawer-open { overflow: hidden; }
+
+/* Fixed bottom "+ Add entry" CTA (mobile only, vault page).
+   Sits above the safe area as a full-width lime pill. */
+.mobile-cta {
+    display: none;
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    height: 48px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-radius: 999px;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    z-index: 90;
+    border: none;
+}
+.mobile-cta:hover { opacity: 0.85; }
+
 
 /* ============================================================
    4. BUTTONS
@@ -920,7 +1008,8 @@ body.gallery-view #vault-container {
     gap: 8px;
 }
 .confirmation-buttons .btn-black,
-.confirmation-buttons .btn-white { flex: 1; }
+.confirmation-buttons .btn-white,
+.confirmation-buttons .btn-danger { flex: 1; }
 
 
 /* ============================================================
@@ -1502,21 +1591,60 @@ body.gallery-view #vault-container {
 @media (max-width: 600px) {
     :root { --page-pad: 16px; }
     main {
-        padding: 16px var(--page-pad) 80px;
+        padding: 16px var(--page-pad) 96px;
     }
     header {
         width: calc(100% - 16px);
         margin: 8px auto 0;
         top: 8px;
     }
-    header .menu { gap: 8px; }
-    header .menu a:not(#logout-btn) { padding: 4px 2px; }
+
+    /* Swap inline nav for the hamburger */
+    header .menu { display: none; }
+    .nav-burger { display: inline-flex; }
+
+    /* Reveal fixed bottom CTA on pages that include the markup */
+    .mobile-cta { display: inline-flex; }
+    /* Add extra bottom padding so the CTA doesn't overlap content */
+    main { padding-bottom: 96px; }
 
     .login-container { margin: 48px auto; }
     .login-title { font-size: 36px; }
 
-    .add-entry-container,
-    .settings-container { margin: 16px 0; }
+    /* Stripe numeral column is tighter on phones */
+    .vault-card { grid-template-columns: 32px 1fr auto; gap: 12px; }
+    .vault-card .row-num { font-size: 18px; }
+
+    /* iOS auto-zooms inputs under 16px on focus — bump everything */
+    #search-input,
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    textarea { font-size: 16px; }
+
+    /* Modals slide up from the bottom as full-screen sheets.
+       1px lime border on the top edge, no backdrop blur. */
+    .expanded-card,
+    .confirmation-overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+    .expanded-content,
+    .confirmation-modal {
+        max-width: 100%;
+        width: 100%;
+        max-height: 92vh;
+        border: none;
+        border-top: 1px solid var(--accent);
+        animation: sheet-up 0.18s linear;
+    }
+    .expanded-card.show .expanded-content,
+    .confirmation-overlay.show .confirmation-modal { animation: sheet-up 0.18s linear; }
 
     .sort-menu { width: 100%; }
+}
+
+@keyframes sheet-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
 }

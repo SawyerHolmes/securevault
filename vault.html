@@ -26,7 +26,22 @@
         <a href="settings.html">Settings</a>
         <a href="login.html" id="logout-btn">Logout</a>
     </nav>
+    <button type="button" class="nav-burger" id="nav-burger" aria-label="Open menu">
+        <i data-lucide="menu"></i>
+    </button>
 </header>
+
+<div class="nav-drawer" id="nav-drawer">
+    <div class="nav-drawer-content">
+        <button type="button" class="nav-drawer-close" id="nav-drawer-close" aria-label="Close menu">
+            <i data-lucide="x"></i>
+        </button>
+        <a href="vault.html" class="active">Vault</a>
+        <a href="add-entry.html">Add</a>
+        <a href="settings.html">Settings</a>
+        <a href="login.html" class="nav-drawer-logout">Logout</a>
+    </div>
+</div>
 
 <main>
     <div class="page-content">
@@ -122,6 +137,8 @@
     </div>
 </div>
 
+<a href="add-entry.html" class="mobile-cta">+ Add entry</a>
+
 <div class="copy-toast" id="copy-toast">Copied!</div>
 
 <!-- Confirmation Modal -->
@@ -137,6 +154,7 @@
 
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <script src="js/icons.js"></script>
+<script src="js/nav.js"></script>
 <script src="js/crypto-utils.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/auth.js"></script>
