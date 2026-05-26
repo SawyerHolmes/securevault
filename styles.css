@@ -1231,12 +1231,46 @@ body.gallery-view #vault-container {
 ============================================================ */
 .page-title,
 .add-entry-container h1 {
-    margin: 0 0 24px;
+    margin: 0 0 8px;
     font-size: 32px;
     font-weight: 500;
     letter-spacing: -0.03em;
     color: var(--text);
     line-height: 1.1;
+}
+
+.page-sub {
+    margin: 0 0 24px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.trash-row-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.btn-row {
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 0;
+    cursor: pointer;
+}
+.btn-row.btn-white  { border: 1px solid var(--border-strong); background: transparent; color: var(--text); }
+.btn-row.btn-white:hover  { border-color: var(--text); }
+.btn-row.btn-danger { border: none; background: var(--danger); color: var(--danger-ink); }
+.btn-row.btn-danger:hover { opacity: 0.85; }
+
+.trash-actions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .add-entry-container {
@@ -1518,6 +1552,29 @@ body[data-view-type="card"]  .type-only-note {
     letter-spacing: 0.06em;
     color: var(--text-secondary);
     min-height: 14px;
+}
+
+.setting-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: background var(--transition);
+}
+.settings-section > .setting-link:last-child { border-bottom: none; }
+.setting-link:hover { background: var(--surface-raised); }
+.setting-link-label {
+    font-size: 14px;
+}
+.setting-link-meta {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
 }
 
 .health-summary {

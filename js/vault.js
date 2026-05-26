@@ -113,6 +113,11 @@ async function loadVault() {
         if (!entry.id)   { entry.id   = newEntryId(); mutated = true; }
         if (!entry.type) { entry.type = "login";      mutated = true; }
     }
+    // Auto-purge trashed entries older than 30 days
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const before = vault.length;
+    vault = vault.filter(e => !e.deleted || e.deleted > cutoff);
+    if (vault.length !== before) mutated = true;
     if (mutated) saveVault();
 }
 
@@ -222,7 +227,8 @@ function renderVault(filter) {
     filter = filter || "";
     vaultContainer.innerHTML = "";
 
-    let items = [...vault];
+    // Active vault excludes soft-deleted + archived entries
+    let items = vault.filter(e => !e.deleted && !e.archived);
     const q   = filter.toLowerCase();
 
     if (q) {
@@ -764,23 +770,22 @@ confirmOverlay.addEventListener("click", e => {
 });
 
 function deleteEntry() {
-    const idx = findEntryIndex(currentEntryId);
-    if (idx < 0) return;
-    const removed = vault[idx];
-    vault.splice(idx, 1);
+    const entry = findEntry(currentEntryId);
+    if (!entry) return;
+    entry.deleted = Date.now();
     saveVault();
     closeCard();
     confirmOverlay.style.display = "none";
     renderVault(searchInput.value);
     haptic([10, 30, 10]);
 
-    window.showToast("Entry removed", {
+    window.showToast("Entry moved to trash", {
         duration: 5000,
         tone: "error",
         action: {
             label: "Undo",
             onClick: () => {
-                vault.splice(Math.min(idx, vault.length), 0, removed);
+                delete entry.deleted;
                 saveVault();
                 renderVault(searchInput.value);
                 window.showToast("Restored", { tone: "success", duration: 1500 });
