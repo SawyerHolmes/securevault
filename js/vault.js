@@ -5,11 +5,12 @@
 // ============================================================
 // STATE
 // ============================================================
-let vault           = [];
-let currentEntryId  = null;
-let passwordVisible = false;
-let sortField       = "name";
-let sortOrder       = "asc";
+let vault            = [];
+let currentEntryId   = null;
+let passwordVisible  = false;
+let sortField        = "name";
+let sortOrder        = "asc";
+let activeTagFilter  = null;
 
 function findEntry(id) {
     return vault.find(e => e.id === id);
@@ -17,6 +18,48 @@ function findEntry(id) {
 function findEntryIndex(id) {
     return vault.findIndex(e => e.id === id);
 }
+function renderTagFilterBar() {
+    const bar = document.getElementById("tag-filter-bar");
+    if (!bar) return;
+    const tagSet = new Set();
+    vault.forEach(e => {
+        if (e.deleted || e.archived) return;
+        (e.tags || []).forEach(t => tagSet.add(t));
+    });
+    const tags = Array.from(tagSet).sort();
+    if (!tags.length) { bar.style.display = "none"; bar.innerHTML = ""; return; }
+
+    bar.innerHTML  = "";
+    bar.style.display = "";
+
+    const mkChip = (label, value, isAll) => {
+        const c = document.createElement("button");
+        c.type      = "button";
+        c.className = "tag-chip tag-chip-filter" +
+            ((value === activeTagFilter || (isAll && !activeTagFilter)) ? " active" : "");
+        c.textContent = label;
+        c.addEventListener("click", () => {
+            activeTagFilter = value;
+            renderVault(document.getElementById("search-input").value);
+        });
+        return c;
+    };
+
+    bar.appendChild(mkChip("All", null, true));
+    tags.forEach(t => bar.appendChild(mkChip(t, t, false)));
+}
+
+function renderTagsInto(el, tags) {
+    el.innerHTML = "";
+    if (!tags || !tags.length) { el.textContent = "—"; return; }
+    tags.forEach(t => {
+        const chip = document.createElement("span");
+        chip.className   = "tag-chip";
+        chip.textContent = t;
+        el.appendChild(chip);
+    });
+}
+
 function entrySecondaryText(entry) {
     const type = entry.type || "login";
     if (type === "note") {
@@ -226,10 +269,14 @@ function formatDate(ts) {
 function renderVault(filter) {
     filter = filter || "";
     vaultContainer.innerHTML = "";
+    renderTagFilterBar();
 
     // Active vault excludes soft-deleted + archived entries
     let items = vault.filter(e => !e.deleted && !e.archived);
-    const q   = filter.toLowerCase();
+    if (activeTagFilter) {
+        items = items.filter(e => (e.tags || []).includes(activeTagFilter));
+    }
+    const q = filter.toLowerCase();
 
     if (q) {
         items = items.filter(e =>
@@ -239,7 +286,8 @@ function renderVault(filter) {
             (e.notes      || "").toLowerCase().includes(q) ||
             (e.content    || "").toLowerCase().includes(q) ||
             (e.cardholder || "").toLowerCase().includes(q) ||
-            (e.cardNumber || "").toLowerCase().includes(q)
+            (e.cardNumber || "").toLowerCase().includes(q) ||
+            (e.tags       || []).some(t => t.toLowerCase().includes(q))
         );
     }
 
@@ -396,6 +444,18 @@ function renderVault(filter) {
         sub.textContent = entrySecondaryText(entry);
         text.appendChild(sub);
 
+        if (entry.tags && entry.tags.length) {
+            const tagBar = document.createElement("div");
+            tagBar.className = "row-tags";
+            entry.tags.slice(0, 3).forEach(t => {
+                const chip = document.createElement("span");
+                chip.className   = "tag-chip-small";
+                chip.textContent = t;
+                tagBar.appendChild(chip);
+            });
+            text.appendChild(tagBar);
+        }
+
         card.appendChild(text);
 
         const cb = document.createElement("button");
@@ -463,7 +523,13 @@ function openCard(entry) {
 
     expandedUsername.textContent = entry.username || "—";
     expandedPassword.textContent = "••••••••";
-    expandedNotes.textContent    = entry.notes || "No notes";
+    expandedNotes.innerHTML = entry.notes
+        ? renderMarkdown(entry.notes)
+        : '<span class="value-empty">No notes</span>';
+
+    // Tags
+    const tagsEl = document.getElementById("expanded-tags");
+    if (tagsEl) renderTagsInto(tagsEl, entry.tags);
 
     // Type-specific fields
     const cardholderEl = document.getElementById("expanded-cardholder");
@@ -475,7 +541,9 @@ function openCard(entry) {
     if (cardNumberEl) cardNumberEl.textContent = entry.cardNumber || "—";
     if (cardExpiryEl) cardExpiryEl.textContent = entry.cardExpiry || "—";
     if (cardCvvEl)    cardCvvEl.textContent    = "•••";
-    if (contentEl)    contentEl.textContent    = entry.content || "—";
+    if (contentEl)    contentEl.innerHTML = entry.content
+        ? renderMarkdown(entry.content)
+        : '<span class="value-empty">—</span>';
 
     // Surface a "found in N breaches" warning if the user has run a
     // health scan and this password came back compromised.
@@ -586,6 +654,19 @@ editBtn.addEventListener("click", () => {
         if (cv) { cv.innerHTML = ""; cv.appendChild(makeInput("edit-card-cvv", e.cardCvv || "")); }
     }
 
+    // Tags input on every type
+    const tagsEl = document.getElementById("expanded-tags");
+    if (tagsEl) {
+        tagsEl.innerHTML = "";
+        const tagsInput = document.createElement("input");
+        tagsInput.type        = "text";
+        tagsInput.id          = "edit-tags";
+        tagsInput.className   = "value";
+        tagsInput.placeholder = "banking, personal";
+        tagsInput.value       = (e.tags || []).join(", ");
+        tagsEl.appendChild(tagsInput);
+    }
+
     // Notes field is on every type
     const ta = document.createElement("textarea");
     ta.id = "edit-notes"; ta.className = "value notes"; ta.value = e.notes || "";
@@ -644,6 +725,10 @@ saveBtn.addEventListener("click", () => {
         entry.cardCvv    = (document.getElementById("edit-card-cvv")?.value    || "").trim();
     }
     entry.notes     = (document.getElementById("edit-notes")?.value || "").trim();
+    const tagsVal   = (document.getElementById("edit-tags")?.value || "")
+        .split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+    if (tagsVal.length) entry.tags = tagsVal;
+    else                delete entry.tags;
     entry.updatedAt = Date.now();
     saveVault();
     renderVault(searchInput.value);
@@ -686,10 +771,17 @@ function exitEditMode() {
         if (cv) cv.textContent = "•••";
     } else if (type === "note") {
         const ce = document.getElementById("expanded-content");
-        if (ce) ce.textContent = e.content || "—";
+        if (ce) ce.innerHTML = e.content
+            ? renderMarkdown(e.content)
+            : '<span class="value-empty">—</span>';
     }
 
-    expandedNotes.textContent = e.notes || "No notes";
+    expandedNotes.innerHTML = e.notes
+        ? renderMarkdown(e.notes)
+        : '<span class="value-empty">No notes</span>';
+
+    const tagsEl = document.getElementById("expanded-tags");
+    if (tagsEl) renderTagsInto(tagsEl, e.tags);
 
     if (expandedModified) {
         const date = formatDate(e.updatedAt || e.createdAt);

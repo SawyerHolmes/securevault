@@ -37,6 +37,7 @@ const passwordInput  = document.getElementById("entry-password");
 const totpInput      = document.getElementById("entry-totp");
 const notesInput     = document.getElementById("entry-notes");
 const contentInput   = document.getElementById("entry-content");
+const tagsInput      = document.getElementById("entry-tags");
 const cardholderIn   = document.getElementById("entry-cardholder");
 const cardNumberIn   = document.getElementById("entry-card-number");
 const cardExpiryIn   = document.getElementById("entry-card-expiry");
@@ -270,7 +271,12 @@ saveBtn.addEventListener("click", async () => {
 
     const id = (crypto.randomUUID && crypto.randomUUID()) ||
                ("e_" + Date.now() + "_" + Math.random().toString(36).slice(2));
+    const tags = (tagsInput?.value || "")
+        .split(",")
+        .map(s => s.trim().toLowerCase())
+        .filter(Boolean);
     const entry = { id, type, name, notes, createdAt: Date.now() };
+    if (tags.length) entry.tags = tags;
 
     if (type === "login") {
         const url      = urlInput.value.trim();

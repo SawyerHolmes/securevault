@@ -47,6 +47,8 @@
 
         <h1 class="page-title">Vault.</h1>
 
+        <div class="tag-filter-bar" id="tag-filter-bar" style="display:none;"></div>
+
         <div class="vault-controls">
             <div class="search-wrapper">
                 <svg class="search-icon" viewBox="0 0 24 24">
@@ -176,6 +178,11 @@
         </div>
 
         <div class="field">
+            <label>Tags</label>
+            <div class="value tag-list" id="expanded-tags">—</div>
+        </div>
+
+        <div class="field">
             <label>Notes</label>
             <div class="value notes" id="expanded-notes">No notes</div>
         </div>
@@ -226,6 +233,7 @@
 <script src="js/crypto-utils.js"></script>
 <script src="js/totp.js"></script>
 <script src="js/health.js"></script>
+<script src="js/markdown.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/vault.js"></script>

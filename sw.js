@@ -5,7 +5,7 @@
 // localStorage and never touches this cache.
 // ============================================================
 
-const CACHE = "securevault-v6";
+const CACHE = "securevault-v7";
 
 const ASSETS = [
     "./",
@@ -38,7 +38,8 @@ const ASSETS = [
     "./js/trash.js",
     "./js/archive.js",
     "./js/history.js",
-    "./js/biometric.js"
+    "./js/biometric.js",
+    "./js/markdown.js"
 ];
 
 self.addEventListener("install", event => {

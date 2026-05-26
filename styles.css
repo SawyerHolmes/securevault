@@ -981,6 +981,116 @@ body.gallery-view #vault-container {
     font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
+.tag-chip,
+.tag-chip-small,
+.tag-chip-filter {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--text);
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+    cursor: default;
+}
+.tag-chip {
+    padding: 4px 10px;
+    font-size: 10px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+}
+.tag-chip-small {
+    padding: 2px 8px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    border-color: var(--border);
+    margin-right: 4px;
+}
+.row-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+}
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.tag-filter-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    margin-bottom: 12px;
+}
+.tag-filter-bar::-webkit-scrollbar { display: none; }
+.tag-chip-filter {
+    padding: 6px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--transition), color var(--transition);
+}
+.tag-chip-filter:hover  { background: var(--surface-raised); }
+.tag-chip-filter.active {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+}
+
+.label-hint {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    color: var(--text-tertiary);
+    margin-left: 8px;
+}
+
+/* Rendered markdown inside note content / notes value */
+.value-empty { color: var(--text-secondary); }
+.md-h1, .md-h2, .md-h3 {
+    margin: 12px 0 4px;
+    color: var(--text);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.md-h1 { font-size: 18px; }
+.md-h2 { font-size: 16px; }
+.md-h3 { font-size: 13px; }
+.value.notes p,
+.value .md-h1, .value .md-h2, .value .md-h3 { margin-top: 0; }
+.value.notes p {
+    margin: 0 0 12px;
+    line-height: 1.5;
+}
+.value.notes p:last-child { margin-bottom: 0; }
+.md-ul {
+    margin: 6px 0 12px;
+    padding-left: 20px;
+}
+.md-ul li {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+.value.notes strong { color: var(--text); font-weight: 500; }
+.value.notes em     { color: var(--text); font-style: italic; }
+.value.notes code   {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.92em;
+    background: var(--surface-raised);
+    padding: 1px 5px;
+    border: 1px solid var(--border);
+}
+.value.notes a { color: var(--accent); text-decoration: underline; }
+
 .password-warning {
     margin-top: 8px;
     font-size: 11px;
