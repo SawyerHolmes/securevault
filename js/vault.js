@@ -17,6 +17,18 @@ function findEntry(id) {
 function findEntryIndex(id) {
     return vault.findIndex(e => e.id === id);
 }
+function entrySecondaryText(entry) {
+    const type = entry.type || "login";
+    if (type === "note") {
+        const first = (entry.content || "").split("\n")[0].slice(0, 50);
+        return first ? "Note · " + first : "Note";
+    }
+    if (type === "card") {
+        const last4 = (entry.cardNumber || "").replace(/\s+/g, "").slice(-4);
+        return last4 ? "Card · •••• " + last4 : "Card";
+    }
+    return entry.username || entry.url || "";
+}
 function newEntryId() {
     return (crypto.randomUUID && crypto.randomUUID()) ||
            ("e_" + Date.now() + "_" + Math.random().toString(36).slice(2));
@@ -95,10 +107,11 @@ async function loadVault() {
         return;
     }
 
-    // Backfill stable IDs on any legacy entries that don't have one
+    // Backfill stable IDs + default type on any legacy entries
     let mutated = false;
     for (const entry of vault) {
-        if (!entry.id) { entry.id = newEntryId(); mutated = true; }
+        if (!entry.id)   { entry.id   = newEntryId(); mutated = true; }
+        if (!entry.type) { entry.type = "login";      mutated = true; }
     }
     if (mutated) saveVault();
 }
@@ -214,10 +227,13 @@ function renderVault(filter) {
 
     if (q) {
         items = items.filter(e =>
-            (e.name     || "").toLowerCase().includes(q) ||
-            (e.username || "").toLowerCase().includes(q) ||
-            (e.url      || "").toLowerCase().includes(q) ||
-            (e.notes    || "").toLowerCase().includes(q)
+            (e.name       || "").toLowerCase().includes(q) ||
+            (e.username   || "").toLowerCase().includes(q) ||
+            (e.url        || "").toLowerCase().includes(q) ||
+            (e.notes      || "").toLowerCase().includes(q) ||
+            (e.content    || "").toLowerCase().includes(q) ||
+            (e.cardholder || "").toLowerCase().includes(q) ||
+            (e.cardNumber || "").toLowerCase().includes(q)
         );
     }
 
@@ -262,10 +278,11 @@ function renderVault(filter) {
             name.textContent = entry.name || "No title";
             tile.appendChild(name);
 
-            if (entry.url) {
+            const secondary = entrySecondaryText(entry);
+            if (secondary) {
                 const url = document.createElement("p");
                 url.className   = "tile-url";
-                url.textContent = entry.url;
+                url.textContent = secondary;
                 tile.appendChild(url);
             }
 
@@ -274,7 +291,9 @@ function renderVault(filter) {
 
             const user = document.createElement("p");
             user.className   = "tile-username";
-            user.textContent = entry.username || "";
+            user.textContent = (entry.type === "login")
+                ? (entry.url || "")
+                : ((entry.type || "login").toUpperCase());
             bottom.appendChild(user);
 
             const cb = document.createElement("button");
@@ -324,7 +343,7 @@ function renderVault(filter) {
 
             const sub   = document.createElement("div");
             sub.className   = "gallery-subtitle";
-            sub.textContent = entry.username || "";
+            sub.textContent = entrySecondaryText(entry);
 
             const cb = document.createElement("button");
             cb.className = "gallery-copy-btn";
@@ -368,7 +387,7 @@ function renderVault(filter) {
 
         const sub = document.createElement("p");
         sub.className   = "row-username";
-        sub.textContent = entry.username || entry.url || "";
+        sub.textContent = entrySecondaryText(entry);
         text.appendChild(sub);
 
         card.appendChild(text);
@@ -419,6 +438,8 @@ function openCard(entry) {
     currentEntryId  = entry.id;
     passwordVisible = false;
 
+    document.body.dataset.viewType = entry.type || "login";
+
     expandedName.textContent = entry.name || "No title";
 
     const urlField = document.getElementById("url-field");
@@ -437,6 +458,18 @@ function openCard(entry) {
     expandedUsername.textContent = entry.username || "—";
     expandedPassword.textContent = "••••••••";
     expandedNotes.textContent    = entry.notes || "No notes";
+
+    // Type-specific fields
+    const cardholderEl = document.getElementById("expanded-cardholder");
+    const cardNumberEl = document.getElementById("expanded-card-number");
+    const cardExpiryEl = document.getElementById("expanded-card-expiry");
+    const cardCvvEl    = document.getElementById("expanded-card-cvv");
+    const contentEl    = document.getElementById("expanded-content");
+    if (cardholderEl) cardholderEl.textContent = entry.cardholder || "—";
+    if (cardNumberEl) cardNumberEl.textContent = entry.cardNumber || "—";
+    if (cardExpiryEl) cardExpiryEl.textContent = entry.cardExpiry || "—";
+    if (cardCvvEl)    cardCvvEl.textContent    = "•••";
+    if (contentEl)    contentEl.textContent    = entry.content || "—";
 
     // Surface a "found in N breaches" warning if the user has run a
     // health scan and this password came back compromised.
@@ -509,10 +542,10 @@ document.addEventListener("keydown", e => {
 editBtn.addEventListener("click", () => {
     const e = findEntry(currentEntryId);
     if (!e) return;
+    const type = e.type || "login";
 
     editBtn.style.display           = "none";
     saveCancelWrapper.style.display = "flex";
-    document.getElementById("url-field").style.display = "";
 
     const makeInput = (id, val, type = "text") => {
         const el = document.createElement("input");
@@ -520,21 +553,37 @@ editBtn.addEventListener("click", () => {
         return el;
     };
 
-    expandedUrl.innerHTML      = ""; expandedUrl.appendChild(makeInput("edit-url", e.url || ""));
-    expandedUsername.innerHTML = ""; expandedUsername.appendChild(makeInput("edit-username", e.username || ""));
-    expandedPassword.innerHTML = ""; expandedPassword.appendChild(makeInput("edit-password", e.password || "", passwordVisible ? "text" : "password"));
+    if (type === "login") {
+        document.getElementById("url-field").style.display = "";
+        expandedUrl.innerHTML      = ""; expandedUrl.appendChild(makeInput("edit-url", e.url || ""));
+        expandedUsername.innerHTML = ""; expandedUsername.appendChild(makeInput("edit-username", e.username || ""));
+        expandedPassword.innerHTML = ""; expandedPassword.appendChild(makeInput("edit-password", e.password || "", passwordVisible ? "text" : "password"));
+        if (totpField) {
+            totpField.style.display = "";
+            stopTotpTimer();
+            setTotpEditMode(e.totp || "");
+        }
+    } else if (type === "note") {
+        const ce = document.getElementById("expanded-content");
+        ce.innerHTML = "";
+        const ta = document.createElement("textarea");
+        ta.id = "edit-content"; ta.className = "value notes"; ta.value = e.content || "";
+        ce.appendChild(ta);
+    } else if (type === "card") {
+        const ch = document.getElementById("expanded-cardholder");
+        const cn = document.getElementById("expanded-card-number");
+        const cx = document.getElementById("expanded-card-expiry");
+        const cv = document.getElementById("expanded-card-cvv");
+        if (ch) { ch.innerHTML = ""; ch.appendChild(makeInput("edit-cardholder", e.cardholder || "")); }
+        if (cn) { cn.innerHTML = ""; cn.appendChild(makeInput("edit-card-number", e.cardNumber || "")); }
+        if (cx) { cx.innerHTML = ""; cx.appendChild(makeInput("edit-card-expiry", e.cardExpiry || "")); }
+        if (cv) { cv.innerHTML = ""; cv.appendChild(makeInput("edit-card-cvv", e.cardCvv || "")); }
+    }
 
+    // Notes field is on every type
     const ta = document.createElement("textarea");
     ta.id = "edit-notes"; ta.className = "value notes"; ta.value = e.notes || "";
     expandedNotes.innerHTML = ""; expandedNotes.appendChild(ta);
-
-    // TOTP: show the field in edit mode (even when entry has no secret),
-    // swap the running code for an input of the base32 secret.
-    if (totpField) {
-        totpField.style.display = "";
-        stopTotpTimer();
-        setTotpEditMode(e.totp || "");
-    }
 
     haptic(6);
 });
@@ -563,14 +612,25 @@ function setTotpEditMode(currentValue) {
 saveBtn.addEventListener("click", () => {
     const entry = findEntry(currentEntryId);
     if (!entry) return;
-    entry.url       = (document.getElementById("edit-url")?.value      || "").trim();
-    entry.username  = (document.getElementById("edit-username")?.value  || "").trim();
-    entry.password  =  document.getElementById("edit-password")?.value  || "";
-    entry.notes     = (document.getElementById("edit-notes")?.value     || "").trim();
-    const totpVal   = (document.getElementById("edit-totp")?.value || "")
-                          .replace(/\s+/g, "").toUpperCase();
-    if (totpVal) entry.totp = totpVal;
-    else delete entry.totp;
+    const type = entry.type || "login";
+
+    if (type === "login") {
+        entry.url       = (document.getElementById("edit-url")?.value      || "").trim();
+        entry.username  = (document.getElementById("edit-username")?.value  || "").trim();
+        entry.password  =  document.getElementById("edit-password")?.value  || "";
+        const totpVal   = (document.getElementById("edit-totp")?.value || "")
+                              .replace(/\s+/g, "").toUpperCase();
+        if (totpVal) entry.totp = totpVal;
+        else delete entry.totp;
+    } else if (type === "note") {
+        entry.content = (document.getElementById("edit-content")?.value || "").trim();
+    } else if (type === "card") {
+        entry.cardholder = (document.getElementById("edit-cardholder")?.value  || "").trim();
+        entry.cardNumber = (document.getElementById("edit-card-number")?.value || "").replace(/\s+/g, "");
+        entry.cardExpiry = (document.getElementById("edit-card-expiry")?.value || "").trim();
+        entry.cardCvv    = (document.getElementById("edit-card-cvv")?.value    || "").trim();
+    }
+    entry.notes     = (document.getElementById("edit-notes")?.value || "").trim();
     entry.updatedAt = Date.now();
     saveVault();
     renderVault(searchInput.value);
@@ -583,25 +643,40 @@ cancelBtn.addEventListener("click", () => { haptic(4); exitEditMode(); });
 function exitEditMode() {
     const e = findEntry(currentEntryId);
     if (!e) return;
+    const type = e.type || "login";
     editBtn.style.display           = "inline-flex";
     saveCancelWrapper.style.display = "none";
 
-    const urlField = document.getElementById("url-field");
-    if (e.url) {
-        expandedUrl.innerHTML = "";
-        const safeUrl = /^https?:\/\//i.test(e.url) ? e.url : "#";
-        const a = document.createElement("a");
-        a.href = safeUrl; a.target = "_blank"; a.rel = "noopener noreferrer";
-        a.textContent = e.url;
-        expandedUrl.appendChild(a);
-        urlField.style.display = "";
-    } else {
-        urlField.style.display = "none";
+    if (type === "login") {
+        const urlField = document.getElementById("url-field");
+        if (e.url) {
+            expandedUrl.innerHTML = "";
+            const safeUrl = /^https?:\/\//i.test(e.url) ? e.url : "#";
+            const a = document.createElement("a");
+            a.href = safeUrl; a.target = "_blank"; a.rel = "noopener noreferrer";
+            a.textContent = e.url;
+            expandedUrl.appendChild(a);
+            urlField.style.display = "";
+        } else {
+            urlField.style.display = "none";
+        }
+        expandedUsername.textContent = e.username || "—";
+        expandedPassword.textContent = passwordVisible ? e.password : "••••••••";
+    } else if (type === "card") {
+        const ch = document.getElementById("expanded-cardholder");
+        const cn = document.getElementById("expanded-card-number");
+        const cx = document.getElementById("expanded-card-expiry");
+        const cv = document.getElementById("expanded-card-cvv");
+        if (ch) ch.textContent = e.cardholder || "—";
+        if (cn) cn.textContent = e.cardNumber || "—";
+        if (cx) cx.textContent = e.cardExpiry || "—";
+        if (cv) cv.textContent = "•••";
+    } else if (type === "note") {
+        const ce = document.getElementById("expanded-content");
+        if (ce) ce.textContent = e.content || "—";
     }
 
-    expandedUsername.textContent = e.username || "—";
-    expandedPassword.textContent = passwordVisible ? e.password : "••••••••";
-    expandedNotes.textContent    = e.notes || "No notes";
+    expandedNotes.textContent = e.notes || "No notes";
 
     if (expandedModified) {
         const date = formatDate(e.updatedAt || e.createdAt);
@@ -662,6 +737,15 @@ if (copyTotpBtn) {
         copyToClipboard(code, "Code copied!");
     });
 }
+
+document.getElementById("copy-card-number-btn")?.addEventListener("click", () => {
+    const entry = findEntry(currentEntryId);
+    if (entry && entry.cardNumber) copyToClipboard(entry.cardNumber, "Card number copied!");
+});
+document.getElementById("copy-card-cvv-btn")?.addEventListener("click", () => {
+    const entry = findEntry(currentEntryId);
+    if (entry && entry.cardCvv) copyToClipboard(entry.cardCvv, "CVV copied!");
+});
 
 // ============================================================
 // DELETE

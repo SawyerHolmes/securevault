@@ -36,6 +36,20 @@ const usernameInput  = document.getElementById("entry-username");
 const passwordInput  = document.getElementById("entry-password");
 const totpInput      = document.getElementById("entry-totp");
 const notesInput     = document.getElementById("entry-notes");
+const contentInput   = document.getElementById("entry-content");
+const cardholderIn   = document.getElementById("entry-cardholder");
+const cardNumberIn   = document.getElementById("entry-card-number");
+const cardExpiryIn   = document.getElementById("entry-card-expiry");
+const cardCvvIn      = document.getElementById("entry-card-cvv");
+
+// Apply the entry type to the body so CSS hides irrelevant fields
+function applyEntryType(type) {
+    document.body.dataset.entryType = type;
+}
+document.querySelectorAll('input[name="entry-type"]').forEach(r => {
+    r.addEventListener("change", e => applyEntryType(e.target.value));
+});
+applyEntryType("login");
 const toggleBtn      = document.getElementById("toggle-password");
 const generateBtn    = document.getElementById("generate-btn");
 const genLengthLabel = document.getElementById("gen-length-label");
@@ -244,17 +258,50 @@ passwordInput.addEventListener("input", () => checkStrength(passwordInput.value)
 // SAVE ENTRY
 // ============================================================
 saveBtn.addEventListener("click", async () => {
+    const type     = document.querySelector('input[name="entry-type"]:checked').value;
     const name     = nameInput.value.trim();
-    const url      = urlInput.value.trim();
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value;
-    const totp     = (totpInput.value || "").replace(/\s+/g, "").toUpperCase();
     const notes    = notesInput.value.trim();
 
-    if (!name || !username || !password) {
-        alert("Name, username, and password are required.");
-        haptic([20, 40, 20]); // error feedback
+    if (!name) {
+        alert("Name is required.");
+        haptic([20, 40, 20]);
         return;
+    }
+
+    const id = (crypto.randomUUID && crypto.randomUUID()) ||
+               ("e_" + Date.now() + "_" + Math.random().toString(36).slice(2));
+    const entry = { id, type, name, notes, createdAt: Date.now() };
+
+    if (type === "login") {
+        const url      = urlInput.value.trim();
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        const totp     = (totpInput.value || "").replace(/\s+/g, "").toUpperCase();
+        if (!username || !password) {
+            alert("Username and password are required for a login.");
+            haptic([20, 40, 20]);
+            return;
+        }
+        Object.assign(entry, { url, username, password });
+        if (totp) entry.totp = totp;
+    } else if (type === "note") {
+        entry.content = (contentInput.value || "").trim();
+        if (!entry.content) {
+            alert("Note content is required.");
+            haptic([20, 40, 20]);
+            return;
+        }
+    } else if (type === "card") {
+        const cardNumber = (cardNumberIn.value || "").replace(/\s+/g, "");
+        if (!cardNumber) {
+            alert("Card number is required.");
+            haptic([20, 40, 20]);
+            return;
+        }
+        entry.cardholder = cardholderIn.value.trim();
+        entry.cardNumber = cardNumber;
+        entry.cardExpiry = cardExpiryIn.value.trim();
+        entry.cardCvv    = cardCvvIn.value.trim();
     }
 
     const key = await getStoredKey();
@@ -266,17 +313,11 @@ saveBtn.addEventListener("click", async () => {
         try   { vault = await decryptData(encrypted, key); }
         catch { vault = []; }
     }
-
-    const id = (crypto.randomUUID && crypto.randomUUID()) ||
-               ("e_" + Date.now() + "_" + Math.random().toString(36).slice(2));
-    const entry = { id, name, url, username, password, notes, createdAt: Date.now() };
-    if (totp) entry.totp = totp;
     vault.push(entry);
     localStorage.setItem("vault", await encryptData(vault, key));
-    // Auto-push to Gist in background
     if (typeof pushToGist === "function") pushToGist().catch(() => {});
 
-    haptic([10, 20, 30]); // success feedback
+    haptic([10, 20, 30]);
     window.location.href = "vault.html";
 });
 

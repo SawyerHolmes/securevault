@@ -49,21 +49,59 @@
         <div class="add-entry-container">
 
         <div class="field">
+            <label>Type</label>
+            <div class="segmented-control-3">
+                <input type="radio" name="entry-type" id="type-login" value="login" checked>
+                <label for="type-login">Login</label>
+                <input type="radio" name="entry-type" id="type-note" value="note">
+                <label for="type-note">Note</label>
+                <input type="radio" name="entry-type" id="type-card" value="card">
+                <label for="type-card">Card</label>
+            </div>
+        </div>
+
+        <div class="field">
             <label for="entry-name">Name</label>
             <input type="text" id="entry-name" placeholder="Gmail" autocomplete="off">
         </div>
 
-        <div class="field">
+        <div class="field type-only-login">
             <label for="entry-url">URL</label>
             <input type="text" id="entry-url" placeholder="https://gmail.com" autocomplete="off">
         </div>
 
-        <div class="field">
+        <div class="field type-only-login">
             <label for="entry-username">Username</label>
             <input type="text" id="entry-username" placeholder="example@gmail.com" autocomplete="off">
         </div>
 
-        <div class="field">
+        <div class="field type-only-card">
+            <label for="entry-cardholder">Cardholder</label>
+            <input type="text" id="entry-cardholder" placeholder="Sawyer Holmes" autocomplete="off">
+        </div>
+
+        <div class="field type-only-card">
+            <label for="entry-card-number">Card number</label>
+            <input type="text" id="entry-card-number" placeholder="4111 1111 1111 1111" autocomplete="off" inputmode="numeric">
+        </div>
+
+        <div class="field type-only-card field-row-split">
+            <div class="field-row-half">
+                <label for="entry-card-expiry">Expiry</label>
+                <input type="text" id="entry-card-expiry" placeholder="MM/YY" autocomplete="off" inputmode="numeric">
+            </div>
+            <div class="field-row-half">
+                <label for="entry-card-cvv">CVV</label>
+                <input type="text" id="entry-card-cvv" placeholder="123" autocomplete="off" inputmode="numeric">
+            </div>
+        </div>
+
+        <div class="field type-only-note">
+            <label for="entry-content">Content</label>
+            <textarea id="entry-content" placeholder="Write your note…" rows="8"></textarea>
+        </div>
+
+        <div class="field type-only-login">
             <label for="entry-password">Password</label>
             <div class="password-wrapper">
                 <input type="password" id="entry-password" placeholder="••••••••" autocomplete="new-password">
@@ -119,7 +157,7 @@
             </div>
         </div>
 
-        <div class="field">
+        <div class="field type-only-login">
             <label for="entry-totp">Two-factor secret (TOTP, optional)</label>
             <input type="text" id="entry-totp" placeholder="JBSWY3DPEHPK3PXP" autocomplete="off" autocapitalize="characters" spellcheck="false">
         </div>

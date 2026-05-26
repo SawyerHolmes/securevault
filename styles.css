@@ -1242,6 +1242,33 @@ body.gallery-view #vault-container {
 .add-entry-container {
     width: 100%;
 }
+
+/* Type-conditional fields — only the rows matching the current
+   entry-type radio are visible. Same pattern is used by the vault
+   expanded modal via body[data-view-type=…]. */
+body[data-entry-type="login"] .type-only-note,
+body[data-entry-type="login"] .type-only-card,
+body[data-entry-type="note"]  .type-only-login,
+body[data-entry-type="note"]  .type-only-card,
+body[data-entry-type="card"]  .type-only-login,
+body[data-entry-type="card"]  .type-only-note {
+    display: none !important;
+}
+body[data-view-type="login"] .type-only-note,
+body[data-view-type="login"] .type-only-card,
+body[data-view-type="note"]  .type-only-login,
+body[data-view-type="note"]  .type-only-card,
+body[data-view-type="card"]  .type-only-login,
+body[data-view-type="card"]  .type-only-note {
+    display: none !important;
+}
+
+.field-row-split {
+    display: flex;
+    gap: 12px;
+}
+.field-row-half { flex: 1; min-width: 0; }
+.field-row-half label { margin-bottom: 6px; }
 .add-entry-container .field { margin-bottom: 16px; }
 .add-entry-container textarea { min-height: 96px; resize: vertical; }
 .add-entry-actions {
