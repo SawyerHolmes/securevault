@@ -14,11 +14,35 @@ Cross-origin autofill — sending an entry's password from the vault tab back in
 
 ## Load locally
 
-1. Chrome / Edge / Brave → `chrome://extensions`.
+### Chrome / Edge / Brave / Arc
+
+1. Visit `chrome://extensions` (or the equivalent — `edge://extensions`, `brave://extensions`, etc.).
 2. Enable **Developer mode** (top right).
 3. **Load unpacked** → select this `extension/` folder.
 4. Open the toolbar pin, paste your vault URL, click **Open vault**.
 5. The pin button shows up on any page with a password field.
+
+### Safari
+
+Safari can't load an unpacked extension directly — it has to be wrapped in a macOS app bundle. You need **Xcode** installed (App Store), then once:
+
+```sh
+xcrun safari-web-extension-converter /path/to/securevault/extension
+```
+
+That generates an Xcode project alongside the folder. Open the project, hit **Run** (Cmd+R) once — it builds and launches a tiny macOS shell app. Then in Safari:
+
+1. Safari → Settings → **Advanced** → tick "Show features for web developers".
+2. Safari → **Develop** menu → tick "Allow Unsigned Extensions".
+3. Safari → Settings → **Extensions** → tick **Securevault**.
+
+The `chrome.*` API calls in this folder are aliased to Safari's `browser.*` automatically, so no code changes are needed.
+
+To rebuild after editing files, re-run the converter (it overwrites the Xcode project) and rebuild in Xcode. Or edit the files Xcode references in-place and rebuild.
+
+### Firefox
+
+Firefox also accepts the same Manifest V3 layout via `about:debugging` → "This Firefox" → "Load Temporary Add-on" → select `manifest.json`. The same `chrome.*` ↔ `browser.*` aliasing applies.
 
 ## Files
 
