@@ -28,36 +28,38 @@
 </header>
 
 <main>
+    <div class="page-content">
 
-    <h1 class="page-title">Vault.</h1>
+        <h1 class="page-title">Vault.</h1>
 
-    <div class="vault-controls">
-        <div class="search-wrapper">
-            <svg class="search-icon" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
-            <input type="text" id="search-input" placeholder="Search entries…" autocomplete="off">
-            <svg class="sort-icon" id="sort-toggle" viewBox="0 0 24 24">
-                <line x1="4" y1="6"  x2="20" y2="6"  stroke="currentColor" stroke-width="1.5"/>
-                <circle cx="10" cy="6"  r="2" fill="currentColor"/>
-                <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.5"/>
-                <circle cx="14" cy="12" r="2" fill="currentColor"/>
-                <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="1.5"/>
-                <circle cx="8"  cy="18" r="2" fill="currentColor"/>
-            </svg>
-            <div class="sort-menu" id="sort-menu">
-                <div class="sort-field" data-field="name">Site name <span class="indicator"></span></div>
-                <div class="sort-field" data-field="username">Username <span class="indicator"></span></div>
-                <div class="divider"></div>
-                <div class="sort-order" data-order="asc">Ascending <span class="indicator"></span></div>
-                <div class="sort-order" data-order="desc">Descending <span class="indicator"></span></div>
+        <div class="vault-controls">
+            <div class="search-wrapper">
+                <svg class="search-icon" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <input type="text" id="search-input" placeholder="Search entries…" autocomplete="off" aria-label="Search vault">
+                <svg class="sort-icon" id="sort-toggle" viewBox="0 0 24 24" role="button" aria-label="Sort">
+                    <line x1="4" y1="6"  x2="20" y2="6"  stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="10" cy="6"  r="2" fill="currentColor"/>
+                    <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="14" cy="12" r="2" fill="currentColor"/>
+                    <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="8"  cy="18" r="2" fill="currentColor"/>
+                </svg>
+                <div class="sort-menu" id="sort-menu">
+                    <div class="sort-field" data-field="name">Site name <span class="indicator"></span></div>
+                    <div class="sort-field" data-field="username">Username <span class="indicator"></span></div>
+                    <div class="divider"></div>
+                    <div class="sort-order" data-order="asc">Ascending <span class="indicator"></span></div>
+                    <div class="sort-order" data-order="desc">Descending <span class="indicator"></span></div>
+                </div>
             </div>
         </div>
+
+        <div id="vault-container"></div>
+
     </div>
-
-    <div id="vault-container"></div>
-
 </main>
 
 <!-- Expanded Card Modal -->

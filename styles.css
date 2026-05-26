@@ -82,6 +82,14 @@ main {
     padding: 24px var(--page-pad) 96px;
 }
 
+/* Unified inner column used by vault, add-entry, settings so the
+   page title and content always line up on the same axis. */
+.page-content {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
 a { color: inherit; text-decoration: none; }
 
 button {
@@ -190,7 +198,11 @@ header .menu a {
     border-radius: 0;
 }
 
-header .menu a.active { opacity: 1; font-weight: 500; }
+header .menu a.active {
+    opacity: 1;
+    font-weight: 500;
+    box-shadow: inset 0 -2px 0 0 currentColor;
+}
 header .menu a:hover { opacity: 1; }
 
 header .menu a#logout-btn {
@@ -203,6 +215,15 @@ header .menu a#logout-btn {
     font-weight: 500;
 }
 header .menu a#logout-btn:hover { opacity: 0.85; }
+
+/* Minimal header (logo only) used on login since the user isn't
+   authenticated. Keeps the lime pill chrome consistent with the rest
+   of the app while omitting the nav links. */
+header.header-minimal {
+    justify-content: flex-start;
+    width: auto;
+    max-width: calc(var(--page-max) - 32px);
+}
 
 
 /* ============================================================
@@ -440,12 +461,8 @@ label {
 ============================================================ */
 #vault-container { display: block; }
 
-/* Grid view collapses to stripes too — the spec retires it. */
-body.grid-view #vault-container,
 body.list-view #vault-container {
     display: block;
-    grid-template-columns: none;
-    gap: 0;
 }
 
 .vault-card {
@@ -523,34 +540,83 @@ body.list-view #vault-container {
 
 
 /* ============================================================
-   8. VAULT LIST-VIEW TABLE
+   8. VAULT GRID VIEW (square brutalist tiles)
 ============================================================ */
-.vault-list-table {
-    width: 100%;
-    border-collapse: collapse;
+body.grid-view #vault-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
 }
-.vault-list-table thead th {
-    font-size: 11px;
+
+.vault-grid-tile {
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 16px;
+    background: transparent;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 140px;
+    position: relative;
+}
+.vault-grid-tile:hover {
+    border-color: var(--text);
+    background: linear-gradient(90deg, rgba(199, 241, 0, 0.06), transparent);
+}
+
+.vault-grid-tile .tile-num {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    line-height: 1;
+}
+.vault-grid-tile.featured .tile-num { color: var(--accent); }
+
+.vault-grid-tile .tile-name {
+    margin: 0;
+    font-size: 13px;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-secondary);
-    text-align: left;
-    padding: 10px 8px 10px 0;
-    border-bottom: 1px solid var(--border);
-}
-.vault-list-table td {
-    padding: 14px 8px 14px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
+    letter-spacing: 0.05em;
     color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-.vault-list-table tbody tr {
-    cursor: pointer;
-    transition: background var(--transition);
+
+.vault-grid-tile .tile-url {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-.vault-list-table tbody tr:hover {
-    background: linear-gradient(90deg, rgba(199, 241, 0, 0.06), transparent);
+
+.vault-grid-tile .tile-bottom {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.vault-grid-tile .tile-username {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
 }
 
 
@@ -926,8 +992,8 @@ body.gallery-view #vault-container {
 }
 
 .add-entry-container {
-    max-width: 560px;
-    margin: 24px auto;
+    max-width: 480px;
+    margin: 0;
 }
 .add-entry-container .field { margin-bottom: 16px; }
 .add-entry-container textarea { min-height: 96px; resize: vertical; }
@@ -1134,8 +1200,8 @@ body.gallery-view #vault-container {
    19. SETTINGS LAYOUT
 ============================================================ */
 .settings-container {
-    max-width: 720px;
-    margin: 24px auto;
+    max-width: 100%;
+    margin: 0;
 }
 .settings-group { margin-bottom: 32px; }
 .settings-title {

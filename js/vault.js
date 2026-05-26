@@ -244,47 +244,56 @@ function renderVault(filter) {
         return;
     }
 
-    const viewMode = settings.viewMode || "grid";
+    const viewMode = settings.viewMode || "list";
 
-    // ---- LIST VIEW ----
-    if (viewMode === "list") {
-        vaultContainer.style.display = "block";
-        const table = document.createElement("table");
-        table.className = "vault-list-table";
-        table.innerHTML = `<thead><tr>
-            <th>Name</th><th>URL</th><th>Username</th><th>Password</th><th></th>
-        </tr></thead>`;
-        const tbody = document.createElement("tbody");
-        items.forEach(entry => {
-            const tr = document.createElement("tr");
+    // ---- GRID VIEW (square tiles, denser than list, more info than gallery) ----
+    if (viewMode === "grid") {
+        vaultContainer.style.display = "";
+        items.forEach((entry, i) => {
+            const tile     = document.createElement("div");
+            tile.className = "vault-grid-tile";
 
-            ["name", "url", "username"].forEach(f => {
-                const td = document.createElement("td");
-                td.textContent = entry[f] || (f === "url" ? "—" : "");
-                tr.appendChild(td);
-            });
+            const num = document.createElement("div");
+            num.className   = "tile-num";
+            num.textContent = String(i + 1).padStart(2, "0");
+            tile.appendChild(num);
 
-            const tdPwd = document.createElement("td");
-            tdPwd.textContent = "••••••••";
-            tr.appendChild(tdPwd);
+            const name = document.createElement("h2");
+            name.className   = "tile-name";
+            name.textContent = entry.name || "No title";
+            tile.appendChild(name);
 
-            const tdCopy = document.createElement("td");
+            if (entry.url) {
+                const url = document.createElement("p");
+                url.className   = "tile-url";
+                url.textContent = entry.url;
+                tile.appendChild(url);
+            }
+
+            const bottom = document.createElement("div");
+            bottom.className = "tile-bottom";
+
+            const user = document.createElement("p");
+            user.className   = "tile-username";
+            user.textContent = entry.username || "";
+            bottom.appendChild(user);
+
             const cb = document.createElement("button");
             cb.className = "card-copy-btn";
             cb.setAttribute("aria-label", "Copy credentials");
             cb.innerHTML = `<i data-lucide="copy"></i>`;
             cb.addEventListener("click", e => showCopyMenu(e, entry));
-            tdCopy.appendChild(cb);
-            tr.appendChild(tdCopy);
+            bottom.appendChild(cb);
 
-            tr.addEventListener("click", e => {
+            tile.appendChild(bottom);
+
+            tile.dataset.id = entry.id;
+            tile.addEventListener("click", e => {
                 if (e.target.closest(".card-copy-btn")) return;
                 haptic(6); openCard(entry);
             });
-            tbody.appendChild(tr);
+            vaultContainer.appendChild(tile);
         });
-        table.appendChild(tbody);
-        vaultContainer.appendChild(table);
         renderIcons();
         return;
     }
@@ -339,7 +348,7 @@ function renderVault(filter) {
         return;
     }
 
-    // ---- DEFAULT STRIPE VIEW ----
+    // ---- LIST VIEW (default — horizontal stripes) ----
     vaultContainer.style.display = "";
     items.forEach((entry, i) => {
         const card     = document.createElement("div");

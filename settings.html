@@ -35,9 +35,9 @@
 </header>
 
 <main>
-    <div class="settings-container">
-
+    <div class="page-content">
         <h1 class="page-title">Settings.</h1>
+        <div class="settings-container">
 
         <div class="settings-group">
             <div class="settings-title">Account & security</div>
@@ -77,10 +77,10 @@
                 <div class="setting-item">
                     <label>Vault view</label>
                     <div class="segmented-control-3">
-                        <input type="radio" name="vault-view" id="view-grid" value="grid" checked>
-                        <label for="view-grid">Grid</label>
-                        <input type="radio" name="vault-view" id="view-list" value="list">
+                        <input type="radio" name="vault-view" id="view-list" value="list" checked>
                         <label for="view-list">List</label>
+                        <input type="radio" name="vault-view" id="view-grid" value="grid">
+                        <label for="view-grid">Grid</label>
                         <input type="radio" name="vault-view" id="view-gallery" value="gallery">
                         <label for="view-gallery">Gallery</label>
                         <div class="segmented-slider-3"></div>
@@ -170,12 +170,12 @@
             </div>
         </div>
 
-        <!-- Save / Reset -->
         <div class="settings-actions">
             <button id="save-settings" class="btn-black">Save settings</button>
             <button id="reset-settings" class="btn-white">Reset defaults</button>
         </div>
 
+        </div>
     </div>
 </main>
 
