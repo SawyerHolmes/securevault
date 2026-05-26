@@ -34,6 +34,7 @@ const nameInput      = document.getElementById("entry-name");
 const urlInput       = document.getElementById("entry-url");
 const usernameInput  = document.getElementById("entry-username");
 const passwordInput  = document.getElementById("entry-password");
+const totpInput      = document.getElementById("entry-totp");
 const notesInput     = document.getElementById("entry-notes");
 const toggleBtn      = document.getElementById("toggle-password");
 const generateBtn    = document.getElementById("generate-btn");
@@ -247,6 +248,7 @@ saveBtn.addEventListener("click", async () => {
     const url      = urlInput.value.trim();
     const username = usernameInput.value.trim();
     const password = passwordInput.value;
+    const totp     = (totpInput.value || "").replace(/\s+/g, "").toUpperCase();
     const notes    = notesInput.value.trim();
 
     if (!name || !username || !password) {
@@ -267,7 +269,9 @@ saveBtn.addEventListener("click", async () => {
 
     const id = (crypto.randomUUID && crypto.randomUUID()) ||
                ("e_" + Date.now() + "_" + Math.random().toString(36).slice(2));
-    vault.push({ id, name, url, username, password, notes, createdAt: Date.now() });
+    const entry = { id, name, url, username, password, notes, createdAt: Date.now() };
+    if (totp) entry.totp = totp;
+    vault.push(entry);
     localStorage.setItem("vault", await encryptData(vault, key));
     // Auto-push to Gist in background
     if (typeof pushToGist === "function") pushToGist().catch(() => {});

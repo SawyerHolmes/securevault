@@ -124,6 +124,20 @@
             </div>
         </div>
 
+        <div class="field" id="totp-field" style="display:none;">
+            <label>Two-factor code</label>
+            <div class="totp-row">
+                <div class="totp-code" id="expanded-totp">— —</div>
+                <div class="totp-countdown" aria-hidden="true">
+                    <div class="totp-countdown-bar" id="expanded-totp-bar"></div>
+                </div>
+                <button class="icon-btn copy-icon-btn" id="copy-totp-btn" title="Copy code" aria-label="Copy two-factor code">
+                    <i data-lucide="copy"></i>
+                </button>
+                <input type="text" id="edit-totp" class="totp-edit-input" placeholder="JBSWY3DPEHPK3PXP" autocomplete="off" autocapitalize="characters" spellcheck="false" style="display:none;">
+            </div>
+        </div>
+
         <div class="field">
             <label>Notes</label>
             <div class="value notes" id="expanded-notes">No notes</div>
@@ -154,6 +168,7 @@
 <script src="js/toast.js"></script>
 <script src="js/sw-register.js"></script>
 <script src="js/crypto-utils.js"></script>
+<script src="js/totp.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/vault.js"></script>

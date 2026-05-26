@@ -981,6 +981,44 @@ body.gallery-view #vault-container {
     font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
+.totp-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.totp-code {
+    flex: 1;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+.totp-countdown {
+    flex: 0 0 80px;
+    height: 3px;
+    background: var(--border);
+    position: relative;
+}
+.totp-countdown-bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--accent);
+    width: 100%;
+    transition: width 1s linear;
+}
+.totp-edit-input {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+}
+.totp-edit-input:focus { outline: none; border-color: var(--text); }
+
 #expanded-modified {
     font-size: 11px;
     font-weight: 500;

@@ -61,6 +61,10 @@ const expandedUsername  = document.getElementById("expanded-username");
 const expandedPassword  = document.getElementById("expanded-password");
 const expandedNotes     = document.getElementById("expanded-notes");
 const expandedModified  = document.getElementById("expanded-modified");
+const totpField         = document.getElementById("totp-field");
+const expandedTotp      = document.getElementById("expanded-totp");
+const expandedTotpBar   = document.getElementById("expanded-totp-bar");
+const copyTotpBtn       = document.getElementById("copy-totp-btn");
 const editBtn           = document.getElementById("edit-btn");
 const saveCancelWrapper = document.getElementById("save-cancel-wrapper");
 const saveBtn           = document.getElementById("save-btn");
@@ -390,6 +394,26 @@ function renderVault(filter) {
 // EXPANDED CARD
 // ============================================================
 let expandedCardRelease = null;
+let totpTimer           = null;
+
+async function refreshTotp() {
+    const entry = findEntry(currentEntryId);
+    if (!entry || !entry.totp) return;
+    try {
+        const { code, secondsRemaining, period } = await generateTOTP(entry.totp);
+        expandedTotp.textContent     = formatTOTP(code);
+        expandedTotpBar.style.width  = (100 * secondsRemaining / period) + "%";
+        expandedTotp.dataset.code    = code;
+    } catch {
+        expandedTotp.textContent  = "Invalid secret";
+        expandedTotpBar.style.width = "0%";
+        delete expandedTotp.dataset.code;
+    }
+}
+
+function stopTotpTimer() {
+    if (totpTimer) { clearInterval(totpTimer); totpTimer = null; }
+}
 
 function openCard(entry) {
     currentEntryId  = entry.id;
@@ -425,6 +449,18 @@ function openCard(entry) {
     saveCancelWrapper.style.display = "none";
     expandedCard.style.display      = "flex";
 
+    // Two-factor: show the field, render current code, refresh every second
+    if (totpField) {
+        if (entry.totp) {
+            totpField.style.display = "";
+            refreshTotp();
+            stopTotpTimer();
+            totpTimer = setInterval(refreshTotp, 1000);
+        } else {
+            totpField.style.display = "none";
+        }
+    }
+
     if (window.trapFocus) expandedCardRelease = window.trapFocus(expandedCard);
 }
 
@@ -437,6 +473,7 @@ function closeCard() {
     saveCancelWrapper.style.display = "none";
     editBtn.style.display           = "inline-flex";
     currentEntryId = null;
+    stopTotpTimer();
     if (expandedCardRelease) { expandedCardRelease(); expandedCardRelease = null; }
 }
 
@@ -477,8 +514,37 @@ editBtn.addEventListener("click", () => {
     ta.id = "edit-notes"; ta.className = "value notes"; ta.value = e.notes || "";
     expandedNotes.innerHTML = ""; expandedNotes.appendChild(ta);
 
+    // TOTP: show the field in edit mode (even when entry has no secret),
+    // swap the running code for an input of the base32 secret.
+    if (totpField) {
+        totpField.style.display = "";
+        stopTotpTimer();
+        setTotpEditMode(e.totp || "");
+    }
+
     haptic(6);
 });
+
+function setTotpDisplayMode() {
+    const row = totpField && totpField.querySelector(".totp-row");
+    if (!row) return;
+    row.querySelectorAll(".totp-code, .totp-countdown, #copy-totp-btn")
+        .forEach(el => el.style.display = "");
+    const input = document.getElementById("edit-totp");
+    if (input) input.style.display = "none";
+}
+
+function setTotpEditMode(currentValue) {
+    const row = totpField && totpField.querySelector(".totp-row");
+    if (!row) return;
+    row.querySelectorAll(".totp-code, .totp-countdown, #copy-totp-btn")
+        .forEach(el => el.style.display = "none");
+    const input = document.getElementById("edit-totp");
+    if (input) {
+        input.value = currentValue;
+        input.style.display = "";
+    }
+}
 
 saveBtn.addEventListener("click", () => {
     const entry = findEntry(currentEntryId);
@@ -487,6 +553,10 @@ saveBtn.addEventListener("click", () => {
     entry.username  = (document.getElementById("edit-username")?.value  || "").trim();
     entry.password  =  document.getElementById("edit-password")?.value  || "";
     entry.notes     = (document.getElementById("edit-notes")?.value     || "").trim();
+    const totpVal   = (document.getElementById("edit-totp")?.value || "")
+                          .replace(/\s+/g, "").toUpperCase();
+    if (totpVal) entry.totp = totpVal;
+    else delete entry.totp;
     entry.updatedAt = Date.now();
     saveVault();
     renderVault(searchInput.value);
@@ -524,6 +594,19 @@ function exitEditMode() {
         expandedModified.textContent   = date ? `Modified ${date}` : "";
         expandedModified.style.display = date ? "" : "none";
     }
+
+    // Restore TOTP display mode and resume the timer if there's a secret
+    if (totpField) {
+        setTotpDisplayMode();
+        if (e.totp) {
+            totpField.style.display = "";
+            refreshTotp();
+            stopTotpTimer();
+            totpTimer = setInterval(refreshTotp, 1000);
+        } else {
+            totpField.style.display = "none";
+        }
+    }
 }
 
 // ============================================================
@@ -557,6 +640,14 @@ copyUsernameBtn.addEventListener("click", () => {
     if (!entry) return;
     copyToClipboard(entry.username, "Username copied!");
 });
+
+if (copyTotpBtn) {
+    copyTotpBtn.addEventListener("click", () => {
+        const code = expandedTotp.dataset.code;
+        if (!code) return;
+        copyToClipboard(code, "Code copied!");
+    });
+}
 
 // ============================================================
 // DELETE
