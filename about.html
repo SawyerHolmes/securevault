@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        (function() {
+            const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
+            if (s.lightMode !== true) document.documentElement.classList.add("dark");
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVault — About</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Crect x='10' y='10' width='12' height='12' fill='%23C7F100'/%3E%3C/svg%3E">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#000000">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">■ Securevault</div>
+    <nav class="menu">
+        <a href="vault.html">Vault</a>
+        <a href="add-entry.html">Add</a>
+        <a href="settings.html">Settings</a>
+        <a href="login.html" id="logout-btn">Logout</a>
+    </nav>
+    <button type="button" class="nav-burger" id="nav-burger" aria-label="Open menu">
+        <i data-lucide="menu"></i>
+    </button>
+</header>
+
+<div class="nav-drawer" id="nav-drawer">
+    <div class="nav-drawer-content">
+        <button type="button" class="nav-drawer-close" id="nav-drawer-close" aria-label="Close menu">
+            <i data-lucide="x"></i>
+        </button>
+        <a href="vault.html">Vault</a>
+        <a href="add-entry.html">Add</a>
+        <a href="settings.html">Settings</a>
+        <a href="login.html" class="nav-drawer-logout">Logout</a>
+    </div>
+</div>
+
+<main>
+    <div class="page-content">
+
+        <h1 class="page-title">About.</h1>
+        <p class="page-sub">Version <span id="about-version">0.10.0</span> · Built <span id="about-built">2026-05-26</span></p>
+
+        <section class="about-section">
+            <h2 class="settings-title">What it is</h2>
+            <p class="about-body">
+                A local-first password manager that lives entirely in your browser. Vault data is encrypted on
+                the device with AES-256-GCM under a key derived from your master password via PBKDF2-HMAC-SHA-256
+                at 600,000 iterations. Nothing is uploaded unless you turn on Gist sync — and even then the only
+                thing that leaves is the encrypted blob.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h2 class="settings-title">Security model</h2>
+            <ul class="about-list">
+                <li>AES-256-GCM, 96-bit IV per record, authenticated.</li>
+                <li>PBKDF2-HMAC-SHA-256, 600 000 iterations, per-vault random salt.</li>
+                <li>Master password never leaves the device. The derived key is held in sessionStorage and cleared on lock.</li>
+                <li>GitHub PAT (when sync is configured) is also encrypted with the vault key.</li>
+                <li>Breach check uses Have I Been Pwned k-anonymity — only the first 5 hex chars of the SHA-1 hash hit the network.</li>
+                <li>Exponential brute-force lockout: 30 s, 1 m, 2 m, 4 m, 8 m, 16 m, 32 m, 1 h cap.</li>
+            </ul>
+        </section>
+
+        <section class="about-section">
+            <h2 class="settings-title">Changelog</h2>
+            <ul class="about-list">
+                <li><strong>0.10.0</strong> — Multiple types (login / note / card), soft delete with Trash, Archive, password History, onboarding, About page.</li>
+                <li><strong>0.9.0</strong> — TOTP / 2FA codes (RFC 6238), Have I Been Pwned breach check + Password health view.</li>
+                <li><strong>0.8.0</strong> — Self-hosted Inter + Lucide, PWA (manifest + service worker, offline + installable).</li>
+                <li><strong>0.7.0</strong> — UX foundation: toasts, undo on delete, focus rings, focus trap, login spinner, prefers-reduced-motion, aria-live.</li>
+                <li><strong>0.6.0</strong> — Mobile pass: hamburger drawer, fixed bottom CTA, slide-up sheet modals, search 16px to defeat iOS auto-zoom.</li>
+                <li><strong>0.5.0</strong> — Brutalist redesign per DESIGN.md, Inter, lime accent, stripe rows.</li>
+                <li><strong>0.4.0</strong> — Encrypted Gist sync, atomic master-password rotation, stable entry IDs.</li>
+                <li><strong>0.3.0</strong> — WebCrypto migration (PBKDF2-SHA-256 / AES-GCM), encrypted PAT, exponential lockout, confirm-password on first-run, CSV parser hardening.</li>
+                <li><strong>0.2.0</strong> — Tier-2 fixes: confirm-password, exp lockout, RFC-style CSV parser, stable IDs, aria-labels.</li>
+                <li><strong>0.1.0</strong> — Initial review pass: WebCrypto rewrite, cleanup of dead code, removal of plaintext PAT.</li>
+            </ul>
+        </section>
+
+        <section class="about-section">
+            <h2 class="settings-title">Built with</h2>
+            <p class="about-body">
+                Vanilla HTML / CSS / JS. No framework, no build step, no dependency on a remote API except (optionally)
+                the GitHub Gist endpoint for sync and the Have I Been Pwned range API for breach checks. Inter is
+                served locally; the ten icons in use are inlined from Lucide.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h2 class="settings-title">Source</h2>
+            <p class="about-body">
+                <a href="https://github.com/SawyerHolmes/securevault" target="_blank" rel="noopener noreferrer" class="about-link">github.com/SawyerHolmes/securevault</a>
+            </p>
+        </section>
+
+    </div>
+</main>
+
+<script src="js/icons.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/sw-register.js"></script>
+<script src="js/crypto-utils.js"></script>
+<script src="js/auth.js"></script>
+<script>
+    // Page is reachable without auth context too, but if we're logged
+    // in still run the activity tracker so auto-lock kicks in.
+    if (sessionStorage.getItem("authenticated") === "true") {
+        if (typeof startActivityTracking === "function") startActivityTracking();
+    }
+    document.getElementById("logout-btn").addEventListener("click", () => {
+        if (typeof logout === "function") logout();
+        else window.location.replace("login.html");
+    });
+</script>
+
+</body>
+</html>

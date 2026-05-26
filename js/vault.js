@@ -1020,6 +1020,23 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ============================================================
+// FIRST-RUN WELCOME
+// ============================================================
+function maybeShowWelcome() {
+    const overlay = document.getElementById("welcome-overlay");
+    const dismiss = document.getElementById("welcome-dismiss");
+    if (!overlay || !dismiss) return;
+    const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
+    if (s.onboarded) return;
+    overlay.style.display = "flex";
+    dismiss.addEventListener("click", () => {
+        overlay.style.display = "none";
+        const next = { ...s, onboarded: true };
+        localStorage.setItem("vaultSettings", JSON.stringify(next));
+    });
+}
+
+// ============================================================
 // INIT
 // ============================================================
 (async () => {
@@ -1028,4 +1045,5 @@ document.addEventListener("DOMContentLoaded", () => {
     applyViewMode(settings.viewMode || "list");
     sortField = settings.defaultSort || "name";
     renderVault();
+    maybeShowWelcome();
 })();

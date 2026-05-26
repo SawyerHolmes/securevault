@@ -5,7 +5,7 @@
 // localStorage and never touches this cache.
 // ============================================================
 
-const CACHE = "securevault-v4";
+const CACHE = "securevault-v5";
 
 const ASSETS = [
     "./",
@@ -16,6 +16,7 @@ const ASSETS = [
     "./trash.html",
     "./archive.html",
     "./history.html",
+    "./about.html",
     "./styles.css",
     "./manifest.webmanifest",
     "./icons/icon.svg",

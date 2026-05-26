@@ -192,6 +192,22 @@
 
 <a href="add-entry.html" class="mobile-cta">+ Add entry</a>
 
+<!-- First-run welcome -->
+<div class="confirmation-overlay" id="welcome-overlay">
+    <div class="confirmation-modal welcome-modal">
+        <p class="confirm-title">Welcome to Securevault.</p>
+        <ul class="welcome-list">
+            <li><strong>Local first.</strong> Your vault is encrypted on this device with AES-256 + PBKDF2 (600k iter). Nothing leaves until you turn on sync.</li>
+            <li><strong>One accent.</strong> Lime means "this is the thing to focus on" — buttons, the active tab, breach alerts.</li>
+            <li><strong>Move things around.</strong> Delete is reversible for 30 days (Trash). Archive moves stuff out of the active list without losing it.</li>
+            <li><strong>Two factor.</strong> Paste a TOTP secret on a login and the rolling 6-digit code lives in the entry.</li>
+        </ul>
+        <div class="confirmation-buttons">
+            <button class="btn-black" id="welcome-dismiss">Get started</button>
+        </div>
+    </div>
+</div>
+
 <!-- Confirmation Modal -->
 <div class="confirmation-overlay" id="confirmation-overlay">
     <div class="confirmation-modal">
