@@ -236,14 +236,13 @@ function renderVault(filter) {
         const div = document.createElement("div");
         div.className = "empty-state";
         div.innerHTML = q
-            ? `<div class="empty-icon"><i data-lucide="search"></i></div>
+            ? `<div class="empty-icon"><span class="empty-icon-shape search"></span></div>
                <h2>No results</h2><p>Try a different search term</p>`
-            : `<div class="empty-icon"><i data-lucide="lock"></i></div>
+            : `<div class="empty-icon"><span class="empty-icon-shape"></span></div>
                <h2>Your vault is empty</h2>
                <p>Add your first password to get started</p>
                <a href="add-entry.html" class="empty-add-btn">Add entry</a>`;
         vaultContainer.appendChild(div);
-        renderIcons();
         return;
     }
 
