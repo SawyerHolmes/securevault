@@ -58,85 +58,42 @@ const strengthBar    = document.getElementById("strength-bar");
 const strengthLabel  = document.getElementById("strength-label");
 
 // ============================================================
-// CUSTOM SLIDER
-// Pill track, discrete steps, inverted ticks on fill
+// LENGTH SLIDER — clean track, square thumb, integer steps
 // ============================================================
-const SLIDER_MIN   = 8;
-const SLIDER_MAX   = 64;
-const SLIDER_STEPS = 14;
+const SLIDER_MIN = 8;
+const SLIDER_MAX = 64;
 
-const sliderTrack   = document.getElementById("gen-slider");
-const sliderFill    = document.getElementById("slider-fill");
-const sliderTicksBg = document.getElementById("slider-ticks-bg");
-const sliderTicksFg = document.getElementById("slider-ticks-fg");
-const sliderThumb   = document.getElementById("slider-thumb");
+const sliderTrack = document.getElementById("gen-slider");
+const sliderFill  = document.getElementById("slider-fill");
+const sliderThumb = document.getElementById("slider-thumb");
 
 let sliderValue = 20;
 let isDragging  = false;
-
-// Build evenly spaced snap values
-function buildSnapValues() {
-    const vals = [];
-    for (let i = 0; i <= SLIDER_STEPS; i++) {
-        vals.push(Math.round(SLIDER_MIN + (SLIDER_MAX - SLIDER_MIN) * i / SLIDER_STEPS));
-    }
-    return vals;
-}
-
-const snapValues = buildSnapValues();
-
-function nearestSnap(val) {
-    return snapValues.reduce((a, b) =>
-        Math.abs(b - val) < Math.abs(a - val) ? b : a
-    );
-}
 
 function valueToPct(val) {
     return (val - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
 }
 
-function buildTicks() {
-    // Background ticks — dark marks on light track
-    sliderTicksBg.innerHTML = "";
-    snapValues.forEach(v => {
-        const d = document.createElement("div");
-        d.className  = "slider-tick";
-        d.style.left = valueToPct(v) * 100 + "%";
-        sliderTicksBg.appendChild(d);
-    });
-
-    // Foreground ticks — light marks shown over the dark fill
-    // The fill colour comes from CSS (.slider-ticks-fg has background via sliderFill sibling)
-    sliderTicksFg.innerHTML = "";
-    snapValues.forEach(v => {
-        const d = document.createElement("div");
-        d.className  = "slider-tick";
-        d.style.left = valueToPct(v) * 100 + "%";
-        sliderTicksFg.appendChild(d);
-    });
-}
-
 function renderSlider() {
     const p = valueToPct(sliderValue) * 100;
-    sliderFill.style.width    = p + "%";
-    sliderThumb.style.left    = p + "%";
-    sliderTicksFg.style.width = p + "%";
+    sliderFill.style.width = p + "%";
+    sliderThumb.style.left = p + "%";
     genLengthLabel.textContent = sliderValue;
 }
 
 function setSliderValue(val) {
-    const snapped = nearestSnap(Math.max(SLIDER_MIN, Math.min(SLIDER_MAX, val)));
-    if (snapped !== sliderValue) {
-        haptic(4); // tick feedback on each step change
+    const clamped = Math.max(SLIDER_MIN, Math.min(SLIDER_MAX, Math.round(val)));
+    if (clamped !== sliderValue) {
+        haptic(4); // tick feedback on each integer step
     }
-    sliderValue = snapped;
+    sliderValue = clamped;
     renderSlider();
 }
 
 function valFromClientX(clientX) {
     const rect  = sliderTrack.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    return nearestSnap(SLIDER_MIN + (SLIDER_MAX - SLIDER_MIN) * ratio);
+    return SLIDER_MIN + (SLIDER_MAX - SLIDER_MIN) * ratio;
 }
 
 // Mouse events
@@ -182,9 +139,8 @@ sliderTrack.addEventListener("click", e => {
     haptic(8);
 });
 
-// Init slider
-setTimeout(() => { buildTicks(); renderSlider(); }, 0);
-window.addEventListener("resize", () => { buildTicks(); renderSlider(); });
+// Init slider once the DOM is ready
+setTimeout(renderSlider, 0);
 
 // ============================================================
 // TOGGLE PASSWORD VISIBILITY

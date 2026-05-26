@@ -1166,6 +1166,38 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ============================================================
+// AUTO-PULL — silent sync pull on focus + every 5 min while open.
+// Throttled so we never hammer the Gist API.
+// ============================================================
+let lastAutoPull = 0;
+const AUTO_PULL_THROTTLE_MS = 30 * 1000;        // 30s minimum between auto-pulls
+const AUTO_PULL_INTERVAL_MS = 5  * 60 * 1000;   // 5-min background tick
+
+async function silentPull() {
+    const now = Date.now();
+    if (now - lastAutoPull < AUTO_PULL_THROTTLE_MS) return;
+    if (typeof syncConfigured !== "function" || !(await syncConfigured())) return;
+    lastAutoPull = now;
+    try {
+        const result = await pullFromGist();
+        if (result && result.ok && !result.reauth) {
+            await loadVault();
+            renderVault(searchInput.value);
+        }
+    } catch {
+        // Silent — auto-pull failures are non-blocking
+    }
+}
+
+window.addEventListener("focus", () => { silentPull(); });
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) silentPull();
+});
+setInterval(() => {
+    if (!document.hidden) silentPull();
+}, AUTO_PULL_INTERVAL_MS);
+
+// ============================================================
 // PULL-TO-REFRESH (mobile only)
 // ============================================================
 (function setupPullToRefresh() {

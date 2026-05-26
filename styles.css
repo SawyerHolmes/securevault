@@ -1576,49 +1576,37 @@ body[data-view-type="card"]  .type-only-note {
 
 
 /* ============================================================
-   16. PASSWORD GENERATOR CARD
+   16. PASSWORD GENERATOR CARD — clean and compact
 ============================================================ */
 .generator-card {
-    background: var(--surface);
+    background: transparent;
     border: 1px solid var(--border);
     border-radius: 0;
-    padding: 24px;
-    margin-top: 16px;
+    padding: 16px;
+    margin-top: 12px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 14px;
 }
 
-.generator-header {
+.generator-row {
     display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-}
-.generator-title {
-    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-secondary);
+    gap: 16px;
 }
-.generator-title svg.lucide { width: 14px; height: 14px; }
 
 .gen-length-display {
     display: inline-flex;
     align-items: baseline;
-    gap: 6px;
+    gap: 4px;
+    flex: 0 0 auto;
+    min-width: 64px;
 }
 #gen-length-label,
 .gen-length-value {
-    font-size: 32px;
+    font-size: 18px;
     font-weight: 500;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
     color: var(--text);
     line-height: 1;
@@ -1631,21 +1619,24 @@ body[data-view-type="card"]  .type-only-note {
     color: var(--text-secondary);
 }
 
-.generator-slider-row { margin: 0; }
+.generator-row-slider .slider-track { flex: 1; }
+
+.generator-row-controls {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
 
 .generator-options {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 .gen-option {
-    flex: 1;
-    min-width: 96px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 10px 12px;
+    padding: 6px 12px;
     border: 1px solid var(--border-strong);
     border-radius: 999px;
     background: transparent;
@@ -1665,22 +1656,21 @@ body[data-view-type="card"]  .type-only-note {
     border-color: var(--accent);
 }
 
-.generator-btn-primary {
-    width: 100%;
-    padding: 14px 18px;
-    background: var(--accent);
-    color: var(--accent-ink);
-    border: none;
-    border-radius: 0;
+.generator-btn {
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
     font-size: 11px;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    transition: opacity var(--transition);
+    transition: border-color var(--transition), background var(--transition), color var(--transition);
 }
-.generator-btn-primary:hover  { opacity: 0.85; }
-.generator-btn-primary:active { transform: scale(0.99); }
+.generator-btn:hover  { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.generator-btn:active { transform: scale(0.99); }
 
 
 /* ============================================================
@@ -1706,26 +1696,6 @@ body[data-view-type="card"]  .type-only-note {
     width: 0;
     background: var(--accent);
 }
-.slider-ticks-bg,
-.slider-ticks-fg,
-#slider-ticks-bg,
-#slider-ticks-fg {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-}
-.slider-tick {
-    position: absolute;
-    top: 5px;
-    width: 1px;
-    height: 10px;
-    background: var(--text);
-    opacity: 0.4;
-    transform: translateX(-0.5px);
-}
-.slider-ticks-fg .slider-tick { background: var(--accent-ink); opacity: 1; }
-
 .slider-thumb,
 #slider-thumb {
     position: absolute;
