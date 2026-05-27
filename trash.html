@@ -4,7 +4,8 @@
     <script>
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
-            if (s.lightMode !== true) document.documentElement.classList.add("dark");
+            const appearance = s.appearance || (s.lightMode ? "light" : "dark");
+            if (appearance === "dark") document.documentElement.classList.add("dark");
         })();
     </script>
     <meta charset="UTF-8">
@@ -16,6 +17,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<a href="#main-content" class="skip-to-content">Skip to content</a>
 
 <header>
     <div class="logo">■ Securevault</div>
@@ -42,7 +45,7 @@
     </div>
 </div>
 
-<main>
+<main id="main-content">
     <div class="page-content">
 
         <h1 class="page-title">Trash.</h1>

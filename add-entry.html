@@ -5,7 +5,8 @@
     <script>
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
-            if (s.lightMode !== true) document.documentElement.classList.add("dark");
+            const appearance = s.appearance || (s.lightMode ? "light" : "dark");
+            if (appearance === "dark") document.documentElement.classList.add("dark");
         })();
     </script>
     <meta charset="UTF-8">
@@ -18,11 +19,13 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-to-content">Skip to content</a>
+
 <header>
     <div class="logo">■ Securevault</div>
     <nav class="menu">
         <a href="vault.html">Vault</a>
-        <a href="add-entry.html" class="active">Add</a>
+        <a href="add-entry.html" class="active" aria-current="page">Add</a>
         <a href="settings.html">Settings</a>
         <a href="login.html" id="logout-btn">Logout</a>
     </nav>
@@ -37,28 +40,22 @@
             <i data-lucide="x"></i>
         </button>
         <a href="vault.html">Vault</a>
-        <a href="add-entry.html" class="active">Add</a>
+        <a href="add-entry.html" class="active" aria-current="page">Add</a>
         <a href="settings.html">Settings</a>
         <a href="login.html" class="nav-drawer-logout">Logout</a>
     </div>
 </div>
 
-<main>
+<main id="main-content">
     <div class="page-content">
         <h1 class="page-title">Add entry.</h1>
         <div class="add-entry-container">
 
-        <div class="field">
-            <label>Type</label>
-            <div class="segmented-control-3">
-                <input type="radio" name="entry-type" id="type-login" value="login" checked>
-                <label for="type-login">Login</label>
-                <input type="radio" name="entry-type" id="type-note" value="note">
-                <label for="type-note">Note</label>
-                <input type="radio" name="entry-type" id="type-card" value="card">
-                <label for="type-card">Card</label>
-            </div>
-        </div>
+        <nav class="settings-tabs entry-type-tabs" role="tablist" aria-label="Entry type">
+            <button type="button" role="tab" class="settings-tab active" data-type="login" aria-selected="true">Login</button>
+            <button type="button" role="tab" class="settings-tab"        data-type="note"  aria-selected="false">Note</button>
+            <button type="button" role="tab" class="settings-tab"        data-type="card"  aria-selected="false">Card</button>
+        </nav>
 
         <div class="field">
             <label for="entry-name">Name</label>

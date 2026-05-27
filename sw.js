@@ -5,7 +5,7 @@
 // localStorage and never touches this cache.
 // ============================================================
 
-const CACHE = "securevault-v10";
+const CACHE = "securevault-v11";
 
 const ASSETS = [
     "./",

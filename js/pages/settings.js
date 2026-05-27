@@ -18,7 +18,7 @@ window.addEventListener("popstate", () => {
 // ============================================================
 const DEFAULT_SETTINGS = {
     autoLock:      true,    // security-first default; toggle off to disable the 5-min lock
-    lightMode:     false,   // dark is default; checking the toggle opts into light
+    appearance:    "dark",  // "dark" | "light" — dark by default
     viewMode:      "list",
     defaultSort:   "name",
     confirmDelete: true
@@ -86,6 +86,11 @@ function initSettingsTabs() {
 function loadSettings() {
     const saved = localStorage.getItem("vaultSettings");
     if (saved) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+    // Migrate legacy `lightMode` boolean → `appearance` string
+    if (typeof settings.lightMode === "boolean" && !settings.appearance) {
+        settings.appearance = settings.lightMode ? "light" : "dark";
+    }
+    delete settings.lightMode;
 }
 
 function saveSettings() {
@@ -98,7 +103,9 @@ function saveSettings() {
 // ============================================================
 async function applySettingsToUI() {
     document.getElementById("auto-lock").checked      = settings.autoLock;
-    document.getElementById("light-mode").checked     = settings.lightMode;
+    document.querySelectorAll('input[name="appearance"]').forEach(r => {
+        r.checked = r.value === settings.appearance;
+    });
     document.getElementById("confirm-delete").checked = settings.confirmDelete;
 
     document.querySelectorAll('input[name="default-sort"]').forEach(r => {
@@ -108,7 +115,7 @@ async function applySettingsToUI() {
         r.checked = r.value === settings.viewMode;
     });
 
-    applyLightMode(settings.lightMode);
+    applyAppearance(settings.appearance);
     applyViewMode(settings.viewMode);
 
     const cfg = await getSyncConfig();
@@ -236,10 +243,10 @@ async function runHealthScan(btn) {
 // ============================================================
 // LIVE EFFECTS
 // ============================================================
-function applyLightMode(enabled) {
-    // Dark is default; .dark class removed when in light mode
-    document.documentElement.classList.toggle("dark", !enabled);
-    document.body.classList.toggle("dark", !enabled);
+function applyAppearance(value) {
+    const dark = value !== "light";
+    document.documentElement.classList.toggle("dark", dark);
+    document.body.classList.toggle("dark", dark);
 }
 
 function applyViewMode(mode) {
@@ -252,7 +259,8 @@ function applyViewMode(mode) {
 // ============================================================
 function readSettingsFromUI() {
     settings.autoLock      = document.getElementById("auto-lock").checked;
-    settings.lightMode     = document.getElementById("light-mode").checked;
+    const appearancePicked = document.querySelector('input[name="appearance"]:checked');
+    if (appearancePicked) settings.appearance = appearancePicked.value;
     settings.confirmDelete = document.getElementById("confirm-delete").checked;
 
     const sort = document.querySelector('input[name="default-sort"]:checked');
@@ -277,7 +285,7 @@ function attachEventListeners() {
             } catch (e) {
                 setSyncStatus("Could not save token: " + e.message, "var(--danger)");
             }
-            applyLightMode(settings.lightMode);
+            applyAppearance(settings.appearance);
             applyViewMode(settings.viewMode);
         });
     });
@@ -291,11 +299,13 @@ function attachEventListeners() {
         });
     });
 
-    // Light mode live toggle
-    document.getElementById("light-mode").addEventListener("change", e => {
-        applyLightMode(e.target.checked);
-        settings.lightMode = e.target.checked;
-        saveSettings();
+    // Appearance live toggle (dark / light segmented control)
+    document.querySelectorAll('input[name="appearance"]').forEach(r => {
+        r.addEventListener("change", () => {
+            settings.appearance = r.value;
+            applyAppearance(r.value);
+            saveSettings();
+        });
     });
 
     // Change master password

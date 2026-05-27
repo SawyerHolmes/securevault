@@ -4,7 +4,8 @@
     <script>
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
-            if (s.lightMode !== true) document.documentElement.classList.add("dark");
+            const appearance = s.appearance || (s.lightMode ? "light" : "dark");
+            if (appearance === "dark") document.documentElement.classList.add("dark");
         })();
     </script>
     <meta charset="UTF-8">
@@ -17,10 +18,12 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-to-content">Skip to content</a>
+
 <header>
     <div class="logo">■ Securevault</div>
     <nav class="menu">
-        <a href="vault.html" class="active">Vault</a>
+        <a href="vault.html" class="active" aria-current="page">Vault</a>
         <a href="add-entry.html">Add</a>
         <a href="settings.html">Settings</a>
         <a href="login.html" id="logout-btn">Logout</a>
@@ -35,7 +38,7 @@
         <button type="button" class="nav-drawer-close" id="nav-drawer-close" aria-label="Close menu">
             <i data-lucide="x"></i>
         </button>
-        <a href="vault.html" class="active">Vault</a>
+        <a href="vault.html" class="active" aria-current="page">Vault</a>
         <a href="add-entry.html">Add</a>
         <a href="settings.html">Settings</a>
         <a href="login.html" class="nav-drawer-logout">Logout</a>
@@ -45,7 +48,7 @@
 <div class="pull-indicator" id="pull-indicator" aria-hidden="true"></div>
 <a href="add-entry.html" class="mobile-cta">+ Add entry</a>
 
-<main>
+<main id="main-content">
     <div class="page-content">
 
         <h1 class="page-title">Vault.</h1>
@@ -59,6 +62,9 @@
                     <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="1.5"/>
                 </svg>
                 <input type="text" id="search-input" placeholder="Search entries…" autocomplete="off" aria-label="Search vault">
+                <button type="button" class="search-clear" id="search-clear" aria-label="Clear search">
+                    <i data-lucide="x"></i>
+                </button>
                 <button type="button" class="sort-toggle-btn" id="sort-toggle" aria-label="Sort">
                     <svg class="sort-icon" viewBox="0 0 24 24" aria-hidden="true">
                         <line x1="4" y1="6"  x2="20" y2="6"  stroke="currentColor" stroke-width="1.5"/>
@@ -72,6 +78,7 @@
                 <div class="sort-menu" id="sort-menu">
                     <div class="sort-field" data-field="name">Site name <span class="indicator"></span></div>
                     <div class="sort-field" data-field="username">Username <span class="indicator"></span></div>
+                    <div class="sort-field" data-field="lastUsed">Recently used <span class="indicator"></span></div>
                     <div class="sort-field" data-field="manual">Manual order <span class="indicator"></span></div>
                     <div class="divider"></div>
                     <div class="sort-order" data-order="asc">Ascending <span class="indicator"></span></div>
@@ -82,7 +89,10 @@
 
         <div class="vault-meta-row" id="vault-meta-row" hidden>
             <span class="vault-count" id="vault-count">0 entries</span>
-            <button type="button" class="vault-meta-action" id="select-toggle">Select</button>
+            <div class="vault-meta-actions">
+                <a href="add-entry.html" class="vault-meta-action vault-meta-action-add" id="new-entry-btn">+ New</a>
+                <button type="button" class="vault-meta-action" id="select-toggle">Select</button>
+            </div>
         </div>
 
         <div id="vault-container"></div>
@@ -209,6 +219,7 @@
         <div id="expanded-modified"></div>
 
         <div class="entry-footer-actions">
+            <button class="btn-white" id="duplicate-btn">Duplicate</button>
             <button class="btn-white" id="archive-btn">Archive</button>
             <button class="btn-danger" id="remove-btn">Remove entry</button>
         </div>

@@ -4,7 +4,8 @@
     <script>
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
-            if (s.lightMode !== true) document.documentElement.classList.add("dark");
+            const appearance = s.appearance || (s.lightMode ? "light" : "dark");
+            if (appearance === "dark") document.documentElement.classList.add("dark");
         })();
     </script>
     <meta charset="UTF-8">
@@ -27,12 +28,14 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-to-content">Skip to content</a>
+
 <header>
     <div class="logo">■ Securevault</div>
     <nav class="menu">
         <a href="vault.html">Vault</a>
         <a href="add-entry.html">Add</a>
-        <a href="settings.html" class="active">Settings</a>
+        <a href="settings.html" class="active" aria-current="page">Settings</a>
         <a href="login.html" id="logout-btn">Logout</a>
     </nav>
     <button type="button" class="nav-burger" id="nav-burger" aria-label="Open menu">
@@ -47,12 +50,12 @@
         </button>
         <a href="vault.html">Vault</a>
         <a href="add-entry.html">Add</a>
-        <a href="settings.html" class="active">Settings</a>
+        <a href="settings.html" class="active" aria-current="page">Settings</a>
         <a href="login.html" class="nav-drawer-logout">Logout</a>
     </div>
 </div>
 
-<main>
+<main id="main-content">
     <div class="page-content">
         <h1 class="page-title">Settings.</h1>
 
@@ -108,12 +111,15 @@
                 <div class="settings-group">
                     <div class="settings-title">Appearance</div>
                     <div class="settings-section">
-                        <div class="setting-item toggle-field no-divider">
-                            <span>Light mode</span>
-                            <label class="switch">
-                                <input type="checkbox" id="light-mode">
-                                <span class="slider"></span>
-                            </label>
+                        <div class="setting-item no-divider">
+                            <label>Theme</label>
+                            <div class="segmented-control-2">
+                                <input type="radio" name="appearance" id="appearance-dark"  value="dark"  checked>
+                                <label for="appearance-dark">Dark</label>
+                                <input type="radio" name="appearance" id="appearance-light" value="light">
+                                <label for="appearance-light">Light</label>
+                                <div class="segmented-slider-2"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

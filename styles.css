@@ -130,6 +130,26 @@ input, textarea, select {
 
 input::placeholder, textarea::placeholder { color: var(--text-tertiary); }
 
+/* Skip-to-content link — only visible when focused, top of page */
+.skip-to-content {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 8px 14px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-radius: 0;
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform 0.1s linear;
+    z-index: 4000;
+}
+.skip-to-content:focus { transform: translateY(0); }
+
 /* Keyboard focus — visible lime ring on focusable elements when
    navigating with Tab. Mouse clicks don't show the ring (per
    :focus-visible spec) so it stays clean for pointer users. */
@@ -539,6 +559,21 @@ label {
     pointer-events: none;
 }
 
+.search-clear {
+    display: none;
+    flex: 0 0 28px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+.search-wrapper.has-text .search-clear { display: inline-flex; }
+.search-clear:hover { color: var(--text); }
+.search-clear svg.lucide { width: 14px; height: 14px; }
+
 .sort-toggle-btn {
     flex: 0 0 44px;
     background: transparent;
@@ -701,6 +736,11 @@ body.list-view #vault-container {
     color: var(--text-secondary);
     font-variant-numeric: tabular-nums;
 }
+.vault-meta-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
 .vault-meta-action {
     background: transparent;
     border: 1px solid var(--border-strong);
@@ -712,9 +752,17 @@ body.list-view #vault-container {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     cursor: pointer;
+    text-decoration: none;
     transition: background var(--transition), color var(--transition);
 }
 .vault-meta-action:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.vault-meta-action-add { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.vault-meta-action-add:hover { opacity: 0.85; background: var(--accent); color: var(--accent-ink); }
+
+/* On mobile the bottom CTA is enough — hide the desktop +New chip. */
+@media (max-width: 600px) {
+    .vault-meta-action-add { display: none; }
+}
 
 /* Per-card checkbox — hidden by default, revealed in select mode */
 .vault-card-checkbox {
@@ -1904,6 +1952,9 @@ body[data-view-type="card"]  .type-only-note {
 }
 
 .settings-tabpanel[hidden] { display: none; }
+
+/* Same tab style reused on Add Entry, with tighter rhythm */
+.entry-type-tabs { margin-bottom: 24px; }
 
 .setting-item-hint {
     margin: 4px 0 0;

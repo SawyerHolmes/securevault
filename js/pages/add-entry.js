@@ -14,8 +14,9 @@ window.addEventListener("popstate", () => {
 });
 
 // Dark is default; only remove .dark if the user opted into light mode
-const _settings = JSON.parse(localStorage.getItem("vaultSettings")) || {};
-if (_settings.lightMode !== true) document.body.classList.add("dark");
+const _settings  = JSON.parse(localStorage.getItem("vaultSettings")) || {};
+const _appearance = _settings.appearance || (_settings.lightMode ? "light" : "dark");
+if (_appearance !== "light") document.body.classList.add("dark");
 
 // ============================================================
 // HAPTIC FEEDBACK
@@ -43,14 +44,27 @@ const cardNumberIn   = document.getElementById("entry-card-number");
 const cardExpiryIn   = document.getElementById("entry-card-expiry");
 const cardCvvIn      = document.getElementById("entry-card-cvv");
 
-// Apply the entry type to the body so CSS hides irrelevant fields
+// Apply the entry type to the body so CSS hides irrelevant fields.
+// The chooser is a Settings-style tab row at the top of the form.
 function applyEntryType(type) {
     document.body.dataset.entryType = type;
+    document.querySelectorAll(".entry-type-tabs .settings-tab").forEach(tab => {
+        const on = tab.dataset.type === type;
+        tab.classList.toggle("active", on);
+        tab.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    const next = new URL(window.location.href);
+    next.hash = "#" + type;
+    history.replaceState(null, "", next.toString());
 }
-document.querySelectorAll('input[name="entry-type"]').forEach(r => {
-    r.addEventListener("change", e => applyEntryType(e.target.value));
+
+document.querySelectorAll(".entry-type-tabs .settings-tab").forEach(tab => {
+    tab.addEventListener("click", () => applyEntryType(tab.dataset.type));
 });
-applyEntryType("login");
+
+// Deep-link via #login / #note / #card
+const initialType = (window.location.hash || "").replace(/^#/, "");
+applyEntryType(["login", "note", "card"].includes(initialType) ? initialType : "login");
 const toggleBtn      = document.getElementById("toggle-password");
 const generateBtn    = document.getElementById("generate-btn");
 const genLengthLabel = document.getElementById("gen-length-label");
@@ -215,7 +229,7 @@ passwordInput.addEventListener("input", () => checkStrength(passwordInput.value)
 // SAVE ENTRY
 // ============================================================
 saveBtn.addEventListener("click", async () => {
-    const type     = document.querySelector('input[name="entry-type"]:checked').value;
+    const type     = document.body.dataset.entryType || "login";
     const name     = nameInput.value.trim();
     const notes    = notesInput.value.trim();
 

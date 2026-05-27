@@ -83,7 +83,7 @@ function newEntryId() {
 }
 
 const settings = JSON.parse(localStorage.getItem("vaultSettings")) || {
-    lightMode:     false,
+    appearance:    "dark",
     viewMode:      "list",
     defaultSort:   "name",
     confirmDelete: true
@@ -179,10 +179,11 @@ async function saveVault() {
 // ============================================================
 // SETTINGS
 // ============================================================
-function applyLightMode() {
-    const isLight = !!settings.lightMode;
-    document.body.classList.toggle("dark", !isLight);
-    document.documentElement.classList.toggle("dark", !isLight);
+function applyAppearance() {
+    const appearance = settings.appearance || (settings.lightMode ? "light" : "dark");
+    const dark = appearance !== "light";
+    document.body.classList.toggle("dark", dark);
+    document.documentElement.classList.toggle("dark", dark);
 }
 
 function applyViewMode(mode) {
@@ -195,11 +196,27 @@ function applyViewMode(mode) {
 // ============================================================
 // CLIPBOARD + TOAST
 // ============================================================
+const CLIPBOARD_CLEAR_MS = 60 * 1000;
+let clipboardClearTimer = null;
+
 function copyToClipboard(text, msg) {
     navigator.clipboard.writeText(text).then(() => {
         window.showToast(msg || "Copied", { duration: 1800 });
         haptic([8, 20, 8]);
+        // Best-effort clipboard wipe after 60s so a copied password
+        // doesn't linger. Browsers only allow clipboard writes while
+        // the document has focus — if it fails, we silently move on.
+        if (clipboardClearTimer) clearTimeout(clipboardClearTimer);
+        clipboardClearTimer = setTimeout(() => {
+            navigator.clipboard.writeText("").catch(() => {});
+        }, CLIPBOARD_CLEAR_MS);
     });
+}
+
+function markUsed(entry) {
+    if (!entry) return;
+    entry.lastUsed = Date.now();
+    saveVault();
 }
 
 // ============================================================
@@ -304,6 +321,13 @@ function renderVault(filter) {
         items.sort((a, b) => {
             const va = (typeof a.order === "number") ? a.order : Number.MAX_SAFE_INTEGER;
             const vb = (typeof b.order === "number") ? b.order : Number.MAX_SAFE_INTEGER;
+            return sortOrder === "asc" ? (va - vb) : (vb - va);
+        });
+    } else if (sortField === "lastUsed") {
+        items.sort((a, b) => {
+            // Default sort for "Recently used" is descending (newest first)
+            const va = a.lastUsed || 0;
+            const vb = b.lastUsed || 0;
             return sortOrder === "asc" ? (va - vb) : (vb - va);
         });
     } else {
@@ -586,6 +610,7 @@ function stopTotpTimer() {
 function openCard(entry) {
     currentEntryId  = entry.id;
     passwordVisible = false;
+    markUsed(entry);
 
     document.body.dataset.viewType = entry.type || "login";
 
@@ -945,6 +970,25 @@ removeBtn.addEventListener("click", () => {
     confirmOverlay.style.display = "flex";
 });
 
+document.getElementById("duplicate-btn")?.addEventListener("click", () => {
+    const original = findEntry(currentEntryId);
+    if (!original) return;
+    const copy = JSON.parse(JSON.stringify(original));
+    copy.id        = newEntryId();
+    copy.name      = (copy.name || "Entry") + " (copy)";
+    copy.createdAt = Date.now();
+    delete copy.updatedAt;
+    delete copy.lastUsed;
+    delete copy.deleted;
+    delete copy.archived;
+    vault.push(copy);
+    saveVault();
+    closeCard();
+    renderVault(searchInput.value);
+    haptic([8, 20, 8]);
+    window.showToast("Entry duplicated", { tone: "success", duration: 1500 });
+});
+
 document.getElementById("archive-btn")?.addEventListener("click", () => {
     const entry = findEntry(currentEntryId);
     if (!entry) return;
@@ -1001,7 +1045,20 @@ function deleteEntry() {
 // ============================================================
 // SEARCH + SORT
 // ============================================================
-searchInput.addEventListener("input", () => renderVault(searchInput.value));
+searchInput.addEventListener("input", () => {
+    document.querySelector(".search-wrapper").classList.toggle("has-text", !!searchInput.value);
+    renderVault(searchInput.value);
+});
+
+const searchClearBtn = document.getElementById("search-clear");
+if (searchClearBtn) {
+    searchClearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        document.querySelector(".search-wrapper").classList.remove("has-text");
+        renderVault("");
+        searchInput.focus();
+    });
+}
 searchInput.addEventListener("focus", () => {
     sortMenu.style.display = "none";
     sortToggle.classList.remove("active");
@@ -1459,7 +1516,7 @@ function maybeShowWelcome() {
 // ============================================================
 (async () => {
     await loadVault();
-    applyLightMode();
+    applyAppearance();
     applyViewMode(settings.viewMode || "list");
     sortField = settings.defaultSort || "name";
     setupFillMode();
