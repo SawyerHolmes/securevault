@@ -391,44 +391,46 @@ Mobile gets light haptic feedback on these interactions (via `navigator.vibrate`
 ## 12. File layout
 
 ```
-/                      ← app root
-├── DESIGN.md          ← this file
-├── index.html         ← meta refresh to login.html
-├── login.html         ← entry point + welcome wordmark
-├── vault.html         ← vault list + expanded modal + pull-to-refresh + bulk bar
-├── add-entry.html     ← new entry form + generator
-├── settings.html      ← tabbed settings
-├── trash.html         ← deleted entries
-├── archive.html       ← archived entries
-├── history.html       ← per-entry password history log
-├── tags.html          ← bulk tag management
-├── about.html         ← version, security model, changelog
+/                          ← app root
+├── README.md              ← project overview
+├── DESIGN.md              ← this file
+├── index.html             ← meta refresh to login.html
+├── login.html             ← entry point + welcome wordmark
+├── vault.html             ← vault list + expanded modal + pull-to-refresh + bulk bar
+├── add-entry.html         ← new entry form + generator
+├── settings.html          ← tabbed settings
+├── trash.html             ← deleted entries
+├── archive.html           ← archived entries
+├── history.html           ← per-entry password history log
+├── tags.html              ← bulk tag management
+├── about.html             ← version, security model, changelog
 ├── manifest.webmanifest
-├── sw.js              ← service worker (cache-first shell)
+├── sw.js                  ← service worker (cache-first shell)
 ├── styles.css
-├── fonts/             ← self-hosted Inter (Regular + Medium)
-├── icons/icon.svg     ← favicon + manifest icon
-├── extension/         ← optional companion browser extension (Manifest V3 stub)
+├── fonts/                 ← self-hosted Inter (Regular + Medium)
+├── icons/icon.svg         ← favicon + manifest icon
 └── js/
-    ├── crypto-utils.js  ← AES-GCM + PBKDF2-SHA256 (600k)
-    ├── auth.js          ← session timeout, master-password change
-    ├── sync.js          ← Gist push/pull (encrypted PAT)
-    ├── login.js
-    ├── vault.js
-    ├── add-entry.js
-    ├── settings.js
-    ├── trash.js
-    ├── archive.js
-    ├── history.js
-    ├── tags.js
-    ├── biometric.js     ← WebAuthn + PRF unlock
-    ├── totp.js          ← RFC 6238
-    ├── health.js        ← HIBP k-anonymity, strength + reuse scan
-    ├── markdown.js      ← tiny safe renderer for note content
-    ├── icons.js         ← inlined Lucide SVG registry
-    ├── nav.js           ← mobile drawer + focus trap helper
-    ├── toast.js         ← window.showToast(msg, opts)
-    └── sw-register.js
+    ├── lib/               ← shared infrastructure, loaded by multiple pages
+    │   ├── auth.js              ← session timeout, master-password change
+    │   ├── biometric.js         ← WebAuthn + PRF unlock
+    │   ├── crypto-utils.js      ← AES-GCM + PBKDF2-SHA256 (600k)
+    │   ├── health.js            ← HIBP k-anonymity, strength + reuse scan
+    │   ├── icons.js             ← inlined Lucide SVG registry
+    │   ├── markdown.js          ← tiny safe renderer for note content
+    │   ├── nav.js               ← mobile drawer + focus trap helper
+    │   ├── sw-register.js
+    │   ├── sync.js              ← Gist push/pull (encrypted PAT)
+    │   ├── toast.js             ← window.showToast(msg, opts)
+    │   └── totp.js              ← RFC 6238
+    └── pages/             ← one entry point per HTML page
+        ├── add-entry.js
+        ├── archive.js
+        ├── history.js
+        ├── login.js
+        ├── settings.js
+        ├── tags.js
+        ├── trash.js
+        └── vault.js
 ```
 
 When editing UI, follow this file. When in doubt, default to: hard edges, UPPERCASE tracked labels, one accent.

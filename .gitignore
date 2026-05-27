@@ -1,0 +1,19 @@
+# macOS junk
+.DS_Store
+
+# Xcode (only relevant if someone ever runs the Safari extension converter
+# in this directory — the converter creates a project alongside our files)
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+Securevault.xcode-backup-*/
+iOS\ (App)/
+iOS\ (Extension)/
+macOS\ (App)/
+macOS\ (Extension)/
+Shared\ (App)/
+Shared\ (Extension)/
+
+# Editor scratch
+.vscode/
+.idea/

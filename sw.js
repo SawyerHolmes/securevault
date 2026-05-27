@@ -5,7 +5,7 @@
 // localStorage and never touches this cache.
 // ============================================================
 
-const CACHE = "securevault-v9";
+const CACHE = "securevault-v10";
 
 const ASSETS = [
     "./",
@@ -23,25 +23,25 @@ const ASSETS = [
     "./icons/icon.svg",
     "./fonts/Inter-Regular.woff2",
     "./fonts/Inter-Medium.woff2",
-    "./js/icons.js",
-    "./js/nav.js",
-    "./js/toast.js",
-    "./js/sw-register.js",
-    "./js/crypto-utils.js",
-    "./js/auth.js",
-    "./js/sync.js",
-    "./js/login.js",
-    "./js/vault.js",
-    "./js/add-entry.js",
-    "./js/settings.js",
-    "./js/totp.js",
-    "./js/health.js",
-    "./js/trash.js",
-    "./js/archive.js",
-    "./js/history.js",
-    "./js/biometric.js",
-    "./js/markdown.js",
-    "./js/tags.js"
+    "./js/lib/icons.js",
+    "./js/lib/nav.js",
+    "./js/lib/toast.js",
+    "./js/lib/sw-register.js",
+    "./js/lib/crypto-utils.js",
+    "./js/lib/auth.js",
+    "./js/lib/sync.js",
+    "./js/pages/login.js",
+    "./js/pages/vault.js",
+    "./js/pages/add-entry.js",
+    "./js/pages/settings.js",
+    "./js/lib/totp.js",
+    "./js/lib/health.js",
+    "./js/pages/trash.js",
+    "./js/pages/archive.js",
+    "./js/pages/history.js",
+    "./js/lib/biometric.js",
+    "./js/lib/markdown.js",
+    "./js/pages/tags.js"
 ];
 
 self.addEventListener("install", event => {
