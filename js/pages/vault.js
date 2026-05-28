@@ -54,6 +54,44 @@ function renderTagFilterBar() {
     tags.forEach(t => bar.appendChild(mkChip(t, t, false)));
 }
 
+function entryIconElement(entry) {
+    const wrap = document.createElement("div");
+    wrap.className = "row-icon";
+    const type = entry.type || "login";
+
+    // Cards and notes get a generic geometric mark instead of trying
+    // to fetch a favicon (there's no domain to look up).
+    if (type === "card") {
+        wrap.textContent = "■";
+        wrap.classList.add("row-icon-glyph");
+        return wrap;
+    }
+    if (type === "note") {
+        wrap.textContent = "≡";
+        wrap.classList.add("row-icon-glyph");
+        return wrap;
+    }
+
+    if (entry.url && /^https?:\/\//i.test(entry.url)) {
+        try {
+            const domain = new URL(entry.url).hostname;
+            const img    = document.createElement("img");
+            img.src      = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+            img.alt      = "";
+            img.loading  = "lazy";
+            img.onerror  = () => {
+                wrap.textContent = (entry.name || "?")[0].toUpperCase();
+                wrap.classList.add("row-icon-fallback");
+            };
+            wrap.appendChild(img);
+            return wrap;
+        } catch { /* fall through */ }
+    }
+    wrap.textContent = (entry.name || "?")[0].toUpperCase();
+    wrap.classList.add("row-icon-fallback");
+    return wrap;
+}
+
 function renderTagsInto(el, tags) {
     el.innerHTML = "";
     if (!tags || !tags.length) { el.textContent = "—"; return; }
@@ -363,10 +401,17 @@ function renderVault(filter) {
             const tile     = document.createElement("div");
             tile.className = "vault-grid-tile";
 
+            const head = document.createElement("div");
+            head.className = "tile-head";
             const num = document.createElement("div");
             num.className   = "tile-num";
             num.textContent = String(i + 1).padStart(2, "0");
-            tile.appendChild(num);
+            head.appendChild(num);
+
+            const icon = entryIconElement(entry);
+            icon.classList.add("tile-icon");
+            head.appendChild(icon);
+            tile.appendChild(head);
 
             const name = document.createElement("h2");
             name.className   = "tile-name";
@@ -477,6 +522,8 @@ function renderVault(filter) {
         num.className   = "row-num";
         num.textContent = String(i + 1).padStart(2, "0");
         card.appendChild(num);
+
+        card.appendChild(entryIconElement(entry));
 
         const text = document.createElement("div");
         text.className = "row-text";
@@ -951,6 +998,16 @@ if (copyTotpBtn) {
     });
 }
 
+document.getElementById("copy-totp-uri-btn")?.addEventListener("click", () => {
+    const entry = findEntry(currentEntryId);
+    if (!entry || !entry.totp) return;
+    const label   = encodeURIComponent((entry.name || "vault") + (entry.username ? ":" + entry.username : ""));
+    const secret  = entry.totp.replace(/\s+/g, "");
+    const issuer  = encodeURIComponent(entry.name || "Securevault");
+    const uri     = `otpauth://totp/${label}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
+    copyToClipboard(uri, "otpauth URI copied — paste into a QR generator or authenticator");
+});
+
 document.getElementById("copy-card-number-btn")?.addEventListener("click", () => {
     const entry = findEntry(currentEntryId);
     if (entry && entry.cardNumber) copyToClipboard(entry.cardNumber, "Card number copied!");
@@ -1301,6 +1358,30 @@ function updateVaultMeta() {
 selectToggleBtn.addEventListener("click", toggleSelectMode);
 document.getElementById("bulk-cancel").addEventListener("click", exitSelectMode);
 
+document.getElementById("bulk-export").addEventListener("click", () => {
+    if (!selectedIds.size) return;
+    const rows = [["Name", "URL", "Username", "Password", "Notes", "Tags", "Type"]];
+    for (const id of selectedIds) {
+        const e = findEntry(id);
+        if (!e) continue;
+        rows.push([
+            e.name      || "",
+            e.url       || "",
+            e.username  || "",
+            e.password  || "",
+            e.notes     || "",
+            (e.tags || []).join("; "),
+            e.type      || "login"
+        ]);
+    }
+    const csv = rows
+        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+    downloadFile(`securevault-export-${selectedIds.size}.csv`, csv, "text/csv");
+    window.showToast(`Exported ${selectedIds.size}`, { tone: "success", duration: 1500 });
+    exitSelectMode();
+});
+
 document.getElementById("bulk-archive").addEventListener("click", () => {
     if (!selectedIds.size) return;
     const now = Date.now();
@@ -1493,6 +1574,54 @@ function sendFillPick(entry) {
     }, "*");
     // The background closes this tab once the message is relayed.
 }
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener("keydown", e => {
+    // Skip when the user is typing in an input/textarea/contentEditable
+    const t = e.target;
+    const inField = t && (
+        t.tagName === "INPUT" ||
+        t.tagName === "TEXTAREA" ||
+        t.isContentEditable
+    );
+
+    // Skip when any modifier is held (browser shortcuts win)
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    // Skip when the drawer or a modal is open (Esc already handled there)
+    if (document.body.classList.contains("drawer-open")) return;
+    if (expandedCard.style.display === "flex") {
+        if (!inField && e.key.toLowerCase() === "e") {
+            e.preventDefault();
+            editBtn.click();
+        }
+        return;
+    }
+
+    if (inField) {
+        // Esc out of the search box clears + blurs
+        if (e.key === "Escape" && t.id === "search-input") {
+            t.value = "";
+            document.querySelector(".search-wrapper").classList.remove("has-text");
+            renderVault("");
+            t.blur();
+        }
+        return;
+    }
+
+    if (e.key === "/") {
+        e.preventDefault();
+        searchInput.focus();
+    } else if (e.key === "n" || e.key === "N") {
+        e.preventDefault();
+        window.location.href = "add-entry.html";
+    } else if (e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        sortToggle.click();
+    }
+});
 
 // ============================================================
 // FIRST-RUN WELCOME

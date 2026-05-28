@@ -104,6 +104,7 @@
     <span class="bulk-count" id="bulk-count">0 selected</span>
     <div class="bulk-actions-buttons">
         <button type="button" class="btn-white btn-row" id="bulk-tag">Add tag</button>
+        <button type="button" class="btn-white btn-row" id="bulk-export">Export</button>
         <button type="button" class="btn-white btn-row" id="bulk-archive">Archive</button>
         <button type="button" class="btn-danger btn-row" id="bulk-delete">Delete</button>
         <button type="button" class="btn-white btn-row" id="bulk-cancel">Cancel</button>
@@ -201,6 +202,9 @@
                 </div>
                 <button class="icon-btn copy-icon-btn" id="copy-totp-btn" title="Copy code" aria-label="Copy two-factor code">
                     <i data-lucide="copy"></i>
+                </button>
+                <button class="icon-btn copy-icon-btn" id="copy-totp-uri-btn" title="Copy otpauth:// URI for migration" aria-label="Copy otpauth URI">
+                    <span class="totp-uri-glyph" aria-hidden="true">↗</span>
                 </button>
                 <input type="text" id="edit-totp" class="totp-edit-input" placeholder="JBSWY3DPEHPK3PXP" autocomplete="off" autocapitalize="characters" spellcheck="false" style="display:none;">
             </div>

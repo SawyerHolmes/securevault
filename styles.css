@@ -650,8 +650,8 @@ body.list-view #vault-container {
 
 .vault-card {
     display: grid;
-    grid-template-columns: 56px 1fr auto;
-    gap: 16px;
+    grid-template-columns: 36px 32px 1fr auto;
+    gap: 14px;
     align-items: center;
     padding: 16px 0;
     border-top: 1px solid var(--border);
@@ -721,6 +721,41 @@ body.list-view #vault-container {
 }
 .card-copy-btn:hover { border-color: var(--text); color: var(--text); }
 
+/* Favicon / type-mark column for stripe rows */
+.row-icon {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    overflow: hidden;
+}
+.row-icon img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    filter: grayscale(100%) contrast(0.9);
+}
+.row-icon.row-icon-fallback,
+.row-icon.row-icon-glyph {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--text);
+}
+.row-icon.row-icon-glyph { color: var(--accent); font-size: 14px; }
+
+/* Grid tiles get a top row with numeral + icon */
+.tile-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+.tile-icon { flex-shrink: 0; }
+
 /* Vault meta row — count on the left, Select toggle on the right */
 .vault-meta-row {
     display: flex;
@@ -780,7 +815,7 @@ body.list-view #vault-container {
     background: var(--accent);
 }
 body.select-mode .vault-card-checkbox { display: block; }
-body.select-mode .vault-card           { grid-template-columns: 24px 56px 1fr auto; cursor: pointer; }
+body.select-mode .vault-card           { grid-template-columns: 24px 36px 32px 1fr auto; cursor: pointer; }
 body.select-mode .vault-card .card-copy-btn { display: none; }
 body.select-mode .vault-card.selected  { background: linear-gradient(90deg, rgba(199, 241, 0, 0.10), transparent); }
 
@@ -1350,6 +1385,14 @@ body.gallery-view #vault-container {
     width: 100%;
     transition: width 1s linear;
 }
+.totp-uri-glyph {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    display: inline-block;
+    transform: translateY(-1px);
+}
+
 .totp-edit-input {
     flex: 1;
     background: transparent;
@@ -2364,8 +2407,10 @@ body[data-view-type="card"]  .type-only-note {
     .login-title { font-size: 36px; }
 
     /* Stripe numeral column is tighter on phones */
-    .vault-card { grid-template-columns: 32px 1fr auto; gap: 12px; }
-    .vault-card .row-num { font-size: 18px; }
+    .vault-card { grid-template-columns: 28px 24px 1fr auto; gap: 10px; }
+    .vault-card .row-num { font-size: 16px; }
+    .vault-card .row-icon { width: 24px; height: 24px; }
+    body.select-mode .vault-card { grid-template-columns: 22px 28px 24px 1fr auto; }
 
     /* iOS auto-zooms inputs under 16px on focus — bump everything */
     #search-input,
