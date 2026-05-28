@@ -406,9 +406,10 @@ Mobile gets light haptic feedback on these interactions (via `navigator.vibrate`
 ├── about.html             ← version, security model, changelog
 ├── manifest.webmanifest
 ├── sw.js                  ← service worker (cache-first shell)
-├── styles.css
-├── fonts/                 ← self-hosted Inter (Regular + Medium)
-├── icons/icon.svg         ← favicon + manifest icon
+├── css/styles.css         ← single stylesheet
+├── assets/
+│   ├── fonts/             ← self-hosted Inter (Regular + Medium)
+│   └── icons/icon.svg     ← favicon + manifest icon
 └── js/
     ├── lib/               ← shared infrastructure, loaded by multiple pages
     │   ├── auth.js              ← session timeout, master-password change

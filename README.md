@@ -69,15 +69,17 @@ Everything else is in `about.html` (also reachable from Settings → About Secur
 See [DESIGN.md](DESIGN.md) for the design system and the file-by-file breakdown. Short version:
 
 ```
-*.html         page templates
-styles.css     single stylesheet
-sw.js          service worker
-manifest.webmanifest
-fonts/         self-hosted Inter
-icons/         favicon + manifest icon
-js/lib/        shared infrastructure
-js/pages/      one entry script per HTML page
+*.html               page templates (kept at root for clean URLs)
+sw.js                service worker (root — controls scope "/")
+manifest.webmanifest PWA manifest
+css/styles.css       single stylesheet
+assets/fonts/        self-hosted Inter
+assets/icons/        favicon + manifest icon
+js/lib/              shared infrastructure
+js/pages/            one entry script per HTML page
 ```
+
+HTML pages, `sw.js`, and `manifest.webmanifest` stay at the repo root on purpose: the pages need clean top-level URLs on GitHub Pages, and the service worker's scope is the directory it's served from.
 
 No build step. Edit, refresh, ship.
 
