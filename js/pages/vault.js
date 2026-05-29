@@ -1463,6 +1463,12 @@ function sendFillPick(entry) {
 // ============================================================
 // KEYBOARD SHORTCUTS
 // ============================================================
+const shortcutsOverlay = document.getElementById("shortcuts-overlay");
+function openShortcuts()  { shortcutsOverlay.style.display = "flex"; }
+function closeShortcuts() { shortcutsOverlay.style.display = "none"; }
+document.getElementById("shortcuts-close")?.addEventListener("click", closeShortcuts);
+shortcutsOverlay?.addEventListener("click", e => { if (e.target === shortcutsOverlay) closeShortcuts(); });
+
 document.addEventListener("keydown", e => {
     // Skip when the user is typing in an input/textarea/contentEditable
     const t = e.target;
@@ -1471,6 +1477,12 @@ document.addEventListener("keydown", e => {
         t.tagName === "TEXTAREA" ||
         t.isContentEditable
     );
+
+    // Shortcuts help is modal: Esc closes it, swallow other keys
+    if (shortcutsOverlay.style.display === "flex") {
+        if (e.key === "Escape") { e.preventDefault(); closeShortcuts(); }
+        return;
+    }
 
     // Skip when any modifier is held (browser shortcuts win)
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -1496,7 +1508,10 @@ document.addEventListener("keydown", e => {
         return;
     }
 
-    if (e.key === "/") {
+    if (e.key === "?") {
+        e.preventDefault();
+        openShortcuts();
+    } else if (e.key === "/") {
         e.preventDefault();
         searchInput.focus();
     } else if (e.key === "n" || e.key === "N") {
