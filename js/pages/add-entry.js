@@ -15,7 +15,8 @@ window.addEventListener("popstate", () => {
 
 // Dark is default; only remove .dark if the user opted into light mode
 const _settings  = JSON.parse(localStorage.getItem("vaultSettings")) || {};
-const _appearance = _settings.appearance || (_settings.lightMode ? "light" : "dark");
+let _appearance = _settings.appearance || (_settings.lightMode ? "light" : "dark");
+if (_appearance === "system") _appearance = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
 if (_appearance !== "light") document.body.classList.add("dark");
 
 // ============================================================

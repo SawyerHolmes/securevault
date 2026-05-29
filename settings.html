@@ -4,7 +4,8 @@
     <script>
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
-            const appearance = s.appearance || (s.lightMode ? "light" : "dark");
+            let appearance = s.appearance || (s.lightMode ? "light" : "dark");
+            if (appearance === "system") appearance = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
             if (appearance === "dark") document.documentElement.classList.add("dark");
         })();
     </script>
@@ -134,12 +135,14 @@
                     <div class="settings-section">
                         <div class="setting-item no-divider">
                             <label>Theme</label>
-                            <div class="segmented-control-2">
+                            <div class="segmented-control-3">
                                 <input type="radio" name="appearance" id="appearance-dark"  value="dark"  checked>
                                 <label for="appearance-dark">Dark</label>
                                 <input type="radio" name="appearance" id="appearance-light" value="light">
                                 <label for="appearance-light">Light</label>
-                                <div class="segmented-slider-2"></div>
+                                <input type="radio" name="appearance" id="appearance-system" value="system">
+                                <label for="appearance-system">System</label>
+                                <div class="segmented-slider-3"></div>
                             </div>
                         </div>
                     </div>

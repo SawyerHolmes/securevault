@@ -5,7 +5,7 @@
 // localStorage and never touches this cache.
 // ============================================================
 
-const CACHE = "securevault-v18";
+const CACHE = "securevault-v19";
 
 const ASSETS = [
     "./",
@@ -62,12 +62,32 @@ self.addEventListener("activate", event => {
     self.clients.claim();
 });
 
+const FAVICON_CACHE = "securevault-favicons";
+
 self.addEventListener("fetch", event => {
     const req = event.request;
     if (req.method !== "GET") return;
 
-    // Same-origin only — never cache the GitHub Gist API or anything else.
     const url = new URL(req.url);
+
+    // Favicons: cache-first in a dedicated cache. Cross-origin opaque
+    // responses are fine to store + re-serve to an <img>. This stops
+    // the list re-fetching icons on every render.
+    if (url.hostname === "www.google.com" && url.pathname.startsWith("/s2/favicons")) {
+        event.respondWith(
+            caches.open(FAVICON_CACHE).then(cache =>
+                cache.match(req).then(hit =>
+                    hit || fetch(req).then(res => {
+                        cache.put(req, res.clone());
+                        return res;
+                    }).catch(() => hit)
+                )
+            )
+        );
+        return;
+    }
+
+    // Same-origin only — never cache the GitHub Gist API or anything else.
     if (url.origin !== self.location.origin) return;
 
     event.respondWith(

@@ -54,41 +54,45 @@ function renderTagFilterBar() {
     tags.forEach(t => bar.appendChild(mkChip(t, t, false)));
 }
 
+// Remembers which domains resolved a favicon this session so re-renders
+// (search keystrokes, sort changes) don't flash the fallback letter or
+// re-attempt icons that are known to 404. The bytes themselves are
+// cached by the service worker.
+const faviconStatus = new Map(); // domain -> "ok" | "fail"
+
 function entryIconElement(entry) {
     const wrap = document.createElement("div");
     wrap.className = "row-icon";
     const type = entry.type || "login";
 
-    // Cards and notes get a generic geometric mark instead of trying
-    // to fetch a favicon (there's no domain to look up).
-    if (type === "card") {
-        wrap.textContent = "■";
-        wrap.classList.add("row-icon-glyph");
-        return wrap;
-    }
-    if (type === "note") {
-        wrap.textContent = "≡";
-        wrap.classList.add("row-icon-glyph");
-        return wrap;
+    // Cards and notes get a generic geometric mark — no domain to look up.
+    if (type === "card") { wrap.textContent = "■"; wrap.classList.add("row-icon-glyph"); return wrap; }
+    if (type === "note") { wrap.textContent = "≡"; wrap.classList.add("row-icon-glyph"); return wrap; }
+
+    let domain = "";
+    if (entry.url && /^https?:\/\//i.test(entry.url)) {
+        try { domain = new URL(entry.url).hostname; } catch { domain = ""; }
     }
 
-    if (entry.url && /^https?:\/\//i.test(entry.url)) {
-        try {
-            const domain = new URL(entry.url).hostname;
-            const img    = document.createElement("img");
-            img.src      = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-            img.alt      = "";
-            img.loading  = "lazy";
-            img.onerror  = () => {
-                wrap.textContent = (entry.name || "?")[0].toUpperCase();
-                wrap.classList.add("row-icon-fallback");
-            };
-            wrap.appendChild(img);
-            return wrap;
-        } catch { /* fall through */ }
-    }
-    wrap.textContent = (entry.name || "?")[0].toUpperCase();
-    wrap.classList.add("row-icon-fallback");
+    const fallback = () => {
+        wrap.textContent = (entry.name || "?")[0].toUpperCase();
+        wrap.classList.add("row-icon-fallback");
+    };
+
+    // No domain, or we already know this domain has no favicon → letter
+    if (!domain || faviconStatus.get(domain) === "fail") { fallback(); return wrap; }
+
+    const img   = document.createElement("img");
+    img.src     = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    img.alt     = "";
+    img.loading = "lazy";
+    img.addEventListener("load",  () => faviconStatus.set(domain, "ok"));
+    img.addEventListener("error", () => {
+        faviconStatus.set(domain, "fail");
+        img.remove();
+        fallback();
+    });
+    wrap.appendChild(img);
     return wrap;
 }
 
@@ -218,10 +222,20 @@ async function saveVault() {
 // SETTINGS
 // ============================================================
 function applyAppearance() {
-    const appearance = settings.appearance || (settings.lightMode ? "light" : "dark");
+    let appearance = settings.appearance || (settings.lightMode ? "light" : "dark");
+    if (appearance === "system") {
+        appearance = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
     const dark = appearance !== "light";
     document.body.classList.toggle("dark", dark);
     document.documentElement.classList.toggle("dark", dark);
+}
+
+// Live-update the theme if the OS scheme flips while in "system" mode
+if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
+        if ((settings.appearance || "dark") === "system") applyAppearance();
+    });
 }
 
 function applyViewMode(mode) {

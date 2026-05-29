@@ -5,7 +5,8 @@
     <script>
         (function() {
             const s = JSON.parse(localStorage.getItem("vaultSettings") || "{}");
-            const appearance = s.appearance || (s.lightMode ? "light" : "dark");
+            let appearance = s.appearance || (s.lightMode ? "light" : "dark");
+            if (appearance === "system") appearance = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
             if (appearance === "dark") document.documentElement.classList.add("dark");
         })();
     </script>

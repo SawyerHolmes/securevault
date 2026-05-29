@@ -259,9 +259,32 @@ async function importFile(file, status) {
         vault.push(...incoming);
         localStorage.setItem("vault", await encryptData(vault, key));
         if (typeof pushToGist === "function") pushToGist().catch(() => {});
-        status.textContent = `Imported ${incoming.length} entr${incoming.length === 1 ? "y" : "ies"}.`;
+
+        const importedIds = new Set(incoming.map(e => e.id));
+        const n = incoming.length;
+        status.textContent = `Imported ${n} entr${n === 1 ? "y" : "ies"}.`;
         status.style.color = "var(--accent)";
-        window.showToast(`Imported ${incoming.length}`, { tone: "success" });
+        window.showToast(`Imported ${n}`, {
+            tone: "success",
+            duration: 8000,
+            action: {
+                label: "Undo",
+                onClick: async () => {
+                    const k = await getStoredKey();
+                    if (!k) return;
+                    const cur = localStorage.getItem("vault");
+                    if (!cur) return;
+                    let v;
+                    try { v = await decryptData(cur, k); } catch { return; }
+                    v = v.filter(e => !importedIds.has(e.id));
+                    localStorage.setItem("vault", await encryptData(v, k));
+                    if (typeof pushToGist === "function") pushToGist().catch(() => {});
+                    status.textContent = "Import undone.";
+                    status.style.color = "var(--text-secondary)";
+                    window.showToast("Import undone", { duration: 1500 });
+                }
+            }
+        });
     } catch (err) {
         status.textContent = "Import failed: " + err.message;
         status.style.color = "var(--danger)";
@@ -394,9 +417,21 @@ async function runHealthScan(btn) {
 // LIVE EFFECTS
 // ============================================================
 function applyAppearance(value) {
-    const dark = value !== "light";
+    let dark;
+    if (value === "system") {
+        dark = !window.matchMedia("(prefers-color-scheme: light)").matches;
+    } else {
+        dark = value !== "light";
+    }
     document.documentElement.classList.toggle("dark", dark);
     document.body.classList.toggle("dark", dark);
+}
+
+// Live-update if the OS scheme flips while "System" is selected
+if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
+        if (settings.appearance === "system") applyAppearance("system");
+    });
 }
 
 function applyViewMode(mode) {

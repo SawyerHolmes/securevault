@@ -12,7 +12,10 @@ const MAX_LOCKOUT_MS   = 60 * 60 * 1000; // cap: 1 hour
 // ============================================================
 (function applyAppearance() {
     const settings = JSON.parse(localStorage.getItem("vaultSettings")) || {};
-    const appearance = settings.appearance || (settings.lightMode ? "light" : "dark");
+    let appearance = settings.appearance || (settings.lightMode ? "light" : "dark");
+    if (appearance === "system") {
+        appearance = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
     document.body.classList.toggle("dark", appearance !== "light");
 })();
 
