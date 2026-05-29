@@ -90,6 +90,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    min-height: 100dvh; /* avoids the iOS URL-bar height jump */
 }
 
 main {
@@ -1140,6 +1141,7 @@ body.gallery-view #vault-container {
     max-width: 480px;
     width: 100%;
     max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
     overflow: auto;
 }
 
