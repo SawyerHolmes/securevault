@@ -1134,12 +1134,26 @@ document.addEventListener("click", () => {
     sortToggle.classList.remove("active");
 });
 
+function persistSort() {
+    localStorage.setItem("vaultSort", JSON.stringify({ field: sortField, order: sortOrder }));
+}
+
+// Reflect the current sortField / sortOrder in the menu's indicator dots
+function syncSortIndicators() {
+    document.querySelectorAll(".sort-field").forEach(el => {
+        el.querySelector(".indicator").classList.toggle("active", el.dataset.field === sortField);
+    });
+    document.querySelectorAll(".sort-order").forEach(el => {
+        el.querySelector(".indicator").classList.toggle("active", el.dataset.order === sortOrder);
+    });
+}
+
 document.querySelectorAll(".sort-field").forEach(el => {
     el.addEventListener("click", e => {
         e.stopPropagation();
         sortField = el.dataset.field;
-        document.querySelectorAll(".sort-field .indicator").forEach(i => i.classList.remove("active"));
-        el.querySelector(".indicator").classList.add("active");
+        syncSortIndicators();
+        persistSort();
         renderVault(searchInput.value);
         haptic(4);
     });
@@ -1149,8 +1163,8 @@ document.querySelectorAll(".sort-order").forEach(el => {
     el.addEventListener("click", e => {
         e.stopPropagation();
         sortOrder = el.dataset.order;
-        document.querySelectorAll(".sort-order .indicator").forEach(i => i.classList.remove("active"));
-        el.querySelector(".indicator").classList.add("active");
+        syncSortIndicators();
+        persistSort();
         renderVault(searchInput.value);
         haptic(4);
     });
@@ -1504,7 +1518,18 @@ function maybeShowWelcome() {
     await loadVault();
     applyAppearance();
     applyViewMode(settings.viewMode || "list");
-    sortField = settings.defaultSort || "name";
+
+    // Restore the last-used sort if there is one, else fall back to
+    // the default sort from Settings.
+    const savedSort = JSON.parse(localStorage.getItem("vaultSort") || "null");
+    if (savedSort && savedSort.field) {
+        sortField = savedSort.field;
+        sortOrder = savedSort.order || "asc";
+    } else {
+        sortField = settings.defaultSort || "name";
+    }
+    syncSortIndicators();
+
     setupFillMode();
     renderVault();
     if (!fillRequestId) maybeShowWelcome();

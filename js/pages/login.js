@@ -399,7 +399,8 @@ resetConfirmYes.addEventListener("click", () => {
     const keysToRemove = [
         "vault", "vaultSalt", "authenticated", "lastActive",
         "loginAttempts", "lockedAt", "lockoutLevel",
-        "vaultSettings", "syncConfig", "biometric"
+        "vaultSettings", "syncConfig", "biometric",
+        "recovery", "vaultSort", "securityNotice"
     ];
     keysToRemove.forEach(k => localStorage.removeItem(k));
     sessionStorage.clear();
