@@ -93,6 +93,22 @@ body {
     min-height: 100dvh; /* avoids the iOS URL-bar height jump */
 }
 
+/* Always-black backdrop behind the iOS status bar (the safe-area top inset)
+   so the white status glyphs of black-translucent stay legible in BOTH light
+   and dark themes when running edge-to-edge. Height collapses to 0 where
+   there is no top inset, so it is a no-op on desktop / non-notched devices. */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top);
+    background: #000;
+    z-index: 95;
+    pointer-events: none;
+}
+
 main {
     flex: 1;
     width: 100%;
@@ -215,11 +231,11 @@ svg.lucide,
 ============================================================ */
 header {
     position: sticky;
-    top: 16px;
+    top: calc(16px + env(safe-area-inset-top));
     z-index: 100;
     width: calc(100% - 32px);
     max-width: calc(var(--page-max) - 32px);
-    margin: 16px auto 0;
+    margin: calc(16px + env(safe-area-inset-top)) auto 0;
     background: var(--accent);
     border-radius: 999px;
     color: var(--accent-ink);
