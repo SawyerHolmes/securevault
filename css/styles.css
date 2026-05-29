@@ -2503,4 +2503,13 @@ body[data-view-type="card"]  .type-only-note {
     text-align: center;
     word-break: break-all;
 }
+#login-panel,
 #recovery-panel { display: flex; flex-direction: column; gap: 16px; }
+
+/* The two text links sit as a tight pair under the buttons */
+.login-links {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+}
