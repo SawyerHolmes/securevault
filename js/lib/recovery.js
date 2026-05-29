@@ -141,4 +141,6 @@ async function rekeyAfterRecovery(newPassword) {
     // The old wraps reference the replaced key — clear them
     localStorage.removeItem(RECOVERY_STORAGE_KEY);
     localStorage.removeItem("biometric");
+    localStorage.setItem("securityNotice",
+        "Recovery used. Your recovery code and biometric unlock were reset — set them up again in Settings.");
 }

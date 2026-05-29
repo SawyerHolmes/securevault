@@ -55,4 +55,21 @@
     }
 
     window.showToast = showToast;
+
+    // A "security notice" is left in localStorage when recovery /
+    // biometric get invalidated (recovery, master-password change,
+    // backup import). Surface it once on the next authenticated page
+    // load so the reset isn't silent.
+    document.addEventListener("DOMContentLoaded", () => {
+        const notice = localStorage.getItem("securityNotice");
+        if (!notice) return;
+        if (sessionStorage.getItem("authenticated") !== "true") return;
+        localStorage.removeItem("securityNotice");
+        setTimeout(() => {
+            showToast(notice, {
+                duration: 7000,
+                action: { label: "Settings", onClick: () => { window.location.href = "settings.html#account"; } }
+            });
+        }, 400);
+    });
 })();

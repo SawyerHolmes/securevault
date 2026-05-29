@@ -238,6 +238,8 @@ async function importFile(file, status) {
                 localStorage.setItem("vault",     parsed.vault);
                 localStorage.removeItem("biometric");
                 localStorage.removeItem("recovery");
+                localStorage.setItem("securityNotice",
+                    "Backup imported. Set up recovery and biometric unlock for this vault in Settings.");
                 sessionStorage.clear();
                 window.location.replace("login.html");
             });
@@ -480,13 +482,18 @@ function attachEventListeners() {
         const result = await changeMasterPassword(current, newPwd);
 
         if (result.ok) {
-            statusEl.textContent = result.warning || "Password changed successfully";
-            statusEl.style.color = result.warning ? "#e67e22" : "#2ecc71";
+            statusEl.textContent = (result.warning || "Password changed.") +
+                " Recovery code and biometric unlock were reset — set them up again below.";
+            statusEl.style.color = result.warning ? "#e67e22" : "var(--accent)";
             document.getElementById("change-password").value  = "";
             document.getElementById("confirm-password").value = "";
+            // Reflect the reset in the recovery/biometric controls without a reload
+            if (typeof refreshRecoveryState === "function") refreshRecoveryState();
+            const bioToggle = document.getElementById("biometric-toggle");
+            if (bioToggle) bioToggle.checked = false;
         } else {
             statusEl.textContent = result.error;
-            statusEl.style.color = "#e74c3c";
+            statusEl.style.color = "var(--danger)";
         }
     });
 
