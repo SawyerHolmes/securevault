@@ -70,6 +70,72 @@ if (bioBtn && typeof biometricConfigured === "function" && biometricConfigured()
 }
 
 // ============================================================
+// RECOVERY CODE
+// "Use a recovery code" swaps the login form for the recovery panel:
+// enter the code, set a new master password, re-key the vault.
+// Only offered when a recovery code is configured on this device.
+// ============================================================
+const loginPanel    = document.getElementById("login-panel");
+const recoveryPanel  = document.getElementById("recovery-panel");
+const recoveryLink   = document.getElementById("recovery-link");
+const recoveryBack   = document.getElementById("recovery-back");
+const recoverBtn     = document.getElementById("recover-btn");
+const recoveryError  = document.getElementById("recovery-error");
+const recoveryCodeIn = document.getElementById("recovery-code-input");
+const recoveryNewPw  = document.getElementById("recovery-new-password");
+const recoveryConfPw = document.getElementById("recovery-confirm-password");
+
+if (recoveryLink && typeof recoveryConfigured === "function" && recoveryConfigured() && !isFirstTime) {
+    recoveryLink.style.display = "";
+}
+
+function showRecoveryError(msg) {
+    recoveryError.textContent = msg;
+    recoveryError.style.display = "block";
+}
+
+if (recoveryLink) {
+    recoveryLink.addEventListener("click", () => {
+        loginPanel.style.display = "none";
+        recoveryPanel.style.display = "";
+        recoveryCodeIn.focus();
+    });
+}
+if (recoveryBack) {
+    recoveryBack.addEventListener("click", () => {
+        recoveryPanel.style.display = "none";
+        loginPanel.style.display = "";
+        recoveryError.textContent = "";
+    });
+}
+if (recoverBtn) {
+    recoverBtn.addEventListener("click", async () => {
+        recoveryError.textContent = "";
+        const code = recoveryCodeIn.value.trim();
+        const pw   = recoveryNewPw.value;
+        const conf = recoveryConfPw.value;
+        if (!code)            { showRecoveryError("Enter your recovery code"); return; }
+        if (!pw)              { showRecoveryError("Set a new master password"); return; }
+        if (pw.length < 8)    { showRecoveryError("Use at least 8 characters"); return; }
+        if (pw !== conf)      { showRecoveryError("Passwords don't match"); return; }
+
+        recoverBtn.disabled = true;
+        recoverBtn.textContent = "Recovering…";
+        try {
+            await recoverWithCode(code);
+            await rekeyAfterRecovery(pw);
+            sessionStorage.setItem("lastActive", Date.now());
+            resetAttempts();
+            window.location.replace("vault.html");
+        } catch (e) {
+            recoverBtn.disabled = false;
+            recoverBtn.textContent = "Recover & set password";
+            showRecoveryError(e.message || "Recovery failed.");
+        }
+    });
+}
+
+// ============================================================
 // LOCKOUT HELPERS
 // During a brute-force run, each 5-attempt cycle escalates the
 // lockout window: 30s, 1m, 2m, 4m, 8m, 16m, 32m, then capped at 1h.

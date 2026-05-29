@@ -32,47 +32,80 @@
             <p class="login-subtitle">Encrypted local · AES-256</p>
         </div>
 
-        <div>
-            <label for="master-password">Master password</label>
-            <div class="password-wrapper">
-                <input
-                    type="password"
-                    id="master-password"
-                    placeholder="••••••••"
-                    autocomplete="current-password"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    spellcheck="false">
-                <button type="button" id="toggle-password" class="toggle-password" title="Show/hide password" aria-label="Show or hide password">
-                    <i data-lucide="eye-off"></i>
-                </button>
+        <!-- Normal login -->
+        <div id="login-panel">
+            <div>
+                <label for="master-password">Master password</label>
+                <div class="password-wrapper">
+                    <input
+                        type="password"
+                        id="master-password"
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                        autocorrect="off"
+                        autocapitalize="off"
+                        spellcheck="false">
+                    <button type="button" id="toggle-password" class="toggle-password" title="Show/hide password" aria-label="Show or hide password">
+                        <i data-lucide="eye-off"></i>
+                    </button>
+                </div>
             </div>
+
+            <div id="confirm-password-field" style="display:none;">
+                <label for="confirm-master-password">Confirm password</label>
+                <div class="password-wrapper">
+                    <input
+                        type="password"
+                        id="confirm-master-password"
+                        placeholder="••••••••"
+                        autocomplete="new-password"
+                        autocorrect="off"
+                        autocapitalize="off"
+                        spellcheck="false">
+                </div>
+                <p>First-time setup. This password protects your vault. There is no way to recover it.</p>
+            </div>
+
+            <div id="login-error" class="login-error" role="alert" aria-live="assertive"></div>
+
+            <button class="btn-black" id="login-btn">Unlock</button>
+
+            <button class="btn-white" id="biometric-btn" style="display:none; margin-top:8px;">
+                <i data-lucide="lock"></i> Use biometric
+            </button>
+
+            <button class="link-btn" id="recovery-link" style="display:none;">Use a recovery code</button>
+            <button class="link-btn" id="reset-btn">Forgot password? Reset vault</button>
         </div>
 
-        <div id="confirm-password-field" style="display:none;">
-            <label for="confirm-master-password">Confirm password</label>
-            <div class="password-wrapper">
+        <!-- Recovery -->
+        <div id="recovery-panel" style="display:none;">
+            <div>
+                <label for="recovery-code-input">Recovery code</label>
                 <input
-                    type="password"
-                    id="confirm-master-password"
-                    placeholder="••••••••"
-                    autocomplete="new-password"
-                    autocorrect="off"
-                    autocapitalize="off"
+                    type="text"
+                    id="recovery-code-input"
+                    placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"
+                    autocomplete="off"
+                    autocapitalize="characters"
                     spellcheck="false">
             </div>
-            <p>First-time setup. This password protects your vault. There is no way to recover it.</p>
+            <div>
+                <label for="recovery-new-password">New master password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="recovery-new-password" placeholder="••••••••" autocomplete="new-password">
+                </div>
+            </div>
+            <div>
+                <label for="recovery-confirm-password">Confirm new password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="recovery-confirm-password" placeholder="••••••••" autocomplete="new-password">
+                </div>
+            </div>
+            <div id="recovery-error" class="login-error" role="alert" aria-live="assertive"></div>
+            <button class="btn-black" id="recover-btn">Recover &amp; set password</button>
+            <button class="link-btn" id="recovery-back">Back to login</button>
         </div>
-
-        <div id="login-error" class="login-error" role="alert" aria-live="assertive"></div>
-
-        <button class="btn-black" id="login-btn">Unlock</button>
-
-        <button class="btn-white" id="biometric-btn" style="display:none; margin-top:8px;">
-            <i data-lucide="lock"></i> Use biometric
-        </button>
-
-        <button class="link-btn" id="reset-btn">Forgot password? Reset vault</button>
 
     </div>
 </main>
@@ -92,6 +125,7 @@
 <script src="js/lib/sw-register.js"></script>
 <script src="js/lib/crypto-utils.js"></script>
 <script src="js/lib/biometric.js"></script>
+<script src="js/lib/recovery.js"></script>
 <script src="js/pages/login.js"></script>
 
 </body>

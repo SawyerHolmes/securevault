@@ -183,6 +183,70 @@ async function setupBiometricToggle() {
 }
 
 // ============================================================
+// RECOVERY CODE
+// ============================================================
+function refreshRecoveryState() {
+    const label    = document.getElementById("recovery-state-label");
+    const genBtn   = document.getElementById("recovery-generate-btn");
+    const removeBtn = document.getElementById("recovery-remove-btn");
+    const set = recoveryConfigured();
+    label.textContent     = set ? "Recovery code is set" : "Recovery code";
+    genBtn.textContent    = set ? "Regenerate" : "Generate";
+    removeBtn.style.display = set ? "" : "none";
+}
+
+function setupRecovery() {
+    const genBtn    = document.getElementById("recovery-generate-btn");
+    const removeBtn = document.getElementById("recovery-remove-btn");
+    const status    = document.getElementById("recovery-settings-status");
+    const overlay   = document.getElementById("recovery-code-overlay");
+    const display   = document.getElementById("recovery-code-display");
+    const copyBtn   = document.getElementById("recovery-code-copy");
+    const doneBtn   = document.getElementById("recovery-code-done");
+    if (!genBtn) return;
+
+    refreshRecoveryState();
+
+    genBtn.addEventListener("click", async () => {
+        if (!sessionStorage.getItem("vaultKey")) {
+            status.textContent = "Locked. Log in first.";
+            status.style.color = "var(--danger)";
+            return;
+        }
+        try {
+            const code = await enableRecovery();
+            display.textContent = code;
+            overlay.style.display = "flex";
+            status.textContent = "";
+            refreshRecoveryState();
+        } catch (e) {
+            status.textContent = e.message || "Could not generate a code.";
+            status.style.color = "var(--danger)";
+        }
+    });
+
+    removeBtn.addEventListener("click", () => {
+        disableRecovery();
+        refreshRecoveryState();
+        status.textContent = "Recovery code removed.";
+        status.style.color = "var(--text-secondary)";
+        window.showToast("Recovery code removed");
+    });
+
+    copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(display.textContent).then(() => {
+            window.showToast("Recovery code copied", { duration: 1500 });
+        });
+    });
+
+    doneBtn.addEventListener("click", () => {
+        overlay.style.display = "none";
+        status.textContent = "Recovery code is set. Keep it somewhere safe.";
+        status.style.color = "var(--accent)";
+    });
+}
+
+// ============================================================
 // PASSWORD HEALTH
 // ============================================================
 async function runHealthScan(btn) {
@@ -351,6 +415,9 @@ function attachEventListeners() {
 
     // Biometric unlock
     setupBiometricToggle();
+
+    // Recovery code
+    setupRecovery();
 
     // Push to Gist
     const pushBtn = document.getElementById("push-btn");

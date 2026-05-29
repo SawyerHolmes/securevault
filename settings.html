@@ -22,6 +22,7 @@
     <script src="js/lib/crypto-utils.js"></script>
     <script src="js/lib/health.js"></script>
     <script src="js/lib/biometric.js"></script>
+    <script src="js/lib/recovery.js"></script>
     <script src="js/lib/auth.js"></script>
     <script src="js/lib/sync.js"></script>
     <script defer src="js/pages/settings.js"></script>
@@ -104,6 +105,25 @@
                         </div>
                         <div class="setting-item no-divider" id="biometric-status-row">
                             <div id="biometric-status" class="setting-item-status" role="status" aria-live="polite"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-title">Recovery</div>
+                    <div class="settings-section">
+                        <div class="setting-item toggle-field">
+                            <div>
+                                <span id="recovery-state-label">Recovery code</span>
+                                <p class="setting-item-hint">A one-time code that lets you back in if you forget your master password.</p>
+                            </div>
+                            <div class="recovery-actions">
+                                <button class="btn-black btn-inline" id="recovery-generate-btn">Generate</button>
+                                <button class="btn-white btn-inline" id="recovery-remove-btn" style="display:none;">Remove</button>
+                            </div>
+                        </div>
+                        <div class="setting-item no-divider">
+                            <div id="recovery-settings-status" class="setting-item-status" role="status" aria-live="polite"></div>
                         </div>
                     </div>
                 </div>
@@ -310,6 +330,19 @@
         <div class="confirmation-buttons">
             <button id="confirm-no" class="btn-white">Cancel</button>
             <button id="confirm-yes" class="btn-black">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- One-time recovery code display -->
+<div class="confirmation-overlay" id="recovery-code-overlay">
+    <div class="confirmation-modal">
+        <p class="confirm-title">Your recovery code</p>
+        <p>Save this somewhere safe and offline. It's the only way back into your vault if you forget your master password — and it won't be shown again.</p>
+        <div class="recovery-code-display" id="recovery-code-display">—</div>
+        <div class="confirmation-buttons">
+            <button class="btn-white" id="recovery-code-copy">Copy</button>
+            <button class="btn-black" id="recovery-code-done">I've saved it</button>
         </div>
     </div>
 </div>

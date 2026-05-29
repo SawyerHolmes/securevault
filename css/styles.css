@@ -2481,3 +2481,26 @@ body[data-view-type="card"]  .type-only-note {
     margin-top: 4px;
     word-break: break-word;
 }
+
+
+/* ============================================================
+   32. RECOVERY CODE
+============================================================ */
+.recovery-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.recovery-code-display {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    padding: 16px;
+    margin: 0 0 16px;
+    text-align: center;
+    word-break: break-all;
+}
+#recovery-panel { display: flex; flex-direction: column; gap: 16px; }
