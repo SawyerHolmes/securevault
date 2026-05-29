@@ -1172,141 +1172,9 @@ document.getElementById("logout-btn").addEventListener("click", async e => {
 // ============================================================
 // IMPORT / EXPORT
 // ============================================================
-function exportVault(format) {
-    if (!sessionStorage.getItem("vaultKey")) return;
-
-    if (format === "encrypted") {
-        // Export raw encrypted blob — only restoreable with master password + same salt
-        const data     = JSON.stringify({
-            vault:     localStorage.getItem("vault"),
-            salt:      localStorage.getItem("vaultSalt"),
-            exportedAt: Date.now()
-        });
-        downloadFile("securevault-backup.json", data, "application/json");
-    } else if (format === "csv") {
-        // Plain CSV — warn user this is unencrypted
-        const rows = [["Name", "URL", "Username", "Password", "Notes"]];
-        vault.forEach(e => rows.push([
-            e.name     || "",
-            e.url      || "",
-            e.username || "",
-            e.password || "",
-            e.notes    || ""
-        ]));
-        const csv = rows.map(r => r.map(v => `"${v.replace(/"/g, '""')}"`).join(",")).join("\n");
-        downloadFile("securevault-export.csv", csv, "text/csv");
-    }
-}
-
-// RFC-4180-style CSV parser: handles quoted commas, embedded
-// newlines, and "" as an escaped quote inside a quoted field.
-function parseCSV(text) {
-    const rows = [];
-    let row    = [];
-    let field  = "";
-    let inQuotes = false;
-    let i = 0;
-
-    while (i < text.length) {
-        const c = text[i];
-
-        if (inQuotes) {
-            if (c === '"') {
-                if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
-                inQuotes = false; i++; continue;
-            }
-            field += c; i++; continue;
-        }
-
-        if (c === '"')                  { inQuotes = true;        i++; continue; }
-        if (c === ",")                  { row.push(field); field = ""; i++; continue; }
-        if (c === "\r" && text[i+1] === "\n") {
-            row.push(field); rows.push(row); row = []; field = ""; i += 2; continue;
-        }
-        if (c === "\n" || c === "\r")   {
-            row.push(field); rows.push(row); row = []; field = ""; i++; continue;
-        }
-        field += c; i++;
-    }
-
-    // Flush the final field/row if the file didn't end with a newline.
-    if (field.length || row.length) { row.push(field); rows.push(row); }
-
-    // Drop trailing empty row from a final newline.
-    return rows.filter(r => r.length > 1 || (r.length === 1 && r[0] !== ""));
-}
-
-function downloadFile(name, content, type) {
-    const blob = new Blob([content], { type });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement("a");
-    a.href = url; a.download = name;
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-function importFromFile(file) {
-    const reader = new FileReader();
-    reader.onload = e => {
-        try {
-            const text = e.target.result;
-            if (file.name.endsWith(".json")) {
-                // Encrypted backup
-                const { vault: encVault, salt } = JSON.parse(text);
-                if (!encVault || !salt) throw new Error("Invalid backup file");
-                const confirmed = confirm(
-                    "This will replace your current vault with the backup.\n\nYou will need your original master password to unlock it. Continue?"
-                );
-                if (!confirmed) return;
-                localStorage.setItem("vaultSalt",     salt);
-                localStorage.setItem("vault",          encVault);
-                localStorage.removeItem("vaultVerifier");
-                sessionStorage.clear();
-                window.location.replace("login.html");
-            } else if (file.name.endsWith(".csv")) {
-                if (!sessionStorage.getItem("vaultKey")) return;
-                const rows = parseCSV(text).slice(1); // skip header
-                const imported = [];
-                rows.forEach(cols => {
-                    if (!cols[0]) return;
-                    imported.push({
-                        id:        newEntryId(),
-                        name:      cols[0] || "",
-                        url:       cols[1] || "",
-                        username:  cols[2] || "",
-                        password:  cols[3] || "",
-                        notes:     cols[4] || "",
-                        createdAt: Date.now()
-                    });
-                });
-                vault.push(...imported);
-                saveVault();
-                renderVault();
-                window.showToast(`Imported ${imported.length} entries`, { tone: "success" });
-            }
-        } catch (err) {
-            alert("Import failed: " + err.message);
-        }
-    };
-    reader.readAsText(file);
-}
-
-// Wire export/import buttons if they exist on this page
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("export-encrypted-btn")?.addEventListener("click", () => exportVault("encrypted"));
-    document.getElementById("export-csv-btn")?.addEventListener("click", () => {
-        if (confirm("CSV export is unencrypted. Anyone with this file can read your passwords. Continue?")) {
-            exportVault("csv");
-        }
-    });
-    const importInput = document.getElementById("import-file-input");
-    document.getElementById("import-btn")?.addEventListener("click", () => importInput?.click());
-    importInput?.addEventListener("change", e => {
-        const file = e.target.files[0];
-        if (file) importFromFile(file);
-        e.target.value = "";
-    });
-});
+// (Import / export moved to Settings → Storage; see js/lib/portation.js.
+//  downloadFile + entriesToCsv come from portation.js, used by the
+//  bulk-export action below.)
 
 // ============================================================
 // BULK SELECT
@@ -1360,25 +1228,14 @@ document.getElementById("bulk-cancel").addEventListener("click", exitSelectMode)
 
 document.getElementById("bulk-export").addEventListener("click", () => {
     if (!selectedIds.size) return;
-    const rows = [["Name", "URL", "Username", "Password", "Notes", "Tags", "Type"]];
+    const chosen = [];
     for (const id of selectedIds) {
         const e = findEntry(id);
-        if (!e) continue;
-        rows.push([
-            e.name      || "",
-            e.url       || "",
-            e.username  || "",
-            e.password  || "",
-            e.notes     || "",
-            (e.tags || []).join("; "),
-            e.type      || "login"
-        ]);
+        if (e) chosen.push(e);
     }
-    const csv = rows
-        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
-        .join("\n");
-    downloadFile(`securevault-export-${selectedIds.size}.csv`, csv, "text/csv");
-    window.showToast(`Exported ${selectedIds.size}`, { tone: "success", duration: 1500 });
+    const csv = entriesToCsv(chosen);
+    downloadFile(`securevault-export-${chosen.length}.csv`, csv, "text/csv");
+    window.showToast(`Exported ${chosen.length}`, { tone: "success", duration: 1500 });
     exitSelectMode();
 });
 

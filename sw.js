@@ -5,7 +5,7 @@
 // localStorage and never touches this cache.
 // ============================================================
 
-const CACHE = "securevault-v15";
+const CACHE = "securevault-v16";
 
 const ASSETS = [
     "./",
@@ -42,6 +42,7 @@ const ASSETS = [
     "./js/lib/biometric.js",
     "./js/lib/markdown.js",
     "./js/lib/recovery.js",
+    "./js/lib/portation.js",
     "./js/pages/tags.js"
 ];
 

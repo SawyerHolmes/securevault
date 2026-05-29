@@ -23,6 +23,7 @@
     <script src="js/lib/health.js"></script>
     <script src="js/lib/biometric.js"></script>
     <script src="js/lib/recovery.js"></script>
+    <script src="js/lib/portation.js"></script>
     <script src="js/lib/auth.js"></script>
     <script src="js/lib/sync.js"></script>
     <script defer src="js/pages/settings.js"></script>
@@ -304,6 +305,27 @@
                             <span class="setting-link-label">Manage tags</span>
                             <span class="setting-link-meta">Rename, merge, or delete tags</span>
                         </a>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-title">Import / Export</div>
+                    <div class="settings-section">
+                        <div class="setting-item">
+                            <label>Export</label>
+                            <div class="sync-buttons">
+                                <button class="btn-black" id="export-encrypted-btn">Encrypted backup</button>
+                                <button class="btn-white" id="export-csv-btn">Plain CSV</button>
+                            </div>
+                            <p class="setting-item-hint">CSV is unencrypted — anyone with the file can read your passwords. The encrypted backup needs your master password to restore.</p>
+                        </div>
+                        <div class="setting-item no-divider">
+                            <label>Import</label>
+                            <button class="btn-black btn-inline" id="import-btn">Choose file…</button>
+                            <input type="file" id="import-file-input" accept=".csv,.json" style="display:none;">
+                            <div id="import-status" class="setting-item-status" role="status" aria-live="polite"></div>
+                            <p class="setting-item-hint">A Securevault backup (.json) or a CSV exported from Chrome, Bitwarden, 1Password, LastPass, Firefox, or Safari.</p>
+                        </div>
                     </div>
                 </div>
             </section>

@@ -183,6 +183,90 @@ async function setupBiometricToggle() {
 }
 
 // ============================================================
+// IMPORT / EXPORT
+// ============================================================
+function setupPortation() {
+    const encBtn   = document.getElementById("export-encrypted-btn");
+    const csvBtn   = document.getElementById("export-csv-btn");
+    const importBtn = document.getElementById("import-btn");
+    const fileInput = document.getElementById("import-file-input");
+    const status   = document.getElementById("import-status");
+    if (!encBtn) return;
+
+    // Export the raw encrypted blob — restores with the master password
+    encBtn.addEventListener("click", () => {
+        const vault = localStorage.getItem("vault");
+        const salt  = localStorage.getItem("vaultSalt");
+        if (!vault || !salt) { status.textContent = "Nothing to export yet."; return; }
+        const data = JSON.stringify({ vault, salt, exportedAt: Date.now() });
+        downloadFile("securevault-backup.json", data, "application/json");
+        window.showToast("Encrypted backup downloaded", { tone: "success", duration: 1500 });
+    });
+
+    // Export plain CSV — decrypt then write
+    csvBtn.addEventListener("click", async () => {
+        const key = await getStoredKey();
+        if (!key) { status.textContent = "Locked. Log in first."; return; }
+        const enc = localStorage.getItem("vault");
+        let entries = [];
+        if (enc) { try { entries = await decryptData(enc, key); } catch { status.textContent = "Could not read the vault."; return; } }
+        const active = entries.filter(e => !e.deleted && !e.archived);
+        if (!active.length) { status.textContent = "No entries to export."; return; }
+        showConfirmation("Export an unencrypted CSV? Anyone with the file can read your passwords.", () => {
+            downloadFile("securevault-export.csv", entriesToCsv(active), "text/csv");
+            window.showToast(`Exported ${active.length}`, { tone: "success", duration: 1500 });
+        });
+    });
+
+    // Import — CSV (append) or encrypted .json (replace + relogin)
+    importBtn.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", e => {
+        const file = e.target.files[0];
+        if (file) importFile(file, status);
+        e.target.value = "";
+    });
+}
+
+async function importFile(file, status) {
+    const text = await file.text();
+    try {
+        if (file.name.toLowerCase().endsWith(".json")) {
+            const parsed = JSON.parse(text);
+            if (!parsed.vault || !parsed.salt) throw new Error("Not a valid Securevault backup.");
+            showConfirmation("Replace your current vault with this backup? You'll need the backup's master password to unlock it.", () => {
+                localStorage.setItem("vaultSalt", parsed.salt);
+                localStorage.setItem("vault",     parsed.vault);
+                localStorage.removeItem("biometric");
+                localStorage.removeItem("recovery");
+                sessionStorage.clear();
+                window.location.replace("login.html");
+            });
+            return;
+        }
+
+        // CSV append
+        const key = await getStoredKey();
+        if (!key) { status.textContent = "Locked. Log in first."; return; }
+        const rows    = parseCSV(text);
+        const incoming = csvRowsToEntries(rows);
+        if (!incoming.length) { status.textContent = "No rows recognised in that file."; status.style.color = "var(--danger)"; return; }
+
+        const enc = localStorage.getItem("vault");
+        let vault = [];
+        if (enc) { try { vault = await decryptData(enc, key); } catch { status.textContent = "Could not read the existing vault."; return; } }
+        vault.push(...incoming);
+        localStorage.setItem("vault", await encryptData(vault, key));
+        if (typeof pushToGist === "function") pushToGist().catch(() => {});
+        status.textContent = `Imported ${incoming.length} entr${incoming.length === 1 ? "y" : "ies"}.`;
+        status.style.color = "var(--accent)";
+        window.showToast(`Imported ${incoming.length}`, { tone: "success" });
+    } catch (err) {
+        status.textContent = "Import failed: " + err.message;
+        status.style.color = "var(--danger)";
+    }
+}
+
+// ============================================================
 // RECOVERY CODE
 // ============================================================
 function refreshRecoveryState() {
@@ -418,6 +502,9 @@ function attachEventListeners() {
 
     // Recovery code
     setupRecovery();
+
+    // Import / Export
+    setupPortation();
 
     // Push to Gist
     const pushBtn = document.getElementById("push-btn");
