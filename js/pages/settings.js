@@ -193,13 +193,20 @@ function setupPortation() {
     const status   = document.getElementById("import-status");
     if (!encBtn) return;
 
-    // Export the raw encrypted blob — restores with the master password
+    // Export the raw encrypted blob — restores with the master password.
+    // Dedicated .svault extension + ISO-dated filename + version marker so a
+    // future format change can branch without breaking old backups.
     encBtn.addEventListener("click", () => {
         const vault = localStorage.getItem("vault");
         const salt  = localStorage.getItem("vaultSalt");
         if (!vault || !salt) { status.textContent = "Nothing to export yet."; return; }
-        const data = JSON.stringify({ vault, salt, exportedAt: Date.now() });
-        downloadFile("securevault-backup.json", data, "application/json");
+        const data = JSON.stringify({
+            format:     "securevault-backup-v1",
+            vault, salt,
+            exportedAt: Date.now()
+        });
+        const date = new Date().toISOString().slice(0, 10);
+        downloadFile(`securevault-backup-${date}.svault`, data, "application/json");
         window.showToast("Encrypted backup downloaded", { tone: "success", duration: 1500 });
     });
 
@@ -230,7 +237,8 @@ function setupPortation() {
 async function importFile(file, status) {
     const text = await file.text();
     try {
-        if (file.name.toLowerCase().endsWith(".json")) {
+        const lower = file.name.toLowerCase();
+        if (lower.endsWith(".json") || lower.endsWith(".svault")) {
             const parsed = JSON.parse(text);
             if (!parsed.vault || !parsed.salt) throw new Error("Not a valid Securevault backup.");
             showConfirmation("Replace your current vault with this backup? You'll need the backup's master password to unlock it.", () => {
