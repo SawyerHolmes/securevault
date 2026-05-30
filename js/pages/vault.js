@@ -13,6 +13,8 @@ let sortOrder        = "asc";
 let activeTagFilter  = null;
 let selectMode       = false;
 let selectedIds      = new Set();
+let currentVisibleEntries = [];  // populated by renderVault, used by keyboard nav
+let focusedIndex     = -1;       // index into currentVisibleEntries for j/k/arrow nav
 let fillRequestId    = null;
 let fillOrigin       = null;
 let fillHost         = null;
@@ -391,6 +393,12 @@ function renderVault(filter) {
             return 0;
         });
     }
+
+    // Snapshot what's about to be drawn so keyboard nav can index into it.
+    // Resetting focus on every render keeps things predictable across
+    // filter / sort changes — the next Arrow / j / k re-focuses row 0.
+    currentVisibleEntries = items;
+    focusedIndex = -1;
 
     if (!items.length) {
         const div = document.createElement("div");
@@ -1773,6 +1781,19 @@ function closeShortcuts() { shortcutsOverlay.style.display = "none"; }
 document.getElementById("shortcuts-close")?.addEventListener("click", closeShortcuts);
 shortcutsOverlay?.addEventListener("click", e => { if (e.target === shortcutsOverlay) closeShortcuts(); });
 
+// Outline the Nth direct child of vault-container and scroll it into view.
+// Children are .vault-row (touch) or .vault-card / .vault-grid-tile /
+// .vault-gallery-card (desktop), each at the same index as currentVisibleEntries.
+function focusEntry(index) {
+    vaultContainer.querySelectorAll(".kbd-focused").forEach(el => el.classList.remove("kbd-focused"));
+    if (index < 0 || index >= currentVisibleEntries.length) { focusedIndex = -1; return; }
+    focusedIndex = index;
+    const child = vaultContainer.children[index];
+    if (!child) return;
+    child.classList.add("kbd-focused");
+    child.scrollIntoView({ block: "nearest" });
+}
+
 document.addEventListener("keydown", e => {
     // Skip when the user is typing in an input/textarea/contentEditable
     const t = e.target;
@@ -1824,6 +1845,17 @@ document.addEventListener("keydown", e => {
     } else if (e.key === "s" || e.key === "S") {
         e.preventDefault();
         sortToggle.click();
+    } else if (e.key === "ArrowDown" || e.key === "j" || e.key === "J") {
+        if (!currentVisibleEntries.length) return;
+        e.preventDefault();
+        focusEntry(focusedIndex < 0 ? 0 : Math.min(focusedIndex + 1, currentVisibleEntries.length - 1));
+    } else if (e.key === "ArrowUp" || e.key === "k" || e.key === "K") {
+        if (!currentVisibleEntries.length) return;
+        e.preventDefault();
+        focusEntry(focusedIndex < 0 ? 0 : Math.max(focusedIndex - 1, 0));
+    } else if (e.key === "Enter" && focusedIndex >= 0) {
+        e.preventDefault();
+        openCard(currentVisibleEntries[focusedIndex]);
     }
 });
 

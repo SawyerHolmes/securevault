@@ -2663,3 +2663,23 @@ kbd {
     border-top: 1px solid var(--border);
     margin: 4px 0;
 }
+
+
+/* ============================================================
+   36. KEYBOARD-FOCUSED VAULT ROW
+   Applied to the direct child of #vault-container at focusedIndex
+   (.vault-row on touch, .vault-card / .vault-grid-tile /
+   .vault-gallery-card on desktop) so it works across all views.
+============================================================ */
+.kbd-focused {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+/* Don't let the sticky header / mobile CTA hide a freshly-focused row. */
+.vault-row,
+.vault-card,
+.vault-grid-tile,
+.vault-gallery-card {
+    scroll-margin-top: 88px;
+    scroll-margin-bottom: 88px;
+}
