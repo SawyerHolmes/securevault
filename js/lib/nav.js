@@ -40,6 +40,47 @@ window.trapFocus = function trapFocus(container) {
     };
 };
 
+// ============================================================
+// Hover tooltips — mirror aria-label to title on any icon-only
+// element so desktop mouse users get the same hint screen readers
+// already get. Runs on initial DOM + on any subsequent additions
+// (dynamic cards, modals, swipe action trays, context menus, etc.).
+// Icon-only check: no visible text content. Buttons that already
+// carry a title attribute are left untouched.
+// ============================================================
+function syncTooltipsFromLabels(root) {
+    if (!root || root.nodeType !== 1) return;
+    if (root.hasAttribute && root.hasAttribute("aria-label") && !root.hasAttribute("title")) {
+        if (root.textContent.trim() === "") {
+            root.setAttribute("title", root.getAttribute("aria-label"));
+        }
+    }
+    if (!root.querySelectorAll) return;
+    root.querySelectorAll("[aria-label]:not([title])").forEach(el => {
+        if (el.textContent.trim() === "") {
+            el.setAttribute("title", el.getAttribute("aria-label"));
+        }
+    });
+}
+
+(function () {
+    function initTooltips() {
+        syncTooltipsFromLabels(document.body);
+        new MutationObserver(muts => {
+            for (const mut of muts) {
+                for (const node of mut.addedNodes) {
+                    if (node.nodeType === 1) syncTooltipsFromLabels(node);
+                }
+            }
+        }).observe(document.body, { childList: true, subtree: true });
+    }
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initTooltips);
+    } else {
+        initTooltips();
+    }
+})();
+
 (function () {
     function init() {
         const burger = document.getElementById("nav-burger");

@@ -1845,6 +1845,14 @@ document.addEventListener("keydown", e => {
     } else if (e.key === "s" || e.key === "S") {
         e.preventDefault();
         sortToggle.click();
+    } else if (e.key === ",") {
+        e.preventDefault();
+        window.location.href = "settings.html";
+    } else if (e.key === "l" || e.key === "L") {
+        // Quick lock: reuse the header Logout handler (which flushes to Gist
+        // first on this page, then clears the session and heads to login).
+        e.preventDefault();
+        document.getElementById("logout-btn")?.click();
     } else if (e.key === "ArrowDown" || e.key === "j" || e.key === "J") {
         if (!currentVisibleEntries.length) return;
         e.preventDefault();
