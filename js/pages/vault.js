@@ -1287,28 +1287,24 @@ document.getElementById("bulk-export").addEventListener("click", () => {
 
 document.getElementById("bulk-archive").addEventListener("click", () => {
     if (!selectedIds.size) return;
-    const now = Date.now();
+    const entries = [];
     for (const id of selectedIds) {
         const e = findEntry(id);
-        if (e) e.archived = now;
+        if (e) entries.push(e);
     }
-    const n = selectedIds.size;
-    saveVault();
-    window.showToast(`${n} archived`, { tone: "success", duration: 1500 });
     exitSelectMode();
+    undoableArchive(entries);
 });
 
 document.getElementById("bulk-delete").addEventListener("click", () => {
     if (!selectedIds.size) return;
-    const now = Date.now();
+    const entries = [];
     for (const id of selectedIds) {
         const e = findEntry(id);
-        if (e) e.deleted = now;
+        if (e) entries.push(e);
     }
-    const n = selectedIds.size;
-    saveVault();
-    window.showToast(`${n} moved to trash`, { tone: "error", duration: 1500 });
     exitSelectMode();
+    undoableTrash(entries);
 });
 
 document.getElementById("bulk-tag").addEventListener("click", () => {
@@ -1328,6 +1324,67 @@ document.getElementById("bulk-tag").addEventListener("click", () => {
     window.showToast(`Tagged ${n} entr${n === 1 ? "y" : "ies"}`, { tone: "success", duration: 1500 });
     exitSelectMode();
 });
+
+// ============================================================
+// UNDOABLE ARCHIVE / TRASH — shared by swipe, context menu, bulk bar.
+// Each entry's previous state is captured by id so an Undo still works
+// if a sync pull replaces the in-memory vault array between then and now.
+// ============================================================
+function undoableArchive(entries) {
+    if (!entries.length) return;
+    const before = entries.map(e => ({ id: e.id, archived: e.archived }));
+    const now = Date.now();
+    entries.forEach(e => { e.archived = now; });
+    saveVault();
+    renderVault(searchInput.value);
+    const n = entries.length;
+    window.showToast(n === 1 ? "Entry archived" : `${n} archived`, {
+        tone: "success",
+        duration: 5000,
+        action: {
+            label: "Undo",
+            onClick: () => {
+                before.forEach(b => {
+                    const e = findEntry(b.id);
+                    if (!e) return;
+                    if (b.archived) e.archived = b.archived;
+                    else            delete e.archived;
+                });
+                saveVault();
+                renderVault(searchInput.value);
+                window.showToast("Restored", { duration: 1500 });
+            }
+        }
+    });
+}
+
+function undoableTrash(entries) {
+    if (!entries.length) return;
+    const before = entries.map(e => ({ id: e.id, deleted: e.deleted }));
+    const now = Date.now();
+    entries.forEach(e => { e.deleted = now; });
+    saveVault();
+    renderVault(searchInput.value);
+    const n = entries.length;
+    window.showToast(n === 1 ? "Entry moved to trash" : `${n} moved to trash`, {
+        tone: "error",
+        duration: 5000,
+        action: {
+            label: "Undo",
+            onClick: () => {
+                before.forEach(b => {
+                    const e = findEntry(b.id);
+                    if (!e) return;
+                    if (b.deleted) e.deleted = b.deleted;
+                    else           delete e.deleted;
+                });
+                saveVault();
+                renderVault(searchInput.value);
+                window.showToast("Restored", { duration: 1500 });
+            }
+        }
+    });
+}
 
 // ============================================================
 // SWIPE-TO-ACTION + LONG-PRESS SELECT (touch devices only)
@@ -1373,17 +1430,13 @@ function wrapWithSwipeRow(card, entry) {
     });
     actions.querySelector(".act-archive").addEventListener("click", e => {
         e.stopPropagation();
-        entry.archived = Date.now();
-        saveVault();
-        window.showToast("Archived", { tone: "success", duration: 1500 });
         closeOpenSwipe();
+        undoableArchive([entry]);
     });
     actions.querySelector(".act-delete").addEventListener("click", e => {
         e.stopPropagation();
-        entry.deleted = Date.now();
-        saveVault();
-        window.showToast("Moved to trash", { tone: "error", duration: 1500 });
         closeOpenSwipe();
+        undoableTrash([entry]);
     });
 
     attachSwipeGesture(row, card, entry);
@@ -1524,15 +1577,11 @@ function showContextMenu(x, y, entry, card) {
         { sep: true },
         { label: "Archive", icon: "archive", onClick: () => {
             hideContextMenu();
-            entry.archived = Date.now();
-            saveVault();
-            window.showToast("Archived", { tone: "success", duration: 1500 });
+            undoableArchive([entry]);
         }},
         { label: "Delete", icon: "trash-2", danger: true, onClick: () => {
             hideContextMenu();
-            entry.deleted = Date.now();
-            saveVault();
-            window.showToast("Moved to trash", { tone: "error", duration: 1500 });
+            undoableTrash([entry]);
         }},
     ];
 
