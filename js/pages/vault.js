@@ -575,6 +575,12 @@ function renderVault(filter) {
 
         card.dataset.id = entry.id;
         card.addEventListener("click", e => {
+            // Swipe just snapped this row open/closed — swallow the trailing click.
+            if (card.dataset.suppressClick === "1") {
+                delete card.dataset.suppressClick;
+                e.stopPropagation();
+                return;
+            }
             if (fillRequestId) {
                 if (e.target.closest(".card-copy-btn")) return;
                 sendFillPick(entry);
@@ -592,7 +598,13 @@ function renderVault(filter) {
             haptic(6); openCard(entry);
         });
         if (sortField === "manual" && !selectMode && !fillRequestId) attachDragReorder(card, entry);
-        vaultContainer.appendChild(card);
+
+        // Touch-only: wrap with a swipe row exposing Copy / Archive / Delete.
+        if (isTouchDevice && !selectMode && !fillRequestId) {
+            vaultContainer.appendChild(wrapWithSwipeRow(card, entry));
+        } else {
+            vaultContainer.appendChild(card);
+        }
     });
     renderIcons();
     updateVaultMeta();
@@ -1310,6 +1322,166 @@ document.getElementById("bulk-tag").addEventListener("click", () => {
     window.showToast(`Tagged ${n} entr${n === 1 ? "y" : "ies"}`, { tone: "success", duration: 1500 });
     exitSelectMode();
 });
+
+// ============================================================
+// SWIPE-TO-ACTION + LONG-PRESS SELECT (touch devices only)
+// ============================================================
+const isTouchDevice = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+let openSwipeRow = null;
+
+function closeOpenSwipe() {
+    if (!openSwipeRow) return;
+    openSwipeRow.classList.remove("open");
+    openSwipeRow = null;
+}
+
+function enterSelectModeWith(id) {
+    selectMode = true;
+    selectedIds.clear();
+    selectedIds.add(id);
+    document.body.classList.add("select-mode");
+    selectToggleBtn.textContent = "Done";
+    bulkActions.hidden = false;
+    updateBulkCount();
+    renderVault(searchInput.value);
+}
+
+function wrapWithSwipeRow(card, entry) {
+    const row = document.createElement("div");
+    row.className = "vault-row";
+
+    const actions = document.createElement("div");
+    actions.className = "vault-row-actions";
+    actions.innerHTML =
+        '<button class="act-copy"    type="button" aria-label="Copy"><i data-lucide="copy"></i>Copy</button>' +
+        '<button class="act-archive" type="button" aria-label="Archive"><i data-lucide="archive"></i>Archive</button>' +
+        '<button class="act-delete"  type="button" aria-label="Delete"><i data-lucide="trash-2"></i>Delete</button>';
+
+    row.appendChild(card);
+    row.appendChild(actions);
+
+    actions.querySelector(".act-copy").addEventListener("click", e => {
+        e.stopPropagation();
+        showCopyMenu(e, entry);
+        closeOpenSwipe();
+    });
+    actions.querySelector(".act-archive").addEventListener("click", e => {
+        e.stopPropagation();
+        entry.archived = Date.now();
+        saveVault();
+        window.showToast("Archived", { tone: "success", duration: 1500 });
+        closeOpenSwipe();
+    });
+    actions.querySelector(".act-delete").addEventListener("click", e => {
+        e.stopPropagation();
+        entry.deleted = Date.now();
+        saveVault();
+        window.showToast("Moved to trash", { tone: "error", duration: 1500 });
+        closeOpenSwipe();
+    });
+
+    attachSwipeGesture(row, card, entry);
+    return row;
+}
+
+function attachSwipeGesture(row, card, entry) {
+    const SWIPE_OFFSET   = 180;
+    const LOCK_THRESHOLD = 8;
+    const OPEN_THRESHOLD = 100;
+    const LONG_PRESS_MS  = 500;
+
+    let startX = 0, startY = 0, dx = 0;
+    let pressing = false;
+    let locked   = "none"; // "none" | "horizontal" | "vertical"
+    let pressTimer = null;
+
+    card.addEventListener("pointerdown", e => {
+        if (e.pointerType !== "touch") return;
+        if (selectMode || fillRequestId) return;
+        if (row.classList.contains("open")) {
+            // Tap on already-open card → close + swallow the click.
+            row.classList.remove("open");
+            openSwipeRow = null;
+            card.dataset.suppressClick = "1";
+            setTimeout(() => delete card.dataset.suppressClick, 100);
+            return;
+        }
+        if (openSwipeRow && openSwipeRow !== row) closeOpenSwipe();
+
+        startX = e.clientX; startY = e.clientY;
+        dx = 0;
+        locked = "none";
+        pressing = true;
+        card.classList.add("swiping");
+        try { card.setPointerCapture(e.pointerId); } catch {}
+
+        pressTimer = setTimeout(() => {
+            if (!pressing || locked !== "none") return;
+            pressTimer = null;
+            pressing = false;
+            card.classList.remove("swiping");
+            haptic(8);
+            enterSelectModeWith(entry.id);
+        }, LONG_PRESS_MS);
+    });
+
+    card.addEventListener("pointermove", e => {
+        if (!pressing) return;
+        dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        if (locked === "none") {
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > LOCK_THRESHOLD) {
+                locked = "horizontal";
+                if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+            } else if (Math.abs(dy) > LOCK_THRESHOLD) {
+                locked = "vertical";
+                pressing = false;
+                card.classList.remove("swiping");
+                if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+                return;
+            }
+        }
+
+        if (locked === "horizontal") {
+            const tx = Math.min(0, Math.max(dx, -(SWIPE_OFFSET + 30)));
+            card.style.transform = `translateX(${tx}px)`;
+        }
+    });
+
+    function release() {
+        if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+        const wasHorizontal = locked === "horizontal";
+        const movedDx = dx;
+        pressing = false;
+        locked = "none";
+        card.classList.remove("swiping");
+        if (!wasHorizontal) return;
+
+        card.style.transform = "";
+        if (movedDx < -OPEN_THRESHOLD) {
+            row.classList.add("open");
+            openSwipeRow = row;
+        } else {
+            row.classList.remove("open");
+            if (openSwipeRow === row) openSwipeRow = null;
+        }
+        // Always swallow the trailing click after a horizontal swipe.
+        card.dataset.suppressClick = "1";
+        setTimeout(() => delete card.dataset.suppressClick, 100);
+    }
+    card.addEventListener("pointerup",     release);
+    card.addEventListener("pointercancel", release);
+}
+
+// Tap outside the open row → close it.
+if (isTouchDevice) {
+    document.addEventListener("pointerdown", e => {
+        if (!openSwipeRow) return;
+        if (openSwipeRow.contains(e.target)) return;
+        closeOpenSwipe();
+    });
+}
 
 // ============================================================
 // AUTO-PULL — silent sync pull on focus + every 5 min while open.

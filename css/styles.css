@@ -2566,3 +2566,58 @@ kbd {
     min-width: 22px;
     text-align: center;
 }
+
+
+/* ============================================================
+   34. SWIPE-TO-ACTION ON LIST-VIEW VAULT CARDS (mobile)
+   Wraps a .vault-card in .vault-row with a 3-action tray behind
+   it. Swipe-left to reveal Copy / Archive / Delete; tap outside
+   or on the open card to close. Desktop is untouched — gesture
+   handlers gate on pointerType === "touch".
+============================================================ */
+.vault-row {
+    position: relative;
+    overflow: hidden;
+}
+.vault-row-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 180px;
+    display: flex;
+    pointer-events: none;
+}
+.vault-row.open .vault-row-actions { pointer-events: auto; }
+.vault-row-actions button {
+    flex: 1;
+    border: none;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.vault-row-actions [data-lucide],
+.vault-row-actions svg.lucide { width: 18px; height: 18px; }
+.vault-row-actions .act-copy    { background: var(--accent);  color: var(--accent-ink); }
+.vault-row-actions .act-archive { background: var(--text-tertiary); }
+.vault-row-actions .act-delete  { background: var(--danger);  color: var(--danger-ink); }
+
+.vault-row .vault-card {
+    z-index: 1;
+    background: var(--bg);
+    transform: translateX(0);
+    transition: background var(--transition), transform 180ms ease;
+    will-change: transform;
+    touch-action: pan-y; /* claim horizontal pans; let vertical scroll the page */
+}
+.vault-row .vault-card.swiping { transition: none; }
+.vault-row.open .vault-card    { transform: translateX(-180px); }
