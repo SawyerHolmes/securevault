@@ -1926,12 +1926,6 @@ body[data-view-type="card"]  .type-only-note {
     margin: 8px 0;
     cursor: pointer;
 }
-.slider-track::before {
-    content: '';
-    position: absolute;
-    left: 0; right: 0; top: 0; bottom: 0;
-    border: 1px solid var(--border-strong);
-}
 .slider-fill,
 #slider-fill {
     position: absolute;
