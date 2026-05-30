@@ -48,6 +48,62 @@ if (isFirstTime) {
 }
 
 // ============================================================
+// STRENGTH METER — same heuristic and visual as the add-entry
+// page. Shown on setup (master password) and on recovery rekey.
+// Plain login mode keeps the meter hidden because the user isn't
+// choosing a password — just typing the existing one.
+// ============================================================
+function updateStrengthMeter(pw, bar, label) {
+    if (!pw) {
+        bar.style.width      = "0%";
+        bar.style.background = "transparent";
+        label.textContent    = "";
+        return;
+    }
+    let score = 0;
+    if (pw.length >= 8)           score++;
+    if (pw.length >= 12)          score++;
+    if (pw.length >= 16)          score++;
+    if (/[A-Z]/.test(pw))         score++;
+    if (/[0-9]/.test(pw))         score++;
+    if (/[^A-Za-z0-9]/.test(pw))  score++;
+
+    const levels = [
+        { label: "",       color: "transparent", width: "0%"   },
+        { label: "Weak",   color: "#FF3838",     width: "25%"  },
+        { label: "Fair",   color: "#E67E22",     width: "50%"  },
+        { label: "Good",   color: "#F1C40F",     width: "75%"  },
+        { label: "Strong", color: "#C7F100",     width: "100%" },
+    ];
+    const level = score <= 1 ? 1 : score <= 3 ? 2 : score <= 4 ? 3 : 4;
+    bar.style.width      = levels[level].width;
+    bar.style.background = levels[level].color;
+    label.textContent    = levels[level].label;
+    label.style.color    = levels[level].color;
+}
+
+if (isFirstTime) {
+    const masterWrap  = document.getElementById("master-strength-wrap");
+    const masterBar   = document.getElementById("master-strength-bar");
+    const masterLabel = document.getElementById("master-strength-label");
+    if (masterWrap && masterBar && masterLabel) {
+        masterWrap.style.display = "";
+        passwordInput.addEventListener("input", () =>
+            updateStrengthMeter(passwordInput.value, masterBar, masterLabel));
+    }
+}
+
+(function wireRecoveryMeter() {
+    const recPw    = document.getElementById("recovery-new-password");
+    const recBar   = document.getElementById("recovery-strength-bar");
+    const recLabel = document.getElementById("recovery-strength-label");
+    if (recPw && recBar && recLabel) {
+        recPw.addEventListener("input", () =>
+            updateStrengthMeter(recPw.value, recBar, recLabel));
+    }
+})();
+
+// ============================================================
 // BIOMETRIC UNLOCK
 // Shown only when a credential has been registered on this device
 // ============================================================
