@@ -1775,6 +1775,153 @@ function sendFillPick(entry) {
 // ============================================================
 // KEYBOARD SHORTCUTS
 // ============================================================
+// ============================================================
+// COMMAND PALETTE (Cmd/Ctrl+K) — fuzzy search across entries +
+// a fixed list of actions. Open with the shortcut, type to filter,
+// Arrow / Enter to navigate, Esc or outside-click to close.
+// ============================================================
+const paletteOverlay = document.getElementById("palette-overlay");
+const paletteInput   = document.getElementById("palette-input");
+const paletteList    = document.getElementById("palette-list");
+const paletteEmpty   = document.getElementById("palette-empty");
+
+const PALETTE_ACTIONS = [
+    { label: "Add entry",              hint: "N",  icon: "pencil",   run: () => window.location.href = "add-entry.html" },
+    { label: "Open settings",          hint: ",",  icon: null,       run: () => window.location.href = "settings.html" },
+    { label: "Open trash",             hint: null, icon: null,       run: () => window.location.href = "trash.html" },
+    { label: "Open archive",           hint: null, icon: null,       run: () => window.location.href = "archive.html" },
+    { label: "Open history",           hint: null, icon: null,       run: () => window.location.href = "history.html" },
+    { label: "Open tags",              hint: null, icon: null,       run: () => window.location.href = "tags.html" },
+    { label: "About",                  hint: null, icon: "info",     run: () => window.location.href = "about.html" },
+    { label: "Lock vault",             hint: "L",  icon: "lock",     run: () => document.getElementById("logout-btn")?.click() },
+    { label: "Keyboard shortcuts",     hint: "?",  icon: null,       run: () => openShortcuts() },
+    { label: "Switch to list view",    hint: null, icon: null,       run: () => paletteSetViewMode("list") },
+    { label: "Switch to grid view",    hint: null, icon: null,       run: () => paletteSetViewMode("grid") },
+    { label: "Switch to gallery view", hint: null, icon: null,       run: () => paletteSetViewMode("gallery") },
+];
+
+function paletteSetViewMode(mode) {
+    settings.viewMode = mode;
+    localStorage.setItem("vaultSettings", JSON.stringify(settings));
+    applyViewMode(mode);
+    renderVault(searchInput.value);
+}
+
+let paletteResults = [];  // [{ kind: "action" | "entry", action?, entry? }]
+let paletteFocused = 0;
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;"
+    })[c]);
+}
+
+function openPalette() {
+    if (!paletteOverlay) return;
+    paletteOverlay.hidden = false;
+    paletteInput.value = "";
+    paletteInput.focus();
+    refreshPalette();
+}
+
+function closePalette() {
+    if (!paletteOverlay) return;
+    paletteOverlay.hidden = true;
+    paletteInput.blur();
+}
+
+function refreshPalette() {
+    const q = paletteInput.value.trim().toLowerCase();
+    paletteResults = [];
+
+    PALETTE_ACTIONS.forEach(action => {
+        if (!q || action.label.toLowerCase().includes(q)) {
+            paletteResults.push({ kind: "action", action });
+        }
+    });
+
+    if (q) {
+        const matches = vault
+            .filter(e => !e.deleted && !e.archived)
+            .filter(e =>
+                (e.name     || "").toLowerCase().includes(q) ||
+                (e.username || "").toLowerCase().includes(q) ||
+                (e.url      || "").toLowerCase().includes(q) ||
+                (e.tags     || []).some(t => t.toLowerCase().includes(q))
+            )
+            .slice(0, 8);
+        matches.forEach(entry => paletteResults.push({ kind: "entry", entry }));
+    }
+
+    paletteFocused = 0;
+    paletteList.innerHTML = "";
+    paletteEmpty.hidden = paletteResults.length > 0;
+
+    paletteResults.forEach((r, i) => {
+        const li = document.createElement("li");
+        li.className = "palette-item" + (i === 0 ? " focused" : "");
+        li.setAttribute("role", "option");
+
+        if (r.kind === "action") {
+            const iconHtml = r.action.icon
+                ? `<i data-lucide="${r.action.icon}"></i>`
+                : `<span class="palette-item-bullet"></span>`;
+            li.innerHTML =
+                `<span class="palette-item-icon">${iconHtml}</span>` +
+                `<span class="palette-item-label">${escapeHtml(r.action.label)}</span>` +
+                (r.action.hint ? `<kbd class="palette-item-hint">${escapeHtml(r.action.hint)}</kbd>` : "<span></span>");
+        } else {
+            const sub = entrySecondaryText(r.entry) || "";
+            li.innerHTML =
+                `<span class="palette-item-icon"></span>` +
+                `<span class="palette-item-label">${escapeHtml(r.entry.name || "Untitled")}</span>` +
+                `<span class="palette-item-sub">${escapeHtml(sub)}</span>`;
+            li.querySelector(".palette-item-icon").appendChild(entryIconElement(r.entry));
+        }
+
+        li.addEventListener("click", () => activatePaletteItem(i));
+        paletteList.appendChild(li);
+    });
+    renderIcons();
+}
+
+function setPaletteFocus(i) {
+    if (!paletteResults.length) return;
+    paletteFocused = Math.max(0, Math.min(i, paletteResults.length - 1));
+    Array.from(paletteList.children).forEach((el, idx) =>
+        el.classList.toggle("focused", idx === paletteFocused));
+    const target = paletteList.children[paletteFocused];
+    if (target) target.scrollIntoView({ block: "nearest" });
+}
+
+function activatePaletteItem(i) {
+    const r = paletteResults[i];
+    if (!r) return;
+    closePalette();
+    if (r.kind === "action") r.action.run();
+    else                     openCard(r.entry);
+}
+
+paletteInput?.addEventListener("input", refreshPalette);
+paletteInput?.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown")    { e.preventDefault(); setPaletteFocus(paletteFocused + 1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setPaletteFocus(paletteFocused - 1); }
+    else if (e.key === "Enter")   { e.preventDefault(); activatePaletteItem(paletteFocused); }
+    else if (e.key === "Escape")  { e.preventDefault(); closePalette(); }
+});
+paletteOverlay?.addEventListener("click", e => {
+    if (e.target === paletteOverlay) closePalette();
+});
+
+// Cmd/Ctrl+K toggles the palette from anywhere on the page.
+document.addEventListener("keydown", e => {
+    if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        if (paletteOverlay.hidden) openPalette();
+        else                       closePalette();
+    }
+});
+
 const shortcutsOverlay = document.getElementById("shortcuts-overlay");
 function openShortcuts()  { shortcutsOverlay.style.display = "flex"; }
 function closeShortcuts() { shortcutsOverlay.style.display = "none"; }

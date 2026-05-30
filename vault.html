@@ -259,6 +259,7 @@
     <div class="confirmation-modal">
         <p class="confirm-title">Keyboard shortcuts</p>
         <ul class="shortcuts-list">
+            <li><span class="sc-desc">Command palette</span> <span><kbd>⌘</kbd> <kbd>K</kbd></span></li>
             <li><span class="sc-desc">Focus search</span> <kbd>/</kbd></li>
             <li><span class="sc-desc">New entry</span> <kbd>N</kbd></li>
             <li><span class="sc-desc">Sort menu</span> <kbd>S</kbd></li>
@@ -273,6 +274,17 @@
         <div class="confirmation-buttons">
             <button class="btn-black" id="shortcuts-close">Close</button>
         </div>
+    </div>
+</div>
+
+<!-- Command palette (Cmd/Ctrl+K) -->
+<div class="palette-overlay" id="palette-overlay" hidden>
+    <div class="palette" role="dialog" aria-label="Command palette">
+        <input type="text" id="palette-input" class="palette-input"
+               placeholder="Search entries or run a command…"
+               autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="off">
+        <ul class="palette-list" id="palette-list" role="listbox"></ul>
+        <div class="palette-empty" id="palette-empty" hidden>No matches</div>
     </div>
 </div>
 
