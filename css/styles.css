@@ -91,6 +91,7 @@ body {
     flex-direction: column;
     min-height: 100vh;
     min-height: 100dvh; /* avoids the iOS URL-bar height jump */
+    overscroll-behavior-y: contain; /* no rubber-band reveal past the page */
 }
 
 /* Always-black backdrop behind the iOS status bar (the safe-area top inset)
