@@ -1926,6 +1926,12 @@ body[data-view-type="card"]  .type-only-note {
     margin: 8px 0;
     cursor: pointer;
 }
+.slider-track::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    border: 1px solid var(--border-strong);
+}
 .slider-fill,
 #slider-fill {
     position: absolute;
@@ -2782,26 +2788,3 @@ kbd {
 }
 
 
-/* ============================================================
-   38. SYNC PILL — small black square in the header
-============================================================ */
-.sync-pill {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    background: rgba(0, 0, 0, 0.4);
-    align-self: center;
-    margin-right: 12px;
-    flex-shrink: 0;
-}
-.sync-pill[data-state="online"]  { background: #000; }
-.sync-pill[data-state="offline"] { background: rgba(0, 0, 0, 0.22); }
-.sync-pill[data-state="error"]   { background: var(--danger); }
-.sync-pill[data-state="syncing"] {
-    background: #000;
-    animation: sync-pulse 1.1s ease-in-out infinite;
-}
-@keyframes sync-pulse {
-    0%, 100% { opacity: 0.3; }
-    50%      { opacity: 1;   }
-}
