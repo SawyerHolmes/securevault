@@ -597,6 +597,12 @@ function renderVault(filter) {
             if (e.target.closest(".card-copy-btn")) return;
             haptic(6); openCard(entry);
         });
+        card.addEventListener("contextmenu", e => {
+            if (isTouchDevice) return;
+            if (selectMode || fillRequestId) return;
+            e.preventDefault();
+            showContextMenu(e.clientX, e.clientY, entry, card);
+        });
         if (sortField === "manual" && !selectMode && !fillRequestId) attachDragReorder(card, entry);
 
         // Touch-only: wrap with a swipe row exposing Copy / Archive / Delete.
@@ -1482,6 +1488,83 @@ if (isTouchDevice) {
         closeOpenSwipe();
     });
 }
+
+// ============================================================
+// RIGHT-CLICK CONTEXT MENU (desktop equivalent of the swipe tray)
+// ============================================================
+let ctxMenuEl = null;
+
+function ensureCtxMenu() {
+    if (ctxMenuEl) return ctxMenuEl;
+    ctxMenuEl = document.createElement("div");
+    ctxMenuEl.className = "context-menu";
+    document.body.appendChild(ctxMenuEl);
+    return ctxMenuEl;
+}
+
+function hideContextMenu() {
+    if (ctxMenuEl) ctxMenuEl.classList.remove("open");
+}
+
+function showContextMenu(x, y, entry, card) {
+    const menu = ensureCtxMenu();
+    menu.innerHTML = "";
+    menu.classList.add("open");
+
+    const items = [
+        { label: "Copy…", icon: "copy", onClick: () => {
+            hideContextMenu();
+            showCopyMenu({ stopPropagation: () => {}, currentTarget: card }, entry);
+        }},
+        { label: "Edit", icon: "pencil", onClick: () => {
+            hideContextMenu();
+            openCard(entry);
+            setTimeout(() => editBtn.click(), 0);
+        }},
+        { sep: true },
+        { label: "Archive", icon: "archive", onClick: () => {
+            hideContextMenu();
+            entry.archived = Date.now();
+            saveVault();
+            window.showToast("Archived", { tone: "success", duration: 1500 });
+        }},
+        { label: "Delete", icon: "trash-2", danger: true, onClick: () => {
+            hideContextMenu();
+            entry.deleted = Date.now();
+            saveVault();
+            window.showToast("Moved to trash", { tone: "error", duration: 1500 });
+        }},
+    ];
+
+    items.forEach(it => {
+        if (it.sep) { menu.appendChild(document.createElement("hr")); return; }
+        const btn = document.createElement("button");
+        btn.type = "button";
+        if (it.danger) btn.classList.add("danger");
+        btn.innerHTML = `<i data-lucide="${it.icon}"></i><span>${it.label}</span>`;
+        btn.addEventListener("click", e => { e.stopPropagation(); it.onClick(); });
+        menu.appendChild(btn);
+    });
+
+    renderIcons();
+
+    // Position with viewport clamping (measure after content is in place).
+    menu.style.left = "0px";
+    menu.style.top  = "0px";
+    const r = menu.getBoundingClientRect();
+    menu.style.left = Math.max(8, Math.min(x, window.innerWidth  - r.width  - 8)) + "px";
+    menu.style.top  = Math.max(8, Math.min(y, window.innerHeight - r.height - 8)) + "px";
+}
+
+// Dismiss on outside click, scroll, Escape, or any other contextmenu firing.
+document.addEventListener("click", hideContextMenu);
+window.addEventListener("scroll", hideContextMenu, { passive: true });
+document.addEventListener("keydown", e => { if (e.key === "Escape") hideContextMenu(); });
+document.addEventListener("contextmenu", e => {
+    if (!ctxMenuEl || !ctxMenuEl.classList.contains("open")) return;
+    if (ctxMenuEl.contains(e.target)) return;
+    hideContextMenu();
+});
 
 // ============================================================
 // AUTO-PULL — silent sync pull on focus + every 5 min while open.
