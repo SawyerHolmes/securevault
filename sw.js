@@ -5,7 +5,7 @@
 // localStorage and never touches this cache.
 // ============================================================
 
-const CACHE = "securevault-v39";
+const CACHE = "securevault-v40";
 
 const ASSETS = [
     "./",
@@ -24,6 +24,10 @@ const ASSETS = [
     "./assets/icons/icon-192.png",
     "./assets/icons/icon-512.png",
     "./assets/icons/apple-touch-icon.png",
+    "./assets/icons/splash-1290x2796.png",
+    "./assets/icons/splash-1284x2778.png",
+    "./assets/icons/splash-1179x2556.png",
+    "./assets/icons/splash-1170x2532.png",
     "./assets/fonts/Inter-Regular.woff2",
     "./assets/fonts/Inter-Medium.woff2",
     "./js/lib/icons.js",
