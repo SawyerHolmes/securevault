@@ -1948,7 +1948,9 @@ body[data-view-type="card"]  .type-only-note {
     background: var(--accent);
     border: 1px solid var(--border-strong);
     cursor: grab;
-    transform: translateX(-9px);
+    margin-left: -9px; /* center on the .left% point without promoting to a
+                          compositor layer; transform: translateX leaves lime
+                          trail pixels on the right side during rapid drag. */
 }
 .slider-thumb:active,
 #slider-thumb:active { cursor: grabbing; }
