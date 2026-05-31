@@ -2956,3 +2956,48 @@ kbd {
     padding: 0 4px;
     -webkit-tap-highlight-color: transparent;
 }
+
+
+/* ============================================================
+   40. TAP-TARGET AUDIT (mobile only)
+   Apple HIG: 44pt minimum. Most icon-only buttons render at
+   18–28px to keep the brutalist visual tight; on touch devices
+   we extend the hit area to 44x44 with a transparent ::after
+   so the visual stays the same.
+   `pointer: coarse` keeps this off desktop windows narrowed
+   below 600px (mouse users don't need it and the haloes can
+   create ambiguous click targets in tight UIs).
+============================================================ */
+@media (max-width: 600px) and (pointer: coarse) {
+    /* search-clear is the only icon button packed next to another
+       (sort-toggle, also in the search-wrapper); bump its width to
+       match rather than rely on a halo that would overlap. */
+    .search-clear { flex-basis: 44px; }
+
+    .icon-btn,
+    .card-copy-btn,
+    .gallery-copy-btn,
+    .nav-burger,
+    .info-btn,
+    .a2hs-close,
+    .password-wrapper .toggle-password,
+    .password-wrapper #toggle-password {
+        position: relative;
+    }
+    .icon-btn::after,
+    .card-copy-btn::after,
+    .gallery-copy-btn::after,
+    .nav-burger::after,
+    .info-btn::after,
+    .a2hs-close::after,
+    .password-wrapper .toggle-password::after,
+    .password-wrapper #toggle-password::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: max(100%, 44px);
+        height: max(100%, 44px);
+    }
+}
