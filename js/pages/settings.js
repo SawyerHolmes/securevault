@@ -196,10 +196,11 @@ function setupPortation() {
     // Export the raw encrypted blob — restores with the master password.
     // Dedicated .svault extension + ISO-dated filename + version marker so a
     // future format change can branch without breaking old backups.
-    encBtn.addEventListener("click", () => {
+    encBtn.addEventListener("click", async () => {
         const vault = localStorage.getItem("vault");
         const salt  = localStorage.getItem("vaultSalt");
         if (!vault || !salt) { status.textContent = "Nothing to export yet."; return; }
+        if (!(await requireMasterPassword("to download an encrypted backup of your vault."))) return;
         const data = JSON.stringify({
             format:     "securevault-backup-v1",
             vault, salt,
@@ -219,10 +220,9 @@ function setupPortation() {
         if (enc) { try { entries = await decryptData(enc, key); } catch { status.textContent = "Could not read the vault."; return; } }
         const active = entries.filter(e => !e.deleted && !e.archived);
         if (!active.length) { status.textContent = "No entries to export."; return; }
-        showConfirmation("Export an unencrypted CSV? Anyone with the file can read your passwords.", () => {
-            downloadFile("securevault-export.csv", entriesToCsv(active), "text/csv");
-            window.showToast(`Exported ${active.length}`, { tone: "success", duration: 1500 });
-        });
+        if (!(await requireMasterPassword("to export every password as plain text. Anyone with the file can read them."))) return;
+        downloadFile("securevault-export.csv", entriesToCsv(active), "text/csv");
+        window.showToast(`Exported ${active.length}`, { tone: "success", duration: 1500 });
     });
 
     // Import — CSV (append) or encrypted .json (replace + relogin)
@@ -330,6 +330,7 @@ function setupRecovery() {
             status.style.color = "var(--danger)";
             return;
         }
+        if (!(await requireMasterPassword("to generate a recovery code. Anyone holding this code can rekey your vault."))) return;
         try {
             const code = await enableRecovery();
             display.textContent = code;

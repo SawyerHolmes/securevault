@@ -2790,3 +2790,63 @@ kbd {
 }
 
 
+
+
+/* ============================================================
+   38. REAUTH MODAL — confirm master password before sensitive
+   actions (CSV export, encrypted backup, generate recovery).
+============================================================ */
+.reauth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: calc(80px + env(safe-area-inset-top)) 16px 16px;
+}
+.reauth-overlay[hidden] { display: none; }
+.reauth-modal {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+}
+.reauth-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+.reauth-reason {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.reauth-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--text);
+}
+.reauth-input:focus { outline: 1px solid var(--accent); outline-offset: -1px; }
+.reauth-error {
+    margin: 0;
+    min-height: 18px;
+    font-size: 12px;
+    color: var(--danger);
+}
+.reauth-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
