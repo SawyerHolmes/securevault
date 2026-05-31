@@ -167,7 +167,8 @@ const expandedNotes     = document.getElementById("expanded-notes");
 const expandedModified  = document.getElementById("expanded-modified");
 const totpField         = document.getElementById("totp-field");
 const expandedTotp      = document.getElementById("expanded-totp");
-const expandedTotpBar   = document.getElementById("expanded-totp-bar");
+const expandedTotpRing  = document.getElementById("expanded-totp-ring");
+const TOTP_RING_CIRC    = 2 * Math.PI * 13; // matches the SVG r=13
 const copyTotpBtn       = document.getElementById("copy-totp-btn");
 const editBtn           = document.getElementById("edit-btn");
 const saveCancelWrapper = document.getElementById("save-cancel-wrapper");
@@ -680,12 +681,26 @@ async function refreshTotp() {
     if (!entry || !entry.totp) return;
     try {
         const { code, secondsRemaining, period } = await generateTOTP(entry.totp);
-        expandedTotp.textContent     = formatTOTP(code);
-        expandedTotpBar.style.width  = (100 * secondsRemaining / period) + "%";
-        expandedTotp.dataset.code    = code;
+        expandedTotp.textContent  = formatTOTP(code);
+        expandedTotp.dataset.code = code;
+
+        // Ring fill represents seconds remaining: full at 30s, empty at 0s.
+        const newOffset = TOTP_RING_CIRC * (1 - secondsRemaining / period);
+        const oldOffset = parseFloat(expandedTotpRing.style.strokeDashoffset || "0");
+        // Rollover (offset would animate backwards) — snap without transition.
+        if (newOffset < oldOffset - 1) {
+            expandedTotpRing.style.transition = "none";
+            expandedTotpRing.style.strokeDashoffset = String(newOffset);
+            void expandedTotpRing.offsetWidth; // force a reflow
+            expandedTotpRing.style.transition = "";
+        } else {
+            expandedTotpRing.style.strokeDashoffset = String(newOffset);
+        }
+        expandedTotpRing.classList.toggle("low", secondsRemaining <= 5);
     } catch {
-        expandedTotp.textContent  = "Invalid secret";
-        expandedTotpBar.style.width = "0%";
+        expandedTotp.textContent = "Invalid secret";
+        expandedTotpRing.style.strokeDashoffset = String(TOTP_RING_CIRC);
+        expandedTotpRing.classList.remove("low");
         delete expandedTotp.dataset.code;
     }
 }

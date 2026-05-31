@@ -1391,19 +1391,28 @@ body.gallery-view #vault-container {
     font-variant-numeric: tabular-nums;
     color: var(--text);
 }
-.totp-countdown {
-    flex: 0 0 80px;
-    height: 3px;
-    background: var(--border);
-    position: relative;
+.totp-ring {
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    transform: rotate(-90deg); /* 12 o'clock start, drains clockwise */
 }
-.totp-countdown-bar {
-    position: absolute;
-    inset: 0 auto 0 0;
-    background: var(--accent);
-    width: 100%;
-    transition: width 1s linear;
+.totp-ring-track {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 3;
 }
+.totp-ring-fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: butt;
+    /* dasharray = 2 * PI * r where r = 13 (the circle's r attribute) */
+    stroke-dasharray: 81.68;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear, stroke 0.4s linear;
+}
+.totp-ring-fill.low { stroke: var(--danger); }
 .totp-uri-glyph {
     font-size: 14px;
     font-weight: 500;

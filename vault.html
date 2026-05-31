@@ -203,9 +203,10 @@
             <label>Two-factor code</label>
             <div class="totp-row">
                 <div class="totp-code" id="expanded-totp">— —</div>
-                <div class="totp-countdown" aria-hidden="true">
-                    <div class="totp-countdown-bar" id="expanded-totp-bar"></div>
-                </div>
+                <svg class="totp-ring" viewBox="0 0 32 32" aria-hidden="true">
+                    <circle class="totp-ring-track" cx="16" cy="16" r="13"></circle>
+                    <circle class="totp-ring-fill"  id="expanded-totp-ring" cx="16" cy="16" r="13"></circle>
+                </svg>
                 <button class="icon-btn copy-icon-btn" id="copy-totp-btn" title="Copy code" aria-label="Copy two-factor code">
                     <i data-lucide="copy"></i>
                 </button>
