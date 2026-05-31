@@ -2495,12 +2495,28 @@ body[data-view-type="card"]  .type-only-note {
     }
     .expanded-content,
     .confirmation-modal {
+        position: relative; /* anchor for the drag-handle ::before */
         max-width: 100%;
         width: 100%;
         max-height: 92vh;
+        padding-top: 22px;  /* clearance above the handle */
         border: none;
         border-top: 1px solid var(--accent);
         animation: sheet-up 0.18s linear;
+    }
+    /* Bottom-sheet drag handle — visual affordance only (not draggable).
+       Hints that this surface slid up from the bottom of the screen. */
+    .expanded-content::before,
+    .confirmation-modal::before {
+        content: "";
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 3px;
+        background: var(--border-strong);
+        opacity: 0.55;
     }
     .expanded-card.show .expanded-content,
     .confirmation-overlay.show .confirmation-modal { animation: sheet-up 0.18s linear; }
