@@ -61,12 +61,16 @@ function passwordStrength(password) {
     return score <= 1 ? 1 : score <= 3 ? 2 : score <= 4 ? 3 : 4;
 }
 
+const OLD_THRESHOLD_MS = 365 * 24 * 60 * 60 * 1000; // 1 year
+
 async function scanVault(entries, onProgress) {
     const report = {
         total: entries.length,
         weak: 0, fair: 0, good: 0, strong: 0,
-        reused: 0, breached: 0, unknown: 0,
-        problems: []
+        reused: 0, breached: 0, old: 0, unknown: 0,
+        // Entries grouped by issue. The same entry can appear in multiple
+        // buckets (e.g. an old + reused + breached password).
+        buckets: { breached: [], reused: [], weak: [], old: [] },
     };
 
     // Group by password to dedupe breach lookups
@@ -77,16 +81,16 @@ async function scanVault(entries, onProgress) {
         groups.get(pwd).push(entry);
     }
 
-    // Strength counts (per entry, not per unique password)
+    // Strength counts (per entry)
     for (const entry of entries) {
         const lvl = passwordStrength(entry.password || "");
-        if (lvl === 1) report.weak++;
+        if      (lvl === 1) report.weak++;
         else if (lvl === 2) report.fair++;
         else if (lvl === 3) report.good++;
         else if (lvl === 4) report.strong++;
     }
 
-    // Reuse counting — any password held by 2+ entries
+    // Reuse — any password held by 2+ entries
     const reusedPasswords = new Set();
     for (const [pwd, group] of groups) {
         if (pwd && group.length > 1) {
@@ -95,7 +99,18 @@ async function scanVault(entries, onProgress) {
         }
     }
 
-    // Breach lookup per unique password
+    // Old — updatedAt / createdAt older than the threshold
+    const now = Date.now();
+    for (const entry of entries) {
+        if (!entry.password) continue;
+        const ts = entry.updatedAt || entry.createdAt || 0;
+        if (ts && now - ts > OLD_THRESHOLD_MS) {
+            report.old++;
+            report.buckets.old.push({ entry });
+        }
+    }
+
+    // Breach lookup per unique password + per-bucket emission
     let done = 0;
     for (const [pwd, group] of groups) {
         if (!pwd) { done++; continue; }
@@ -105,17 +120,16 @@ async function scanVault(entries, onProgress) {
         const isReused    = reusedPasswords.has(pwd);
         const isWeak      = passwordStrength(pwd) <= 2;
 
-        if (isBreached) report.breached += group.length;
-        if (isUnknown)  report.unknown  += group.length;
-
-        if (isBreached || isReused || isWeak) {
-            for (const entry of group) {
-                const issues = [];
-                if (isBreached) issues.push("breached");
-                if (isReused)   issues.push("reused");
-                if (isWeak)     issues.push("weak");
-                report.problems.push({ entry, issues, breachCount });
-            }
+        if (isBreached) {
+            report.breached += group.length;
+            for (const entry of group) report.buckets.breached.push({ entry, breachCount });
+        }
+        if (isUnknown) report.unknown += group.length;
+        if (isReused) {
+            for (const entry of group) report.buckets.reused.push({ entry });
+        }
+        if (isWeak) {
+            for (const entry of group) report.buckets.weak.push({ entry });
         }
         done++;
         if (onProgress) onProgress(done, groups.size);

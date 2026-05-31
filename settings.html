@@ -238,11 +238,15 @@
                                     <span class="health-stat-num" id="health-breached">—</span>
                                     <span class="health-stat-label">Breached</span>
                                 </div>
+                                <div class="health-stat">
+                                    <span class="health-stat-num" id="health-old">—</span>
+                                    <span class="health-stat-label">Old</span>
+                                </div>
                             </div>
                             <p class="health-hint">Breach check uses Have I Been Pwned with SHA-1 k-anonymity. Only the first 5 chars of each hash leave your device.</p>
                             <button class="btn-black btn-inline" id="health-scan-btn">Scan vault</button>
                             <div id="health-status" class="setting-item-status" role="status" aria-live="polite"></div>
-                            <ul class="health-problems" id="health-problems"></ul>
+                            <div class="health-buckets" id="health-buckets"></div>
                         </div>
                     </div>
                 </div>

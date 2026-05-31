@@ -2151,33 +2151,70 @@ body[data-view-type="card"]  .type-only-note {
     margin: 0 0 12px;
     line-height: 1.5;
 }
-.health-problems {
+.health-buckets {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.health-bucket {
+    border: 1px solid var(--border);
+    padding: 16px;
+}
+.health-bucket-danger { border-color: var(--danger); }
+.health-bucket-warn   { border-color: var(--border-strong); }
+.health-bucket-muted  { border-color: var(--border); }
+.health-bucket-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+.health-bucket-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text);
+}
+.health-bucket-danger .health-bucket-name { color: var(--danger); }
+.health-bucket-count {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+.health-bucket-hint {
+    margin: 0 0 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+.health-bucket-list {
     list-style: none;
-    margin: 16px 0 0;
+    margin: 0;
     padding: 0;
 }
-.health-problem {
+.health-bucket-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    padding: 10px 0;
+    padding: 8px 0;
     border-top: 1px solid var(--border);
 }
-.health-problem:last-child { border-bottom: 1px solid var(--border); }
-.health-problem-name {
+.health-bucket-item:last-child { border-bottom: 1px solid var(--border); }
+.health-bucket-item-name {
     font-size: 13px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-.health-problem-tags {
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--danger);
+.health-bucket-fix {
+    flex-shrink: 0;
+    text-decoration: none;
 }
 
 .sync-buttons {

@@ -368,8 +368,8 @@ function setupRecovery() {
 // PASSWORD HEALTH
 // ============================================================
 async function runHealthScan(btn) {
-    const status = document.getElementById("health-status");
-    const list   = document.getElementById("health-problems");
+    const status     = document.getElementById("health-status");
+    const bucketHost = document.getElementById("health-buckets");
     const key    = await getStoredKey();
     if (!key) { status.textContent = "Locked. Log in first."; return; }
 
@@ -393,29 +393,70 @@ async function runHealthScan(btn) {
     document.getElementById("health-weak").textContent     = report.weak;
     document.getElementById("health-reused").textContent   = report.reused;
     document.getElementById("health-breached").textContent = report.breached;
+    document.getElementById("health-old").textContent      = report.old;
 
-    list.innerHTML = "";
-    if (report.problems.length === 0) {
+    bucketHost.innerHTML = "";
+
+    const BUCKET_DEFS = [
+        { key: "breached", label: "Breached", tone: "danger", hint: "Seen in public breaches — change these first." },
+        { key: "reused",   label: "Reused",   tone: "warn",   hint: "Used on more than one entry." },
+        { key: "weak",     label: "Weak",     tone: "warn",   hint: "Short, simple, or low-entropy passwords." },
+        { key: "old",      label: "Old",      tone: "muted",  hint: "Not changed in over a year." },
+    ];
+
+    let anyBucket = false;
+    for (const def of BUCKET_DEFS) {
+        const items = (report.buckets && report.buckets[def.key]) || [];
+        if (!items.length) continue;
+        anyBucket = true;
+
+        const section = document.createElement("div");
+        section.className = "health-bucket health-bucket-" + def.tone;
+
+        const head = document.createElement("div");
+        head.className = "health-bucket-head";
+        const heading = document.createElement("h3");
+        heading.className = "health-bucket-name";
+        heading.textContent = def.label;
+        const count = document.createElement("span");
+        count.className = "health-bucket-count";
+        count.textContent = items.length;
+        head.appendChild(heading);
+        head.appendChild(count);
+        section.appendChild(head);
+
+        const hintEl = document.createElement("p");
+        hintEl.className = "health-bucket-hint";
+        hintEl.textContent = def.hint;
+        section.appendChild(hintEl);
+
+        const list = document.createElement("ul");
+        list.className = "health-bucket-list";
+        items.forEach(item => {
+            const li = document.createElement("li");
+            li.className = "health-bucket-item";
+            const name = document.createElement("span");
+            name.className = "health-bucket-item-name";
+            name.textContent = item.entry.name || "Untitled";
+            const fix = document.createElement("a");
+            fix.className = "btn-white btn-row health-bucket-fix";
+            fix.href = "vault.html?edit=" + encodeURIComponent(item.entry.id);
+            fix.textContent = "Fix";
+            li.appendChild(name);
+            li.appendChild(fix);
+            list.appendChild(li);
+        });
+        section.appendChild(list);
+        bucketHost.appendChild(section);
+    }
+
+    if (!anyBucket) {
         status.textContent = "All good — no problems found.";
         status.style.color = "var(--accent)";
     } else {
-        status.textContent = `${report.problems.length} problem${report.problems.length === 1 ? "" : "s"} found.`;
-        status.style.color = "var(--danger)";
-        report.problems
-            .sort((a, b) => b.issues.length - a.issues.length)
-            .forEach(p => {
-                const li = document.createElement("li");
-                li.className = "health-problem";
-                const name = document.createElement("span");
-                name.className   = "health-problem-name";
-                name.textContent = p.entry.name || "Untitled";
-                const tags = document.createElement("span");
-                tags.className = "health-problem-tags";
-                tags.textContent = p.issues.join(" · ");
-                li.appendChild(name);
-                li.appendChild(tags);
-                list.appendChild(li);
-            });
+        const total = report.breached + report.reused + report.weak + report.old;
+        status.textContent = `${total} issue${total === 1 ? "" : "s"} across the buckets below.`;
+        status.style.color = report.breached > 0 ? "var(--danger)" : "var(--text-secondary)";
     }
 
     btn.disabled = false;

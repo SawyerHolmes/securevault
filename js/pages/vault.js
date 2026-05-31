@@ -2068,4 +2068,16 @@ function maybeShowWelcome() {
     setupFillMode();
     renderVault();
     if (!fillRequestId) maybeShowWelcome();
+
+    // ?edit=<id> deep-link (used by Health page Fix buttons) — opens the
+    // entry in edit mode, then strips the query so a refresh doesn't repeat.
+    const editId = new URLSearchParams(location.search).get("edit");
+    if (editId) {
+        const entry = findEntry(editId);
+        if (entry) {
+            openCard(entry);
+            setTimeout(() => editBtn.click(), 0);
+        }
+        history.replaceState({}, "", location.pathname);
+    }
 })();
