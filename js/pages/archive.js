@@ -106,3 +106,6 @@ document.getElementById("logout-btn").addEventListener("click", logout);
     await loadVault();
     render();
 })();
+
+// Keyboard list navigation (j / k / arrows) — outline-only; no Enter binding.
+if (typeof attachListNav === "function") attachListNav(list);
