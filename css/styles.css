@@ -2896,3 +2896,63 @@ kbd {
     gap: 8px;
     margin-top: 4px;
 }
+
+
+/* ============================================================
+   39. ADD-TO-HOME-SCREEN HINT (iOS Safari only, login page)
+============================================================ */
+.a2hs-hint {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: 1500;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    padding: 14px 14px 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+.a2hs-share {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    color: var(--accent);
+}
+.a2hs-text {
+    flex: 1;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--text);
+}
+.a2hs-text strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.a2hs-text em {
+    font-style: normal;
+    font-weight: 500;
+}
+.a2hs-share-glyph {
+    display: inline-block;
+    padding: 1px 6px;
+    margin: 0 1px;
+    border: 1px solid var(--border-strong);
+    font-size: 11px;
+    font-weight: 500;
+}
+.a2hs-close {
+    flex-shrink: 0;
+    background: transparent;
+    border: 0;
+    color: var(--text-secondary);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+    -webkit-tap-highlight-color: transparent;
+}

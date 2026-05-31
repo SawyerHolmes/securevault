@@ -465,3 +465,39 @@ resetConfirmYes.addEventListener("click", () => {
     sessionStorage.clear();
     window.location.replace("login.html");
 });
+
+// ============================================================
+// iOS "ADD TO HOME SCREEN" HINT — Safari iOS has no
+// beforeinstallprompt event so the only nudge available is this
+// small dismissable banner. Shown on iPhone / iPad when the app
+// is not already running standalone and hasn't been dismissed.
+// ============================================================
+(function maybeShowA2hs() {
+    const ua = navigator.userAgent;
+    const isAppleTouch = /iPhone|iPad|iPod/.test(ua) ||
+                         (ua.includes("Mac") && navigator.maxTouchPoints > 1);
+    if (!isAppleTouch) return;
+    if (navigator.standalone === true) return;                 // already installed
+    if (localStorage.getItem("a2hsDismissed") === "1") return; // user dismissed
+
+    const hint = document.createElement("div");
+    hint.className = "a2hs-hint";
+    hint.innerHTML =
+        '<svg class="a2hs-share" viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
+              ' stroke-width="1.5" aria-hidden="true">' +
+            '<path d="M12 4 L12 16" stroke-linecap="round"/>' +
+            '<path d="M8 8 L12 4 L16 8" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '<path d="M5 12 L5 20 L19 20 L19 12" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>' +
+        '<div class="a2hs-text">' +
+            '<strong>Install Securevault</strong>' +
+            'Tap <span class="a2hs-share-glyph">Share</span> then <em>Add to Home Screen</em> — opens fullscreen, works offline.' +
+        '</div>' +
+        '<button type="button" class="a2hs-close" aria-label="Dismiss">&times;</button>';
+    document.body.appendChild(hint);
+
+    hint.querySelector(".a2hs-close").addEventListener("click", () => {
+        localStorage.setItem("a2hsDismissed", "1");
+        hint.remove();
+    });
+})();
