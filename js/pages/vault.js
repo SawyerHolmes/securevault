@@ -11,6 +11,7 @@ let passwordVisible  = false;
 let sortField        = "name";
 let sortOrder        = "asc";
 let activeTagFilter  = null;
+let activeTypeFilter = null;  // null = all types; "login" | "note" | "card" otherwise
 let selectMode       = false;
 let selectedIds      = new Set();
 let currentVisibleEntries = [];  // populated by renderVault, used by keyboard nav
@@ -28,32 +29,65 @@ function findEntryIndex(id) {
 function renderTagFilterBar() {
     const bar = document.getElementById("tag-filter-bar");
     if (!bar) return;
-    const tagSet = new Set();
+
+    // Discover present types + tags from the active set.
+    const tagSet  = new Set();
+    const typeSet = new Set();
     vault.forEach(e => {
         if (e.deleted || e.archived) return;
         (e.tags || []).forEach(t => tagSet.add(t));
+        typeSet.add(e.type || "login");
     });
     const tags = Array.from(tagSet).sort();
-    if (!tags.length) { bar.style.display = "none"; bar.innerHTML = ""; return; }
 
+    // Hide the bar only when there's nothing to choose from in either axis.
+    if (!tags.length && typeSet.size <= 1) {
+        bar.style.display = "none";
+        bar.innerHTML = "";
+        return;
+    }
     bar.innerHTML  = "";
     bar.style.display = "";
 
-    const mkChip = (label, value, isAll) => {
+    const mkTag = (label, value, isAll) => {
         const c = document.createElement("button");
         c.type      = "button";
         c.className = "tag-chip tag-chip-filter" +
-            ((value === activeTagFilter || (isAll && !activeTagFilter)) ? " active" : "");
+            ((value === activeTagFilter || (isAll && !activeTagFilter && !activeTypeFilter)) ? " active" : "");
         c.textContent = label;
         c.addEventListener("click", () => {
-            activeTagFilter = value;
-            renderVault(document.getElementById("search-input").value);
+            if (isAll) { activeTagFilter = null; activeTypeFilter = null; }
+            else       { activeTagFilter = (activeTagFilter === value) ? null : value; }
+            renderVault(searchInput.value);
         });
         return c;
     };
 
-    bar.appendChild(mkChip("All", null, true));
-    tags.forEach(t => bar.appendChild(mkChip(t, t, false)));
+    const mkType = (label, type) => {
+        const c = document.createElement("button");
+        c.type      = "button";
+        c.className = "tag-chip tag-chip-filter tag-chip-type" +
+            (activeTypeFilter === type ? " active" : "");
+        c.textContent = label;
+        c.addEventListener("click", () => {
+            activeTypeFilter = (activeTypeFilter === type) ? null : type;
+            renderVault(searchInput.value);
+        });
+        return c;
+    };
+
+    bar.appendChild(mkTag("All", null, true));
+
+    // Only surface type pills when more than one type actually exists in the
+    // vault — otherwise filtering by type is pointless noise.
+    if (typeSet.size > 1) {
+        const TYPE_LABELS = { login: "Logins", note: "Notes", card: "Cards" };
+        ["login", "note", "card"].forEach(t => {
+            if (typeSet.has(t)) bar.appendChild(mkType(TYPE_LABELS[t], t));
+        });
+    }
+
+    tags.forEach(t => bar.appendChild(mkTag(t, t, false)));
 }
 
 // Remembers which domains resolved a favicon this session so re-renders
@@ -356,6 +390,9 @@ function renderVault(filter) {
     }
     if (activeTagFilter) {
         items = items.filter(e => (e.tags || []).includes(activeTagFilter));
+    }
+    if (activeTypeFilter) {
+        items = items.filter(e => (e.type || "login") === activeTypeFilter);
     }
     const q = filter.toLowerCase();
 
@@ -1160,6 +1197,8 @@ function deleteEntry() {
 searchInput.addEventListener("input", () => {
     document.querySelector(".search-wrapper").classList.toggle("has-text", !!searchInput.value);
     renderVault(searchInput.value);
+    if (searchInput.value) hideRecentSearches();
+    else if (document.activeElement === searchInput) showRecentSearches();
 });
 
 const searchClearBtn = document.getElementById("search-clear");
@@ -1174,7 +1213,67 @@ if (searchClearBtn) {
 searchInput.addEventListener("focus", () => {
     sortMenu.style.display = "none";
     sortToggle.classList.remove("active");
+    if (!searchInput.value) showRecentSearches();
 });
+searchInput.addEventListener("blur", () => {
+    // Capture the search the user just finished doing into recents.
+    if (searchInput.value.trim()) addRecentSearch(searchInput.value.trim());
+    // Delay so a click on a recent item still fires before the dropdown hides.
+    setTimeout(hideRecentSearches, 120);
+});
+
+// ============================================================
+// RECENT SEARCHES DROPDOWN
+// ============================================================
+const RECENT_KEY      = "vaultRecentSearches";
+const RECENT_MAX      = 6;
+const searchRecentEl  = document.getElementById("search-recent");
+const searchRecentList = document.getElementById("search-recent-list");
+
+function loadRecentSearches() {
+    try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; }
+    catch { return []; }
+}
+function saveRecentSearches(arr) {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(arr.slice(0, RECENT_MAX)));
+}
+function addRecentSearch(q) {
+    const list = loadRecentSearches().filter(x => x.toLowerCase() !== q.toLowerCase());
+    list.unshift(q);
+    saveRecentSearches(list);
+}
+function clearRecentSearches() {
+    localStorage.removeItem(RECENT_KEY);
+    hideRecentSearches();
+}
+function showRecentSearches() {
+    const list = loadRecentSearches();
+    if (!list.length || !searchRecentEl) return;
+    searchRecentList.innerHTML = "";
+    list.forEach(q => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "search-recent-item";
+        btn.textContent = q;
+        btn.addEventListener("mousedown", e => e.preventDefault()); // don't blur the input
+        btn.addEventListener("click", () => {
+            searchInput.value = q;
+            document.querySelector(".search-wrapper").classList.add("has-text");
+            renderVault(q);
+            hideRecentSearches();
+            searchInput.focus();
+        });
+        li.appendChild(btn);
+        searchRecentList.appendChild(li);
+    });
+    searchRecentEl.hidden = false;
+}
+function hideRecentSearches() {
+    if (searchRecentEl) searchRecentEl.hidden = true;
+}
+document.getElementById("search-recent-clear")?.addEventListener("mousedown", e => e.preventDefault());
+document.getElementById("search-recent-clear")?.addEventListener("click", clearRecentSearches);
 
 sortToggle.addEventListener("click", e => {
     e.stopPropagation();
