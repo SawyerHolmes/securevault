@@ -1083,14 +1083,47 @@ if (copyTotpBtn) {
     });
 }
 
-document.getElementById("copy-totp-uri-btn")?.addEventListener("click", () => {
-    const entry = findEntry(currentEntryId);
-    if (!entry || !entry.totp) return;
+function buildOtpauthUri(entry) {
     const label   = encodeURIComponent((entry.name || "vault") + (entry.username ? ":" + entry.username : ""));
     const secret  = entry.totp.replace(/\s+/g, "");
     const issuer  = encodeURIComponent(entry.name || "Securevault");
-    const uri     = `otpauth://totp/${label}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
-    copyToClipboard(uri, "otpauth URI copied — paste into a QR generator or authenticator");
+    return `otpauth://totp/${label}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
+}
+
+document.getElementById("copy-totp-uri-btn")?.addEventListener("click", () => {
+    const entry = findEntry(currentEntryId);
+    if (!entry || !entry.totp) return;
+    copyToClipboard(buildOtpauthUri(entry), "otpauth URI copied — paste into a QR generator or authenticator");
+});
+
+// ============================================================
+// TOTP QR overlay — renders the otpauth URI as a scannable QR
+// using the local js/lib/qr.js (no external API; the secret
+// never leaves the device).
+// ============================================================
+const qrOverlay = document.getElementById("qr-overlay");
+const qrCanvas  = document.getElementById("qr-canvas");
+const qrError   = document.getElementById("qr-error");
+
+document.getElementById("show-totp-qr-btn")?.addEventListener("click", () => {
+    const entry = findEntry(currentEntryId);
+    if (!entry || !entry.totp) return;
+    const uri = buildOtpauthUri(entry);
+    const svg = typeof generateQR === "function" ? generateQR(uri, { moduleSize: 8 }) : null;
+    if (svg) {
+        qrCanvas.innerHTML = svg;
+        qrError.hidden = true;
+    } else {
+        qrCanvas.innerHTML = "";
+        qrError.hidden = false;
+    }
+    qrOverlay.hidden = false;
+});
+
+document.getElementById("qr-close")?.addEventListener("click", () => { qrOverlay.hidden = true; });
+qrOverlay?.addEventListener("click", e => { if (e.target === qrOverlay) qrOverlay.hidden = true; });
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && qrOverlay && !qrOverlay.hidden) { e.preventDefault(); qrOverlay.hidden = true; }
 });
 
 document.getElementById("copy-card-number-btn")?.addEventListener("click", () => {

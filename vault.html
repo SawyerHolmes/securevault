@@ -217,6 +217,9 @@
                 <button class="icon-btn copy-icon-btn" id="copy-totp-btn" title="Copy code" aria-label="Copy two-factor code">
                     <i data-lucide="copy"></i>
                 </button>
+                <button class="icon-btn copy-icon-btn" id="show-totp-qr-btn" title="Show as scannable QR code" aria-label="Show TOTP QR">
+                    <span class="totp-qr-glyph" aria-hidden="true">▦</span>
+                </button>
                 <button class="icon-btn copy-icon-btn" id="copy-totp-uri-btn" title="Copy otpauth:// URI for migration" aria-label="Copy otpauth URI">
                     <span class="totp-uri-glyph" aria-hidden="true">↗</span>
                 </button>
@@ -296,6 +299,16 @@
     </div>
 </div>
 
+<!-- TOTP QR modal -->
+<div class="qr-overlay" id="qr-overlay" hidden>
+    <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-title">
+        <h2 id="qr-title" class="qr-title">Scan with your authenticator</h2>
+        <div class="qr-canvas" id="qr-canvas"></div>
+        <p class="qr-error" id="qr-error" hidden>This entry's TOTP secret is too long to encode into a QR at this version.</p>
+        <button type="button" class="btn-black qr-close" id="qr-close">Close</button>
+    </div>
+</div>
+
 <!-- Confirmation Modal -->
 <div class="confirmation-overlay" id="confirmation-overlay">
     <div class="confirmation-modal">
@@ -313,6 +326,7 @@
 <script src="js/lib/sw-register.js"></script>
 <script src="js/lib/crypto-utils.js"></script>
 <script src="js/lib/totp.js"></script>
+<script src="js/lib/qr.js"></script>
 <script src="js/lib/health.js"></script>
 <script src="js/lib/markdown.js"></script>
 <script src="js/lib/portation.js"></script>
