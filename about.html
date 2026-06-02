@@ -55,7 +55,7 @@
     <div class="page-content">
 
         <h1 class="page-title">About.</h1>
-        <p class="page-sub">Version <span id="about-version">0.10.0</span> · Built <span id="about-built">2026-05-26</span></p>
+        <p class="page-sub">Version <span id="about-version">1.0.0</span> · Built <span id="about-built">2026-06-02</span></p>
 
         <section class="about-section">
             <h2 class="settings-title">What it is</h2>
@@ -82,6 +82,20 @@
         <section class="about-section">
             <h2 class="settings-title">Changelog</h2>
             <ul class="about-list">
+                <li><strong>1.0.0</strong> — Feature complete.
+                    <ul>
+                        <li><strong>Interaction.</strong> Command palette (⌘K), mobile swipe-to-action + long-press select, desktop right-click context menu, arrow / J / K list navigation, Enter to open, ? shortcut help, `,` to settings, L to lock, hover tooltips from aria-labels.</li>
+                        <li><strong>iOS PWA.</strong> Edge-to-edge with safe-area handling, real PNG home-screen icons + apple-touch-icon, status-bar black-translucent, splash images for iPhone 12–16 sizes, Add-to-Home-Screen first-visit hint, no-rubber-band overscroll.</li>
+                        <li><strong>Accessibility.</strong> WCAG AA contrast pass (tertiary text + new --accent-text variable for legible lime on light), 44pt tap targets on all icon buttons, bottom-sheet drag handles, mirrored aria-label → title.</li>
+                        <li><strong>Security.</strong> Re-prompt master password before plain CSV export, encrypted backup, generate recovery code. Dedicated .svault extension + format-version marker. Password-strength meter on master-password setup and recovery rekey.</li>
+                        <li><strong>TOTP.</strong> Countdown ring (replacing the old horizontal bar) with low-time red tint and clean rollover. Scannable QR rendered locally — the secret never leaves the device.</li>
+                        <li><strong>Health.</strong> Breached / Reused / Weak / Old buckets with per-row Fix links that deep-link straight into the entry's edit mode. New "Old" bucket flags any password not updated in over a year.</li>
+                        <li><strong>Search.</strong> Recent-searches dropdown on focus, plus type-filter pills (Logins / Notes / Cards) combinable with tag filters.</li>
+                        <li><strong>Undo.</strong> Archive and move-to-trash now offer Undo from every surface — swipe tray, right-click menu, bulk bar, and the expanded card.</li>
+                        <li><strong>System theme.</strong> Appearance setting now offers Dark / Light / System; system mode follows prefers-color-scheme live.</li>
+                        <li><strong>Other.</strong> Service-worker favicon caching, iOS input-zoom prevention, slider rendering fix, missing icons (archive / trash-2) added to the inlined Lucide bundle.</li>
+                    </ul>
+                </li>
                 <li><strong>0.10.0</strong> — Multiple types (login / note / card), soft delete with Trash, Archive, password History, onboarding, About page.</li>
                 <li><strong>0.9.0</strong> — TOTP / 2FA codes (RFC 6238), Have I Been Pwned breach check + Password health view.</li>
                 <li><strong>0.8.0</strong> — Self-hosted Inter + Lucide, PWA (manifest + service worker, offline + installable).</li>
