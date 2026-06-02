@@ -233,7 +233,7 @@ saveBtn.addEventListener("click", async () => {
     }
 
     const id = (crypto.randomUUID && crypto.randomUUID()) ||
-               ("e_" + Date.now() + "_" + Math.random().toString(36).slice(2));
+               ("e_" + Date.now() + "_" + Array.from(crypto.getRandomValues(new Uint8Array(8)), b => b.toString(16).padStart(2, "0")).join(""));
     const tags = (tagsInput?.value || "")
         .split(",")
         .map(s => s.trim().toLowerCase())

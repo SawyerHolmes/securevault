@@ -95,7 +95,7 @@ function extractTotpSecret(value) {
 
 function portationNewId() {
     return (crypto.randomUUID && crypto.randomUUID()) ||
-           ("e_" + Date.now() + "_" + Math.random().toString(36).slice(2));
+           ("e_" + Date.now() + "_" + Array.from(crypto.getRandomValues(new Uint8Array(8)), b => b.toString(16).padStart(2, "0")).join(""));
 }
 
 // Turn parsed CSV rows into entry objects. Header-aware; falls back

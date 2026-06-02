@@ -17,3 +17,17 @@ Shared\ (Extension)/
 # Editor scratch
 .vscode/
 .idea/
+
+# Secrets — defensive backstop. Nothing here is currently used by the
+# app, but list common patterns so an accidental drop-in never lands.
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+*.token
+*.svault
+*-backup-*.json

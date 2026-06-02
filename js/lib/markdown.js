@@ -8,11 +8,18 @@
 function renderMarkdown(src) {
     if (!src) return "";
 
-    // 1. HTML-escape so user text can't inject markup
+    // 1. HTML-escape so user text can't inject markup. Quotes are
+    //    important too — the link substitution below drops the
+    //    captured URL straight into an href="..." attribute, and an
+    //    unescaped " in the URL would let a crafted note break out
+    //    of the attribute and add new ones (e.g. onclick=) — which
+    //    would steal the sessionStorage vault key.
     let html = src
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 
     // 2. Block: headings (must come before paragraph wrapping)
     html = html.replace(/^### (.+)$/gm, '<h3 class="md-h3">$1</h3>');
