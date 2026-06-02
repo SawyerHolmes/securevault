@@ -35,9 +35,10 @@
     --border-strong:  #000000;
     --text:           #000000;
     --text-secondary: #555555;
-    --text-tertiary:  #999999;
+    --text-tertiary:  #767676; /* AA 4.5:1 on #FFFFFF */
     --accent:         #C7F100;
     --accent-ink:     #000000;
+    --accent-text:    #5A7000; /* darker lime — AA 5.6:1 on #FFFFFF */
     --danger:         #DC2626;
     --danger-ink:     #FFFFFF;
 
@@ -57,9 +58,10 @@ body.dark {
     --border-strong:  #2C2C2C;
     --text:           #FFFFFF;
     --text-secondary: #888888;
-    --text-tertiary:  #555555;
+    --text-tertiary:  #7E7E7E; /* AA 5.1:1 on #000000 */
     --accent:         #C7F100;
     --accent-ink:     #000000;
+    --accent-text:    #C7F100; /* bright lime is already 16:1 on #000000 */
     --danger:         #FF3838;
     --danger-ink:     #FFFFFF;
 }
@@ -693,7 +695,7 @@ body.list-view #vault-container {
     color: var(--text);
     line-height: 1;
 }
-.vault-card.featured .row-num { color: var(--accent); }
+.vault-card.featured .row-num { color: var(--accent-text); }
 
 .vault-card .row-text {
     min-width: 0;
@@ -763,7 +765,7 @@ body.list-view #vault-container {
     text-transform: uppercase;
     color: var(--text);
 }
-.row-icon.row-icon-glyph { color: var(--accent); font-size: 14px; }
+.row-icon.row-icon-glyph { color: var(--accent-text); font-size: 14px; }
 
 /* Grid tiles get a top row with numeral + icon */
 .tile-head {
@@ -988,7 +990,7 @@ body.grid-view #vault-container {
     color: var(--text);
     line-height: 1;
 }
-.vault-grid-tile.featured .tile-num { color: var(--accent); }
+.vault-grid-tile.featured .tile-num { color: var(--accent-text); }
 
 .vault-grid-tile .tile-name {
     margin: 0;
@@ -1357,7 +1359,7 @@ body.gallery-view #vault-container {
     padding: 1px 5px;
     border: 1px solid var(--border);
 }
-.value.notes a { color: var(--accent); text-decoration: underline; }
+.value.notes a { color: var(--accent-text); text-decoration: underline; }
 
 .password-warning {
     margin-top: 8px;
@@ -1607,7 +1609,7 @@ body.gallery-view #vault-container {
 .empty-icon {
     width: 64px; height: 64px;
     border: 1px solid var(--border-strong);
-    color: var(--accent);
+    color: var(--accent-text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1738,7 +1740,7 @@ body.gallery-view #vault-container {
     font-variant-numeric: tabular-nums;
 }
 .about-link {
-    color: var(--accent);
+    color: var(--accent-text);
     text-decoration: underline;
     word-break: break-all;
 }
@@ -2346,7 +2348,7 @@ body[data-view-type="card"]  .type-only-note {
     width: 260px;
     z-index: 50;
 }
-.tooltip a { color: var(--accent); text-decoration: underline; }
+.tooltip a { color: var(--accent-text); text-decoration: underline; }
 .tooltip.show { display: block; }
 
 
@@ -2935,7 +2937,7 @@ kbd {
     flex-shrink: 0;
     width: 22px;
     height: 22px;
-    color: var(--accent);
+    color: var(--accent-text);
 }
 .a2hs-text {
     flex: 1;
