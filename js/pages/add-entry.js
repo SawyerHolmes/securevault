@@ -20,14 +20,6 @@ if (_appearance === "system") _appearance = window.matchMedia("(prefers-color-sc
 if (_appearance !== "light") document.body.classList.add("dark");
 
 // ============================================================
-// HAPTIC FEEDBACK
-// Triggers device vibration where supported (mobile)
-// ============================================================
-function haptic(pattern) {
-    if (navigator.vibrate) navigator.vibrate(pattern);
-}
-
-// ============================================================
 // ELEMENTS
 // ============================================================
 const saveBtn        = document.getElementById("save-entry");

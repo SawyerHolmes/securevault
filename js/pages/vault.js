@@ -179,13 +179,6 @@ window.addEventListener("popstate", () => {
 });
 
 // ============================================================
-// HAPTIC FEEDBACK
-// ============================================================
-function haptic(pattern) {
-    if (navigator.vibrate) navigator.vibrate(pattern);
-}
-
-// ============================================================
 // ELEMENTS
 // ============================================================
 const vaultContainer    = document.getElementById("vault-container");

@@ -5,7 +5,7 @@
 // localStorage and never touches this cache.
 // ============================================================
 
-const CACHE = "securevault-v46";
+const CACHE = "securevault-v47";
 
 const ASSETS = [
     "./",
@@ -31,6 +31,7 @@ const ASSETS = [
     "./assets/fonts/Inter-Regular.woff2",
     "./assets/fonts/Inter-Medium.woff2",
     "./js/lib/icons.js",
+    "./js/lib/haptic.js",
     "./js/lib/nav.js",
     "./js/lib/toast.js",
     "./js/lib/sw-register.js",
