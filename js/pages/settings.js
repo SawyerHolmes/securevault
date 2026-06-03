@@ -121,6 +121,12 @@ async function applySettingsToUI() {
     const cfg = await getSyncConfig();
     document.getElementById("github-token").value = cfg.token;
     document.getElementById("gist-id").value      = cfg.gistId;
+    // Show the current Sync state so a password-typed input doesn't
+    // make the user wonder whether the token is actually saved.
+    if (cfg.token && cfg.gistId)        setSyncStatus("Sync ready — token and Gist ID saved.", "var(--accent)");
+    else if (cfg.token && !cfg.gistId)  setSyncStatus("Token saved. Add a Gist ID to enable sync.", "var(--text-secondary)");
+    else if (!cfg.token && cfg.gistId)  setSyncStatus("Gist ID saved. Add a GitHub token to enable sync.", "var(--text-secondary)");
+    else                                setSyncStatus("Not configured. Paste a GitHub token and Gist ID, then tap Save changes.", "var(--text-secondary)");
 
     initSegmentedControls2();
     initSegmentedControls3();

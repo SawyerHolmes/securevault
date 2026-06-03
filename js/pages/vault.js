@@ -1764,12 +1764,13 @@ document.addEventListener("contextmenu", e => {
 });
 
 // ============================================================
-// AUTO-PULL — silent sync pull on focus + every 5 min while open.
-// Throttled so we never hammer the Gist API.
+// AUTO-PULL — silent sync pull on focus + every 60s while open.
+// Throttled so we never hammer the Gist API (still cleanly under
+// GitHub's 5000 authenticated requests/hour limit).
 // ============================================================
 let lastAutoPull = 0;
-const AUTO_PULL_THROTTLE_MS = 30 * 1000;        // 30s minimum between auto-pulls
-const AUTO_PULL_INTERVAL_MS = 5  * 60 * 1000;   // 5-min background tick
+const AUTO_PULL_THROTTLE_MS = 20 * 1000;        // 20s minimum between auto-pulls
+const AUTO_PULL_INTERVAL_MS = 60 * 1000;        // 60s background tick
 
 async function silentPull() {
     const now = Date.now();

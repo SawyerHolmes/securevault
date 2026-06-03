@@ -118,6 +118,12 @@ if (bioBtn && typeof biometricConfigured === "function" && biometricConfigured()
         try {
             await unlockBiometric();
             resetAttempts();
+            // Pull from Gist after biometric unlock too — matches the
+            // password-login flow so the user lands on the freshest data.
+            try {
+                const key = await getStoredKey();
+                if (key) await autoSyncOnLogin(key);
+            } catch {}
             window.location.replace("vault.html");
         } catch (e) {
             bioBtn.disabled = false;
