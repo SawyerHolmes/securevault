@@ -84,7 +84,7 @@ async function changeMasterPassword(currentPassword, newPassword) {
         try {
             vaultData = await decryptData(encryptedVault, currentKey);
         } catch {
-            return { ok: false, error: "Current password is incorrect" };
+            return { ok: false, error: "Your current password is wrong. Re-type it and try again." };
         }
     }
 
@@ -124,7 +124,7 @@ async function changeMasterPassword(currentPassword, newPassword) {
     if (typeof syncConfigured === "function" && await syncConfigured()) {
         const result = await pushToGist();
         if (!result.ok) {
-            return { ok: true, warning: "Password changed locally but Gist push failed: " + result.error };
+            return { ok: true, warning: "Password changed on this device, but the Gist sync push didn't go through (" + result.error + "). Push manually from Settings → Sync when you have a connection." };
         }
     }
 

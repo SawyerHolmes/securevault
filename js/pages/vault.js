@@ -1851,7 +1851,7 @@ setInterval(() => {
                 window.showToast("Sync not configured", { duration: 1500 });
             }
         } catch {
-            window.showToast("Pull failed", { tone: "error" });
+            window.showToast("Sync pull failed. Check your network, then try again from Settings → Sync.", { tone: "error" });
         }
         setIndicator(0, false);
     }, { passive: true });

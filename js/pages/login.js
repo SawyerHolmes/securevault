@@ -123,7 +123,7 @@ if (bioBtn && typeof biometricConfigured === "function" && biometricConfigured()
             bioBtn.disabled = false;
             bioBtn.innerHTML = '<i data-lucide="lock"></i> Use biometric';
             if (window.renderIcons) window.renderIcons();
-            showError(e.message || "Biometric unlock failed.");
+            showError(e.message || "Biometric unlock didn't work. Try again, or use your master password below.");
         }
     });
 }
@@ -173,10 +173,10 @@ if (recoverBtn) {
         const code = recoveryCodeIn.value.trim();
         const pw   = recoveryNewPw.value;
         const conf = recoveryConfPw.value;
-        if (!code)            { showRecoveryError("Enter your recovery code"); return; }
-        if (!pw)              { showRecoveryError("Set a new master password"); return; }
-        if (pw.length < 8)    { showRecoveryError("Use at least 8 characters"); return; }
-        if (pw !== conf)      { showRecoveryError("Passwords don't match"); return; }
+        if (!code)            { showRecoveryError("Enter the 24-character recovery code you saved during setup."); return; }
+        if (!pw)              { showRecoveryError("Choose a new master password to use after recovery."); return; }
+        if (pw.length < 8)    { showRecoveryError("New master password needs at least 8 characters."); return; }
+        if (pw !== conf)      { showRecoveryError("The two passwords don't match. Re-type them so they're identical."); return; }
 
         recoverBtn.disabled = true;
         recoverBtn.textContent = "Recovering…";
@@ -189,7 +189,7 @@ if (recoverBtn) {
         } catch (e) {
             recoverBtn.disabled = false;
             recoverBtn.textContent = "Recover & set password";
-            showRecoveryError(e.message || "Recovery failed.");
+            showRecoveryError(e.message || "Recovery didn't work. Double-check the code and your new password, then try again.");
         }
     });
 }
@@ -253,7 +253,7 @@ function startLockoutTimer() {
             loginError.style.display  = "none";
             loginError.textContent    = "";
         } else {
-            loginError.textContent = `Too many attempts. Try again in ${remaining}s`;
+            loginError.textContent = `Too many failed attempts. Wait ${remaining}s, or tap Forgot password to reset the vault.`;
         }
     }, 1000);
 }
@@ -264,7 +264,7 @@ function startLockoutTimer() {
     if (remaining) {
         loginBtn.disabled        = true;
         loginError.style.display = "block";
-        loginError.textContent   = `Too many attempts. Try again in ${remaining}s`;
+        loginError.textContent   = `Too many failed attempts. Wait ${remaining}s, or tap Forgot password to reset the vault.`;
         startLockoutTimer();
     }
 })();
@@ -353,14 +353,14 @@ loginBtn.addEventListener("click", async () => {
     if (remaining) return;
 
     const password = passwordInput.value;
-    if (!password) { showError("Enter your master password"); return; }
+    if (!password) { showError("Enter your master password to unlock the vault."); return; }
 
     // First-time setup: require confirm-password to match
     if (isFirstTime) {
         const confirm = confirmInput.value;
-        if (!confirm) { showError("Confirm your master password"); return; }
-        if (password !== confirm) { showError("Passwords don't match"); return; }
-        if (password.length < 8) { showError("Use at least 8 characters"); return; }
+        if (!confirm) { showError("Re-type your master password in the second field to confirm."); return; }
+        if (password !== confirm) { showError("Those two passwords don't match. Re-type them so they're identical."); return; }
+        if (password.length < 8) { showError("Master passwords need at least 8 characters. Add more and try again."); return; }
     }
 
     clearError();
@@ -388,12 +388,12 @@ loginBtn.addEventListener("click", async () => {
             loginBtn.textContent = "Unlock";
 
             if (stillLocked) {
-                showError(`Too many attempts. Try again in ${stillLocked}s`);
+                showError(`Too many failed attempts. Wait ${stillLocked}s, or tap Forgot password to reset the vault.`);
                 startLockoutTimer();
             } else {
                 showError(left > 0
-                    ? `Incorrect password. ${left} attempt${left === 1 ? "" : "s"} remaining`
-                    : "Incorrect password");
+                    ? `Wrong password. ${left} attempt${left === 1 ? "" : "s"} left before the vault is locked for a while.`
+                    : "Wrong password. Try again, or tap Forgot password if you've lost it.");
             }
             return;
         }

@@ -52,7 +52,7 @@ async function unwrapKeyBytes(wrappingKey, packed) {
 // Returns the formatted code (shown once).
 async function enableRecovery() {
     const vaultKeyB64 = sessionStorage.getItem("vaultKey");
-    if (!vaultKeyB64) throw new Error("Unlock the vault first.");
+    if (!vaultKeyB64) throw new Error("Log in to the vault before generating a recovery code.");
 
     const code        = generateRecoveryCode();
     const salt        = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
@@ -70,7 +70,7 @@ async function enableRecovery() {
 // session. Throws on a wrong code (AES-GCM auth) or a mismatched vault.
 async function recoverWithCode(code) {
     const raw = localStorage.getItem(RECOVERY_STORAGE_KEY);
-    if (!raw) throw new Error("No recovery code is set up on this device.");
+    if (!raw) throw new Error("No recovery code is saved on this device. Generate one from Settings → Account → Recovery on a logged-in device first.");
     const cfg = JSON.parse(raw);
 
     const recoveryKey = await deriveKeyFromSalt(normalizeRecoveryCode(code), base64ToBytes(cfg.salt));
@@ -79,7 +79,7 @@ async function recoverWithCode(code) {
     try {
         vaultKeyBytes = await unwrapKeyBytes(recoveryKey, cfg.wrapped);
     } catch {
-        throw new Error("Incorrect recovery code.");
+        throw new Error("That recovery code is wrong. Codes are 24 letters and digits in six groups of four — check for typos and try again.");
     }
 
     // Sanity-check the recovered key against the actual vault, if present
@@ -89,7 +89,7 @@ async function recoverWithCode(code) {
             "raw", vaultKeyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]
         );
         try { await decryptData(encryptedVault, vaultKey); }
-        catch { throw new Error("That code doesn't match this vault."); }
+        catch { throw new Error("That code was generated for a different vault. Generate a fresh one from another logged-in device."); }
     }
 
     sessionStorage.setItem("vaultKey",      bytesToBase64(vaultKeyBytes));
@@ -102,7 +102,7 @@ async function recoverWithCode(code) {
 // recovery + biometric wraps (both wrapped the now-replaced key).
 async function rekeyAfterRecovery(newPassword) {
     const vaultKeyB64 = sessionStorage.getItem("vaultKey");
-    if (!vaultKeyB64) throw new Error("Not in a recovered session.");
+    if (!vaultKeyB64) throw new Error("Your recovery session expired. Tap Use a recovery code on the login screen and start over.");
     const oldKey = await crypto.subtle.importKey(
         "raw", base64ToBytes(vaultKeyB64), { name: "AES-GCM" }, false, ["encrypt", "decrypt"]
     );
@@ -111,7 +111,7 @@ async function rekeyAfterRecovery(newPassword) {
     const enc = localStorage.getItem("vault");
     if (enc) {
         try { vaultData = await decryptData(enc, oldKey); }
-        catch { throw new Error("Could not read the vault during re-key."); }
+        catch { throw new Error("Couldn't re-encrypt the vault during recovery. Try again, or restore from your most recent .svault backup."); }
     }
 
     // Carry the encrypted sync token across, if any

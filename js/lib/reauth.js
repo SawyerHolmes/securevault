@@ -61,14 +61,14 @@ window.requireMasterPassword = function (reason) {
 
         async function onSubmit() {
             const pw = input.value;
-            if (!pw) { errorEl.textContent = "Enter your master password."; return; }
+            if (!pw) { errorEl.textContent = "Type your master password to continue."; return; }
             errorEl.textContent = "Checking…";
             submitBtn.disabled = true;
             try {
                 const saltB64  = localStorage.getItem("vaultSalt");
                 const vaultEnc = localStorage.getItem("vault");
                 if (!saltB64 || !vaultEnc) {
-                    errorEl.textContent = "No vault stored on this device.";
+                    errorEl.textContent = "There's no vault on this device yet. Add an entry first.";
                     return;
                 }
                 const salt = base64ToBytes(saltB64);
@@ -76,7 +76,7 @@ window.requireMasterPassword = function (reason) {
                 await decryptData(vaultEnc, key); // throws on wrong password
                 close(true);
             } catch {
-                errorEl.textContent = "Incorrect password.";
+                errorEl.textContent = "That's not your master password. Try again.";
                 input.select();
             } finally {
                 submitBtn.disabled = false;

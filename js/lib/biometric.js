@@ -30,7 +30,7 @@ function disableBiometric() {
 
 async function enableBiometric() {
     const vaultKeyB64 = sessionStorage.getItem("vaultKey");
-    if (!vaultKeyB64) throw new Error("Unlock the vault first.");
+    if (!vaultKeyB64) throw new Error("Log in to the vault before setting up biometric unlock.");
 
     const prfSalt   = crypto.getRandomValues(new Uint8Array(32));
     const challenge = crypto.getRandomValues(new Uint8Array(32));
@@ -61,7 +61,7 @@ async function enableBiometric() {
 
     const ext = cred.getClientExtensionResults();
     if (!ext || !ext.prf || !ext.prf.results || !ext.prf.results.first) {
-        throw new Error("This device's authenticator doesn't support the PRF extension required for biometric unlock.");
+        throw new Error("This device's authenticator can't be used for biometric unlock. Log in with your master password instead.");
     }
 
     const wrappingKey = await deriveWrappingKey(new Uint8Array(ext.prf.results.first));
@@ -76,7 +76,7 @@ async function enableBiometric() {
 
 async function unlockBiometric() {
     const raw = localStorage.getItem(BIO_STORAGE_KEY);
-    if (!raw) throw new Error("Biometric unlock isn't set up on this device.");
+    if (!raw) throw new Error("Biometric unlock isn't set up on this device. Turn it on from Settings → Account first.");
     const cfg = JSON.parse(raw);
 
     const credentialId = base64ToBytes(cfg.credentialId);
@@ -99,7 +99,7 @@ async function unlockBiometric() {
 
     const ext = assertion.getClientExtensionResults();
     if (!ext || !ext.prf || !ext.prf.results || !ext.prf.results.first) {
-        throw new Error("PRF result missing — re-enable biometric unlock.");
+        throw new Error("Biometric unlock looks broken. Turn it off in Settings and set it up again.");
     }
 
     const wrappingKey = await deriveWrappingKey(new Uint8Array(ext.prf.results.first));

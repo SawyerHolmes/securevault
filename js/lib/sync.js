@@ -5,6 +5,17 @@
 
 const GIST_FILENAME = "vault.json";
 
+// Translate a GitHub Gist API HTTP status into a plain-English message
+// that also tells the user where to fix it.
+function gistHttpError(status) {
+    if (status === 401) return "Your GitHub token isn't accepted. Open Settings → Sync and paste a fresh one.";
+    if (status === 403) return "GitHub rejected the request (rate limited or token missing the gist scope). Check Settings → Sync.";
+    if (status === 404) return "Couldn't find that Gist. Double-check the Gist ID in Settings → Sync.";
+    if (status === 422) return "GitHub couldn't update the Gist (bad payload). Try Push again from Settings → Sync.";
+    if (status >= 500)  return "GitHub is having trouble right now. Try again in a minute.";
+    return `GitHub returned HTTP ${status}. Check your token and Gist ID in Settings → Sync.`;
+}
+
 // ============================================================
 // CONFIG
 // Stored shape: { gistId, encryptedToken? }
@@ -31,7 +42,7 @@ async function writeSyncConfig(token, gistId) {
     const out = { gistId };
     if (token) {
         const key = await getStoredKey();
-        if (!key) throw new Error("Not logged in");
+        if (!key) throw new Error("Your session expired. Log in again before changing sync settings.");
         out.encryptedToken = await encryptData(token, key);
     }
     localStorage.setItem("syncConfig", JSON.stringify(out));
@@ -47,7 +58,7 @@ async function syncConfigured() {
 // ============================================================
 async function pushToGist() {
     const { token, gistId } = await getSyncConfig();
-    if (!token || !gistId) return { ok: false, error: "Sync not configured" };
+    if (!token || !gistId) return { ok: false, error: "Sync isn't configured yet. Add a GitHub token and Gist ID in Settings → Sync." };
 
     const vaultData = localStorage.getItem("vault") || "";
     const salt      = localStorage.getItem("vaultSalt") || "";
@@ -64,7 +75,7 @@ async function pushToGist() {
                 files: { [GIST_FILENAME]: { content: payload } }
             })
         });
-        if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+        if (!res.ok) throw new Error(gistHttpError(res.status));
         return { ok: true };
     } catch (e) {
         return { ok: false, error: e.message };
@@ -78,17 +89,17 @@ async function pushToGist() {
 // ============================================================
 async function pullFromGist() {
     const { token, gistId } = await getSyncConfig();
-    if (!token || !gistId) return { ok: false, error: "Sync not configured" };
+    if (!token || !gistId) return { ok: false, error: "Sync isn't configured yet. Add a GitHub token and Gist ID in Settings → Sync." };
 
     try {
         const res = await fetch(`https://api.github.com/gists/${gistId}`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
-        if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+        if (!res.ok) throw new Error(gistHttpError(res.status));
 
         const data        = await res.json();
         const fileContent = data.files?.[GIST_FILENAME]?.content;
-        if (!fileContent) throw new Error("vault.json not found in Gist");
+        if (!fileContent) throw new Error("That Gist doesn't contain a vault.json yet. Run Push from Settings → Sync to create it.");
 
         const { vault: remoteEncrypted, salt: remoteSalt } = JSON.parse(fileContent);
 
@@ -110,7 +121,7 @@ async function pullFromGist() {
 
         // Same salt — decrypt both sides and merge
         const key = await getStoredKey();
-        if (!key) return { ok: false, error: "Not logged in" };
+        if (!key) return { ok: false, error: "Your session expired. Log in again to pull from Gist." };
 
         let remoteEntries = [];
         let localEntries  = [];

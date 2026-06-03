@@ -104,7 +104,7 @@ async function encryptData(data, key) {
 
 async function decryptData(encrypted, key) {
     const parts = encrypted.split(":");
-    if (parts.length !== 2) throw new Error("Invalid encrypted format");
+    if (parts.length !== 2) throw new Error("The stored vault data looks corrupt. Restore from your most recent .svault backup.");
     const iv         = base64ToBytes(parts[0]);
     const ciphertext = base64ToBytes(parts[1]);
     try {
@@ -115,7 +115,7 @@ async function decryptData(encrypted, key) {
         );
         return JSON.parse(new TextDecoder().decode(plaintext));
     } catch {
-        throw new Error("Decryption failed — wrong key or corrupt data");
+        throw new Error("Couldn't decrypt — either the password is wrong or the data is corrupt. Log out and back in, then try again.");
     }
 }
 
@@ -125,7 +125,7 @@ async function decryptData(encrypted, key) {
 // ============================================================
 function generatePassword(length, chars) {
     if (length <= 0) return "";
-    if (!chars.length) throw new Error("Empty character set");
+    if (!chars.length) throw new Error("No character types selected. Turn on at least one of A–Z, 0–9, or symbols.");
     const max = Math.floor(0xFFFFFFFF / chars.length) * chars.length;
     const buf = new Uint32Array(1);
     let out   = "";

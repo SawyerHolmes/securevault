@@ -32,7 +32,7 @@ async function generateTOTP(base32Secret, opts) {
     const counter = Math.floor(time / period);
 
     const keyBytes = base32Decode(base32Secret);
-    if (!keyBytes.length) throw new Error("Invalid TOTP secret");
+    if (!keyBytes.length) throw new Error("TOTP secret looks invalid. Paste a base32 string (A–Z and 2–7), no spaces.");
 
     const counterBuf = new ArrayBuffer(8);
     new DataView(counterBuf).setBigUint64(0, BigInt(counter), false);

@@ -154,7 +154,7 @@ async function setupBiometricToggle() {
     if (!available) {
         row.style.display = "";
         toggle.disabled   = true;
-        if (status) status.textContent = "This device doesn't expose a platform authenticator.";
+        if (status) status.textContent = "This device doesn't have Touch ID / Face ID available, so biometric unlock can't be turned on.";
         return;
     }
 
@@ -170,7 +170,7 @@ async function setupBiometricToggle() {
                 window.showToast("Biometric unlock enabled", { tone: "success" });
             } catch (e) {
                 toggle.checked = false;
-                status.textContent = e.message || "Couldn't enable biometric unlock.";
+                status.textContent = e.message || "Couldn't enable biometric unlock. Try again — your browser may need permission to use the authenticator.";
                 status.style.color = "var(--danger)";
             }
         } else {
@@ -199,7 +199,7 @@ function setupPortation() {
     encBtn.addEventListener("click", async () => {
         const vault = localStorage.getItem("vault");
         const salt  = localStorage.getItem("vaultSalt");
-        if (!vault || !salt) { status.textContent = "Nothing to export yet."; return; }
+        if (!vault || !salt) { status.textContent = "Your vault is empty — there's nothing to export. Add an entry first."; return; }
         if (!(await requireMasterPassword("to download an encrypted backup of your vault."))) return;
         const data = JSON.stringify({
             format:     "securevault-backup-v1",
@@ -214,12 +214,12 @@ function setupPortation() {
     // Export plain CSV — decrypt then write
     csvBtn.addEventListener("click", async () => {
         const key = await getStoredKey();
-        if (!key) { status.textContent = "Locked. Log in first."; return; }
+        if (!key) { status.textContent = "Your session expired. Log out and back in, then try again."; return; }
         const enc = localStorage.getItem("vault");
         let entries = [];
-        if (enc) { try { entries = await decryptData(enc, key); } catch { status.textContent = "Could not read the vault."; return; } }
+        if (enc) { try { entries = await decryptData(enc, key); } catch { status.textContent = "Couldn't read the vault. Log out, log back in, and try again."; return; } }
         const active = entries.filter(e => !e.deleted && !e.archived);
-        if (!active.length) { status.textContent = "No entries to export."; return; }
+        if (!active.length) { status.textContent = "Nothing active to export. Restore an entry from Trash or Archive, then try again."; return; }
         if (!(await requireMasterPassword("to export every password as plain text. Anyone with the file can read them."))) return;
         downloadFile("securevault-export.csv", entriesToCsv(active), "text/csv");
         window.showToast(`Exported ${active.length}`, { tone: "success", duration: 1500 });
@@ -240,7 +240,7 @@ async function importFile(file, status) {
         const lower = file.name.toLowerCase();
         if (lower.endsWith(".json") || lower.endsWith(".svault")) {
             const parsed = JSON.parse(text);
-            if (!parsed.vault || !parsed.salt) throw new Error("Not a valid Securevault backup.");
+            if (!parsed.vault || !parsed.salt) throw new Error("That file isn't a Securevault backup. Choose a .svault file you previously downloaded from Settings → Storage.");
             showConfirmation("Replace your current vault with this backup? You'll need the backup's master password to unlock it.", () => {
                 localStorage.setItem("vaultSalt", parsed.salt);
                 localStorage.setItem("vault",     parsed.vault);
@@ -256,14 +256,14 @@ async function importFile(file, status) {
 
         // CSV append
         const key = await getStoredKey();
-        if (!key) { status.textContent = "Locked. Log in first."; return; }
+        if (!key) { status.textContent = "Your session expired. Log out and back in, then try again."; return; }
         const rows    = parseCSV(text);
         const incoming = csvRowsToEntries(rows);
-        if (!incoming.length) { status.textContent = "No rows recognised in that file."; status.style.color = "var(--danger)"; return; }
+        if (!incoming.length) { status.textContent = "Couldn't read any entries from that CSV. Try a fresh export from Chrome, Bitwarden, 1Password, LastPass, Firefox, or Safari."; status.style.color = "var(--danger)"; return; }
 
         const enc = localStorage.getItem("vault");
         let vault = [];
-        if (enc) { try { vault = await decryptData(enc, key); } catch { status.textContent = "Could not read the existing vault."; return; } }
+        if (enc) { try { vault = await decryptData(enc, key); } catch { status.textContent = "Couldn't read your existing vault. Log out, log back in, then try again."; return; } }
         vault.push(...incoming);
         localStorage.setItem("vault", await encryptData(vault, key));
         if (typeof pushToGist === "function") pushToGist().catch(() => {});
@@ -294,7 +294,7 @@ async function importFile(file, status) {
             }
         });
     } catch (err) {
-        status.textContent = "Import failed: " + err.message;
+        status.textContent = "Import failed. " + (err.message || "Try a different file.");
         status.style.color = "var(--danger)";
     }
 }
@@ -326,7 +326,7 @@ function setupRecovery() {
 
     genBtn.addEventListener("click", async () => {
         if (!sessionStorage.getItem("vaultKey")) {
-            status.textContent = "Locked. Log in first.";
+            status.textContent = "Your session expired. Log out and back in, then try again.";
             status.style.color = "var(--danger)";
             return;
         }
@@ -338,7 +338,7 @@ function setupRecovery() {
             status.textContent = "";
             refreshRecoveryState();
         } catch (e) {
-            status.textContent = e.message || "Could not generate a code.";
+            status.textContent = e.message || "Couldn't generate a recovery code. Try again, or log out and back in.";
             status.style.color = "var(--danger)";
         }
     });
@@ -371,13 +371,13 @@ async function runHealthScan(btn) {
     const status     = document.getElementById("health-status");
     const bucketHost = document.getElementById("health-buckets");
     const key    = await getStoredKey();
-    if (!key) { status.textContent = "Locked. Log in first."; return; }
+    if (!key) { status.textContent = "Your session expired. Log out and back in, then try again."; return; }
 
     const encrypted = localStorage.getItem("vault");
     let entries = [];
     if (encrypted) {
         try { entries = await decryptData(encrypted, key); }
-        catch { status.textContent = "Could not decrypt vault."; return; }
+        catch { status.textContent = "Couldn't decrypt the vault. Log out and back in, then run the scan again."; return; }
     }
 
     btn.disabled = true;
@@ -550,13 +550,13 @@ function attachEventListeners() {
         const statusEl = document.getElementById("password-change-status");
 
         if (!current || !newPwd) {
-            statusEl.textContent = "Fill in both fields";
+            statusEl.textContent = "Type your current and new password before saving.";
             statusEl.style.color = "#e74c3c";
             return;
         }
 
         if (current === newPwd) {
-            statusEl.textContent = "New password must differ from current";
+            statusEl.textContent = "The new password has to be different from your current one. Pick a new one.";
             statusEl.style.color = "#e74c3c";
             return;
         }
