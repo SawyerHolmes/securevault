@@ -1530,6 +1530,7 @@ body.gallery-view #vault-container {
 }
 .confirmation-buttons {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
 }
 .confirmation-buttons .btn-black,
@@ -1730,6 +1731,27 @@ body.gallery-view #vault-container {
     line-height: 1.5;
 }
 .about-list li:last-child { border-bottom: 1px solid var(--border); }
+
+/* Nested changelog ul (e.g. 1.0.0 sub-bullets). Plain dash markers,
+   tight padding so they line up cleanly at any viewport width. */
+.about-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+}
+.about-list ul li {
+    padding: 4px 0 4px 16px;
+    border: none;
+    position: relative;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.about-list ul li::before {
+    content: "–";
+    position: absolute;
+    left: 0;
+    color: var(--text-tertiary);
+}
 .about-list strong {
     color: var(--text);
     font-weight: 500;
@@ -2118,7 +2140,10 @@ body[data-view-type="card"]  .type-only-note {
 
 .health-summary {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    /* auto-fit so the row gracefully holds 5 stats at wide widths,
+       4 / 3 / 2 as the container shrinks, and never leaves one
+       lonely cell wrapped to a row of its own. */
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 12px;
     margin-bottom: 16px;
 }
@@ -2524,8 +2549,7 @@ body[data-view-type="card"]  .type-only-note {
     .confirmation-overlay.show .confirmation-modal { animation: sheet-up 0.18s linear; }
 
     .sort-menu { width: 100%; }
-
-    .health-summary { grid-template-columns: repeat(2, 1fr); }
+    /* .health-summary handled by auto-fit above; no mobile override needed. */
 }
 
 @keyframes sheet-up {
@@ -2911,6 +2935,7 @@ kbd {
 .reauth-buttons {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap; /* fall back to stacked on ultra-narrow widths */
     gap: 8px;
     margin-top: 4px;
 }
